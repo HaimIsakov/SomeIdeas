@@ -4,16 +4,15 @@ from JustValues.Data.gdm_dataset import GDMDataset
 from torch.utils.data import DataLoader, random_split
 from JustValues.Models.fc_binary_classification import _train, JustValuesOnNodes
 import matplotlib.pyplot as plt
+import os
 
 
 def load_params_file(file_path):
-    RECEIVED_PARAMS = json.load(open('params_file.json', 'r'))
+    RECEIVED_PARAMS = json.load(open(file_path, 'r'))
     return RECEIVED_PARAMS
 
 
 def create_dataset(data_file_path, tag_file_path):
-    data_file_path = "taxonomy_gdm_file.csv"
-    tag_file_path = "tag_gdm_file.csv"
     gdm_dataset = GDMDataset(data_file_path, tag_file_path)
     return gdm_dataset
 
@@ -38,3 +37,11 @@ def train_model(gdm_dataset, RECEIVED_PARAMS):
 
     train_loss_vec, train_auc_vec, test_loss_vec, test_auc_vec = \
         _train(model, RECEIVED_PARAMS, train_loader, test_loader, device, loss_weights)
+
+
+if __name__ == '__main__':
+    data_file_path = os.path.join('Data', 'OTU_merged_Mucositis_Genus_after_mipmlp_new.csv')
+    tag_file_path = os.path.join('Data', "tag_gdm_file.csv")
+    gdm_dataset = create_dataset(data_file_path, tag_file_path)
+    values, label = gdm_dataset[0]
+    print()
