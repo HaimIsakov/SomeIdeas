@@ -18,28 +18,33 @@ class GDMDataset(Dataset):
         self.remove_na()
         self._tags['Tag'] = self._tags['Tag'].astype(int)
         self._tags['trimester'] = self._tags['trimester'].astype(int)
+        self.split_id_col()
         self._df = self._df[self._tags['trimester'] > 2]
         self._tags = self._tags[self._tags['trimester'] > 2]
+        self._tags = self._tags[self._df['Repetition'] == 1]
+        self._df = self._df[self._df['Repetition'] == 1]
         self._df.sort_index(inplace=True)
         self._tags.sort_index(inplace=True)
         del self._tags['trimester']
+        del self._df['Repetition']
+        del self._df['Code']
 
     def __getitem__(self, index):
-        if self.mission == 'just_values':
-            # ToDo: change the values list, to be the values of the ordered nodes.
-            values = list(self._df.iloc[index])
-            label = int(self._tags.iloc[index])
-            return Tensor(values), label
-        else:
-            # need to return A - adjacency matrix as well as values on each node and label
-            values = list(self._df.iloc[index])
-            adjacency_matrix = nx.adjacency_matrix(self.graphs_list[index]).todense()
-            label = int(self._tags.iloc[index])
-            return Tensor(adjacency_matrix), Tensor(values), label
+        # need to return A - adjacency matrix as well as values on each node and label
+        values = self.get_values_on_nodes_ordered_by_nodes(index)
+        # values = list(self._df.iloc[index])
+        # adjacency_matrix = nx.adjacency_matrix(self.graphs_list[index]).todense()
+        adjacency_matrix = [5]
+        label = int(self._tags.iloc[index]['Tag'])
+        return Tensor(adjacency_matrix), Tensor(values), label
 
     def __len__(self):
         a, b = self._df.shape
         return a
+
+    def split_id_col(self):
+        self._df['Code'] = [cur_id.split('-')[0] for cur_id in self._df.index]
+        self._df['Repetition'] = [int(cur_id.split('-')[-1]) for cur_id in self._df.index]
 
     def remove_na(self):
         index = self._tags['Tag'].index[self._tags['Tag'].apply(np.isnan)]
@@ -47,16 +52,19 @@ class GDMDataset(Dataset):
         self._df.drop(index, inplace=True)
 
     def get_vector_size(self):
-        a, b = self._df.shape
-        return b
+        nodes_dict = self.find_common_nodes()
+        vector_size = len(nodes_dict)
+        return vector_size
+        # a, b = self._df.shape
+        # return b
 
     def count_each_class(self):
-        counter_dict = self._tags.value_counts()
+        counter_dict = self._tags['Tag'].value_counts()
         return counter_dict[0], counter_dict[1]
 
     def create_tax_trees(self):
         for i, mom in tqdm(enumerate(self._df.iterrows()), desc='Create graphs'):
-            cur_graph = create_tax_tree(self._df.iloc[i], ignore_values=-1, ignore_flag=True)
+            cur_graph = create_tax_tree(self._df.iloc[i], ignore_values=0, ignore_flag=True)
             self.graphs_list.append(cur_graph)
 
     def find_common_nodes(self):
@@ -93,6 +101,14 @@ class GDMDataset(Dataset):
             # temp_graph.add_edges_from(sorted(graph.edges(data=True)))
             temp_graph_list.append(temp_graph)
         self.graphs_list = temp_graph_list
+
+    def get_values_on_nodes_ordered_by_nodes(self, index):
+        cur_graph = self.graphs_list[index]
+        nodes_and_values = cur_graph.nodes()
+        values = [value for node_name, value in nodes_and_values]
+        return values
+
+
 
     # def check_graphs(self):
     ## check adjacency_matrix

@@ -14,20 +14,35 @@ class JustValuesOnNodes(nn.Module):
         self.fc1 = nn.Linear(self.data_size, self.RECEIVED_PARAMS["layer_1"])  # input layer
         self.fc2 = nn.Linear(self.RECEIVED_PARAMS["layer_1"], self.RECEIVED_PARAMS["layer_2"])
         self.fc3 = nn.Linear(self.RECEIVED_PARAMS["layer_2"], 1)
-        self.activation_func = self.RECEIVED_PARAMS['activation']
-        self.write_to_log()
+        self.alpha = torch.autograd.Variable(torch.rand(1), requires_grad=True)
 
-    def forward(self, x):
+        # self.bn1 = nn.BatchNorm1d(self.RECEIVED_PARAMS["layer_1"])
+        # self.bn2 = nn.BatchNorm1d(self.RECEIVED_PARAMS["layer_2"])
+        self.activation_func = self.RECEIVED_PARAMS['activation']
+        # self.write_to_log()
+
+    def forward(self, x, adjacency_matrix):
         # x = x.view(-1, self.data_size)
+        alpha_A = adjacency_matrix * self.alpha.expand_as(adjacency_matrix)
+        a, b = alpha_A.shape
+        I = torch.eye(a)
+        alpha_A_plus_I = alpha_A + I
+        x = torch.mm(alpha_A_plus_I, x)
         if self.activation_func == 'relu':
             x = F.relu(self.fc1(x))
             x = F.relu(self.fc2(x))
+            # x = self.bn1(F.relu(self.fc1(x)))
+            # x = self.bn2(F.relu(self.fc2(x)))
         elif self.activation_func == 'elu':
             x = F.elu(self.fc1(x))
             x = F.elu(self.fc2(x))
+            # x = self.bn1((F.elu(self.fc1(x))))
+            # x = self.bn2((F.elu(self.fc2(x))))
         elif self.activation_func == 'tanh':
-            x = F.tanh(self.fc1(x))
-            x = F.tanh(self.fc2(x))
+            x = torch.tanh(self.fc1(x))
+            x = torch.tanh(self.fc2(x))
+            # x = self.bn1(torch.tanh(self.fc1(x)))
+            # x = self.bn2((torch.tanh(self.fc2(x))))
         # x = torch.sigmoid(x) # BCE loss automatically applies sigmoid
         x = self.fc3(x)
         return x
@@ -43,7 +58,7 @@ def _train(model, RECEIVED_PARAMS, train_loader, test_loader, loss_weights, devi
     the optimizer grad from the earlier epoch, calculate our model, calculate loss, do backpropagation
     and one optimizing step.
     """
-    settings.log_file.write("Training process started..")
+    # settings.log_file.write("Training process started..")
     # for the plots afterwards
     train_loss_vec = []
     test_loss_vec = []
@@ -56,30 +71,31 @@ def _train(model, RECEIVED_PARAMS, train_loader, test_loader, loss_weights, devi
     epochs = RECEIVED_PARAMS['epochs']
     # run the main training loop
     for epoch in range(epochs):
-        settings.log_file.write(f"Epoch {epoch}")
+        # settings.log_file.write(f"Epoch {epoch}")
         print(f"epoch {epoch}")
         model.train()
-        for batch_idx, (data, target) in enumerate(train_loader):
-            data, target = data.to(device), target.to(device)
+        for batch_idx, (A, data, target) in enumerate(train_loader):
+            A, data, target = A.to(device), data.to(device), target.to(device)
             optimizer.zero_grad()
-            net_out = model(data)
+            net_out = model(data, A)
             loss = F.binary_cross_entropy_with_logits(net_out, target.unsqueeze(dim=1).float(),
                                                       weight=torch.Tensor([loss_weights[i] for i in target]).unsqueeze(dim=1).to(device))
             loss.backward()
             optimizer.step()
-        print(f"loss {loss.item()}")
-        settings.log_file.write(f"Train loss {loss.item()}")
+        # settings.log_file.write(f"Train loss {loss.item()}")
 
         train_loss_vec.append(loss.item())
-        train_auc, train_loss = _test(model, test_loader, loss_weights, device)
-        settings.log_file.write(f"Train auc {train_auc}")
+        train_auc, train_loss = _test(model, train_loader, loss_weights, device)
+        print(f"Train AUC: {train_auc}, Train Loss: {train_loss}")
+        # settings.log_file.write(f"Train auc {train_auc}")
 
         test_auc, test_loss = _test(model, test_loader, loss_weights, device)
         test_auc_vec.append(test_auc)
         test_loss_vec.append(test_loss)
-        settings.log_file.write(f"Test loss {test_loss}")
-        settings.log_file.write(f"Test auc {test_auc}")
-    settings.log_file.write("Training process finished..")
+        print(f"Test AUC: {test_auc}, Test Loss: {test_loss}")
+        # settings.log_file.write(f"Test loss {test_loss}")
+        # settings.log_file.write(f"Test auc {test_auc}")
+    # settings.log_file.write("Training process finished..")
     return train_loss_vec, train_auc_vec, test_loss_vec, test_auc_vec
 
 
@@ -101,12 +117,12 @@ def _test(model, set, loss_weights, device, job='Test'):
     all_targets = []
     all_pred = []
     loss = 0
-    for data, target in set:
+    for A, data, target in set:
         data, target = data.to(device), target.to(device)
-        output = model(data)
+        output = model(data, A)
         if job == 'Test':
             loss = F.binary_cross_entropy_with_logits(output, target.unsqueeze(dim=1).float(),
-                                                       weight=torch.Tensor([loss_weights[i] for i in target]).unsqueeze(dim=1).to(device))
+                                                      weight=torch.Tensor([loss_weights[i] for i in target]).unsqueeze(dim=1).to(device))
             output = torch.sigmoid(output)
         for i in target:
             all_targets.append(i.item())
