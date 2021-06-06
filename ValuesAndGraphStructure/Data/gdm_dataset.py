@@ -1,7 +1,7 @@
 from torch.utils.data import Dataset
 import pandas as pd
 from torch import Tensor
-from JustValues.Data.taxonomy_tree import *
+from ValuesAndGraphStructure.Data.taxonomy_tree import *
 import numpy as np
 from tqdm import tqdm
 
@@ -19,8 +19,8 @@ class GDMDataset(Dataset):
         self._tags['Tag'] = self._tags['Tag'].astype(int)
         self._tags['trimester'] = self._tags['trimester'].astype(int)
         self.split_id_col()
-        self._df = self._df[self._tags['trimester'] > 2]
-        self._tags = self._tags[self._tags['trimester'] > 2]
+        # self._df = self._df[self._tags['trimester'] > 2]
+        # self._tags = self._tags[self._tags['trimester'] > 2]
         self._tags = self._tags[self._df['Repetition'] == 1]
         self._df = self._df[self._df['Repetition'] == 1]
         self._df.sort_index(inplace=True)

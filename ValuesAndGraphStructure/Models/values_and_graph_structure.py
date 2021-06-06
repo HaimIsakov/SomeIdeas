@@ -6,9 +6,9 @@ from sklearn.metrics import roc_auc_score
 import settings
 
 
-class Valeus_And_Graph_Structure(nn.Module):
+class ValuesAndGraphStructure(nn.Module):
     def __init__(self, data_size, RECEIVED_PARAMS):
-        super(JustValuesOnNodes, self).__init__()
+        super(ValuesAndGraphStructure, self).__init__()
         self.data_size = data_size
         self.RECEIVED_PARAMS = RECEIVED_PARAMS
         self.fc1 = nn.Linear(self.data_size, self.RECEIVED_PARAMS["layer_1"])  # input layer

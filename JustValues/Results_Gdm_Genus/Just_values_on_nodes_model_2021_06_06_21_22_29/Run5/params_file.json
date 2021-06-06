@@ -4,7 +4,7 @@
     "dropout":0,
     "optimizer":"adam",
     "activation":"relu",
-    "regularization": 1e-5,
+    "regularization": 0,
     "layer_1":50,
     "layer_2":30,
     "train_frac":0.8,

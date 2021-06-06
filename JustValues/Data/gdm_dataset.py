@@ -19,8 +19,8 @@ class GDMDataset(Dataset):
         self._tags['Tag'] = self._tags['Tag'].astype(int)
         self._tags['trimester'] = self._tags['trimester'].astype(int)
         self.split_id_col()
-        self._df = self._df[self._tags['trimester'] > 2]
-        self._tags = self._tags[self._tags['trimester'] > 2]
+        # self._df = self._df[self._tags['trimester'] > 2]
+        # self._tags = self._tags[self._tags['trimester'] > 2]
         self._tags = self._tags[self._df['Repetition'] == 1]
         self._df = self._df[self._df['Repetition'] == 1]
         self._df.sort_index(inplace=True)
@@ -31,10 +31,10 @@ class GDMDataset(Dataset):
 
     def __getitem__(self, index):
         # need to return A - adjacency matrix as well as values on each node and label
-        values = self.get_values_on_nodes_ordered_by_nodes(index)
-        # values = list(self._df.iloc[index])
-        adjacency_matrix = nx.adjacency_matrix(self.graphs_list[index]).todense()
-        # adjacency_matrix = [5]
+        # values = self.get_values_on_nodes_ordered_by_nodes(index)
+        values = list(self._df.iloc[index])
+        # adjacency_matrix = nx.adjacency_matrix(self.graphs_list[index]).todense()
+        adjacency_matrix = [5]  # random value only for speed
         label = int(self._tags.iloc[index]['Tag'])
         return Tensor(adjacency_matrix), Tensor(values), label
 
@@ -52,11 +52,11 @@ class GDMDataset(Dataset):
         self._df.drop(index, inplace=True)
 
     def get_vector_size(self):
-        nodes_dict = self.find_common_nodes()
-        vector_size = len(nodes_dict)
-        return vector_size
-        # a, b = self._df.shape
-        # return b
+        # nodes_dict = self.find_common_nodes()
+        # vector_size = len(nodes_dict)
+        # return vector_size
+        a, b = self._df.shape
+        return b
 
     def count_each_class(self):
         counter_dict = self._tags['Tag'].value_counts()

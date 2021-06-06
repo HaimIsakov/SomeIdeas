@@ -8,5 +8,6 @@
     "layer_1":10,
     "layer_2":10,
     "train_frac":0.8,
+    "runs_number": 10,
     "epochs": 200
 }
