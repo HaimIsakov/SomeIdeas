@@ -1,0 +1,12 @@
+{
+    "learning_rate":0.0005,
+    "batch_size":50,
+    "dropout":0,
+    "optimizer":"adam",
+    "activation":"relu",
+    "regularization": 1e-6,
+    "layer_1":10,
+    "layer_2":10,
+    "train_frac":0.8,
+    "epochs": 200
+}

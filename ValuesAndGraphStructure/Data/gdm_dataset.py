@@ -6,7 +6,7 @@ import numpy as np
 from tqdm import tqdm
 
 class GDMDataset(Dataset):
-    def __init__(self, data_file_path, tag_file_path, mission='just_values'):
+    def __init__(self, data_file_path, tag_file_path, mission='values_and_graph_structure'):
         self.mission = mission
         self._df = pd.read_csv(data_file_path, index_col='ID')
         self._tags = pd.read_csv(tag_file_path, index_col='ID')

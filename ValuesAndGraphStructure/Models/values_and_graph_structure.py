@@ -6,7 +6,7 @@ from sklearn.metrics import roc_auc_score
 import settings
 
 
-class JustValuesOnNodes(nn.Module):
+class Valeus_And_Graph_Structure(nn.Module):
     def __init__(self, data_size, RECEIVED_PARAMS):
         super(JustValuesOnNodes, self).__init__()
         self.data_size = data_size
