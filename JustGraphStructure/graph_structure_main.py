@@ -2,9 +2,9 @@ import json
 from datetime import datetime
 from shutil import copyfile
 import torch
-from ValuesAndGraphStructure.Data.gdm_dataset import GDMDataset
+from JustGraphStructure.Data.gdm_dataset import GDMDataset
 from torch.utils.data import DataLoader, random_split
-from ValuesAndGraphStructure.Models.values_and_graph_structure import ValuesAndGraphStructure, _train
+from JustGraphStructure.Models.just_graph_structure import JustGraphStructure, _train
 import matplotlib.pyplot as plt
 import os
 import numpy as np
@@ -39,7 +39,7 @@ def count_pos_neg_train_set(train_loader):
 
 
 def train_model(gdm_dataset, RECEIVED_PARAMS):
-    params_file_path = os.path.join('Models', "values_and_graph_structure_on_nodes_params_file.json")
+    params_file_path = os.path.join('Models', "graph_structure_params_file.json")
 
     batch_size = RECEIVED_PARAMS['batch_size']
     number_of_runs = RECEIVED_PARAMS['runs_number']
@@ -54,7 +54,7 @@ def train_model(gdm_dataset, RECEIVED_PARAMS):
         if i == 0:
             root = os.path.join("Results_Gdm_Genus")
             date = datetime.today().strftime('%Y_%m_%d_%H_%M_%S')
-            directory_root = os.path.join(root, f'Values_and_graph_structure_on_nodes_model_{date}')
+            directory_root = os.path.join(root, f'graph_structure_on_nodes_model_{date}')
             os.mkdir(directory_root)
         train, test = random_split(gdm_dataset, [len_train, len_test])
         train_loader = DataLoader(train, batch_size=batch_size, shuffle=True)
@@ -66,7 +66,7 @@ def train_model(gdm_dataset, RECEIVED_PARAMS):
         count_zeros, count_ones = count_pos_neg_train_set(train_loader)
         loss_weights = [1 / count_zeros, 1 / count_ones]
 
-        model = ValuesAndGraphStructure(data_size, RECEIVED_PARAMS)
+        model = JustGraphStructure(data_size, RECEIVED_PARAMS)
         model = model.to(device)
         train_loss_vec, train_auc_vec, test_loss_vec, test_auc_vec = \
             _train(model, RECEIVED_PARAMS, train_loader, test_loader, loss_weights, device)
@@ -154,7 +154,7 @@ if __name__ == '__main__':
     data_file_path = os.path.join('Data', 'OTU_merged_Mucositis_Genus_after_mipmlp_eps_1.csv')
     # data_file_path = os.path.join('Data', 'taxonomy_gdm_file.csv')
     tag_file_path = os.path.join('Data', "tag_gdm_file.csv")
-    params_file_path = os.path.join('Models', "values_and_graph_structure_on_nodes_params_file.json")
+    params_file_path = os.path.join('Models', "graph_structure_params_file.json")
     gdm_dataset = create_dataset(data_file_path, tag_file_path)
     RECEIVED_PARAMS = load_params_file(params_file_path)
     train_model(gdm_dataset, RECEIVED_PARAMS)
