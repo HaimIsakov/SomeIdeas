@@ -25,7 +25,8 @@ class JustGraphStructure(nn.Module):
 
     def forward(self, x, adjacency_matrix):
         # x = x.view(-1, self.data_size)
-        alpha_A = adjacency_matrix * self.alpha.expand_as(adjacency_matrix)
+        # alpha_A = adjacency_matrix * self.alpha.expand_as(adjacency_matrix)
+        alpha_A = torch.mul(adjacency_matrix, self.alpha)
         # alpha_A = torch.matmul(adjacency_matrix, self.alpha.expand_as(adjacency_matrix))
         a, b, c = alpha_A.shape
         d, e = x.shape
