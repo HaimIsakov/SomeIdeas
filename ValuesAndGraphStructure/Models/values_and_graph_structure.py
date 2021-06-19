@@ -11,7 +11,8 @@ class ValuesAndGraphStructure(nn.Module):
         super(ValuesAndGraphStructure, self).__init__()
         self.data_size = data_size
         self.RECEIVED_PARAMS = RECEIVED_PARAMS
-        self.fc1 = nn.Linear(self.data_size, self.RECEIVED_PARAMS["layer_1"])  # input layer
+        self.pre_weighting = nn.Linear(self.data_size, self.RECEIVED_PARAMS["preweight"])
+        self.fc1 = nn.Linear(self.RECEIVED_PARAMS["preweight"], self.RECEIVED_PARAMS["layer_1"])  # input layer
         self.fc2 = nn.Linear(self.RECEIVED_PARAMS["layer_1"], self.RECEIVED_PARAMS["layer_2"])
         self.fc3 = nn.Linear(self.RECEIVED_PARAMS["layer_2"], 1)
         self.alpha = torch.rand(1, requires_grad=True)
@@ -24,7 +25,7 @@ class ValuesAndGraphStructure(nn.Module):
     def forward(self, x, adjacency_matrix):
         # x = x.view(-1, self.data_size)
         # alpha_A = adjacency_matrix * self.alpha.expand_as(adjacency_matrix)
-        alpha_A = torch.mul(x, self.alpha)
+        alpha_A = torch.mul(adjacency_matrix, self.alpha)
         # alpha_A = torch.matmul(adjacency_matrix, self.alpha.expand_as(adjacency_matrix))
         a, b, c = alpha_A.shape
         d, e = x.shape
@@ -34,16 +35,19 @@ class ValuesAndGraphStructure(nn.Module):
         x = torch.matmul(alpha_A_plus_I, x)
         x = torch.reshape(x, (d, e))
         if self.activation_func == 'relu':
+            x = F.relu(self.pre_weighting(x))
             x = F.relu(self.fc1(x))
             x = F.relu(self.fc2(x))
             # x = self.bn1(F.relu(self.fc1(x)))
             # x = self.bn2(F.relu(self.fc2(x)))
         elif self.activation_func == 'elu':
+            x = F.elu(self.pre_weighting(x))
             x = F.elu(self.fc1(x))
             x = F.elu(self.fc2(x))
             # x = self.bn1((F.elu(self.fc1(x))))
             # x = self.bn2((F.elu(self.fc2(x))))
         elif self.activation_func == 'tanh':
+            x = torch.tanh(self.pre_weighting(x))
             x = torch.tanh(self.fc1(x))
             x = torch.tanh(self.fc2(x))
             # x = self.bn1(torch.tanh(self.fc1(x)))

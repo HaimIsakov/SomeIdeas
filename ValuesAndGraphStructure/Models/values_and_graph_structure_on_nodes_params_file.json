@@ -5,6 +5,7 @@
     "optimizer":"adam",
     "activation":"relu",
     "regularization": 1e-7,
+    "preweight": 10,
     "layer_1":10,
     "layer_2":10,
     "train_frac":0.8,
