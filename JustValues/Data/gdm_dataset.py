@@ -1,6 +1,7 @@
 from torch import Tensor
 from arrange_gdm_dataset import *
 
+
 class GDMDataset(ArrangeGDMDataset):
     def __init__(self, data_file_path, tag_file_path, mission='just_values'):
         super().__init__(data_file_path, tag_file_path, mission)
