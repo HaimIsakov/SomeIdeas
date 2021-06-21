@@ -64,92 +64,92 @@ class JustGraphStructure(nn.Module):
         settings.log_file.write(f"Model parameters: {self.RECEIVED_PARAMS}")
 
 
-def _train(model, RECEIVED_PARAMS, train_loader, test_loader, loss_weights, device='cpu'):
-    """
-    The training function. We train our model for 10 epochs (like requested). Every epoch we zero
-    the optimizer grad from the earlier epoch, calculate our model, calculate loss, do backpropagation
-    and one optimizing step.
-    """
-    # settings.log_file.write("Training process started..")
-    # for the plots afterwards
-    train_loss_vec = []
-    test_loss_vec = []
-    # train_acc = []
-    # test_acc = []
-    test_auc_vec = []
-    train_auc_vec = []
-    optimizer = get_optimizer(RECEIVED_PARAMS, model)
-    loss = 0
-    epochs = RECEIVED_PARAMS['epochs']
-    # run the main training loop
-    for epoch in range(epochs):
-        # settings.log_file.write(f"Epoch {epoch}")
-        print(f"epoch {epoch}")
-        model.train()
-        for batch_idx, (A, data, target) in enumerate(train_loader):
-            A, data, target = A.to(device), data.to(device), target.to(device)
-            optimizer.zero_grad()
-            net_out = model(data, A)
-            loss = F.binary_cross_entropy_with_logits(net_out, target.unsqueeze(dim=1).float(),
-                                                      weight=torch.Tensor([loss_weights[i] for i in target]).unsqueeze(dim=1).to(device))
-            loss.backward()
-            optimizer.step()
-        # settings.log_file.write(f"Train loss {loss.item()}")
-
-        train_loss_vec.append(loss.item())
-        train_auc, train_loss = _test(model, train_loader, loss_weights, device)
-        print(f"Train AUC: {train_auc}, Train Loss: {train_loss}")
-        # settings.log_file.write(f"Train auc {train_auc}")
-
-        test_auc, test_loss = _test(model, test_loader, loss_weights, device)
-        test_auc_vec.append(test_auc)
-        test_loss_vec.append(test_loss)
-        print(f"Test AUC: {test_auc}, Test Loss: {test_loss}")
-        # settings.log_file.write(f"Test loss {test_loss}")
-        # settings.log_file.write(f"Test auc {test_auc}")
-    # settings.log_file.write("Training process finished..")
-    return train_loss_vec, train_auc_vec, test_loss_vec, test_auc_vec
-
-
-def _binary_acc(y_pred, y_test):
-    y_pred_tag = torch.round(torch.sigmoid(y_pred))
-    correct_results_sum = (y_pred_tag == y_test).sum().float()
-    acc = correct_results_sum / y_test.shape[0]
-    acc = torch.round(acc * 100)
-    return acc
-
-
-def _test(model, set, loss_weights, device, job='Test'):
-    """
-    The test function. for every (data, traget) in our train set we calculate the output according
-    to our model, calculating the loss, get the index of the max log-probability, and claculate
-    "correct" variable to help us later calculate the accuracy.
-    """
-    model.eval()
-    all_targets = []
-    all_pred = []
-    loss = 0
-    for A, data, target in set:
-        data, target = data.to(device), target.to(device)
-        output = model(data, A)
-        if job == 'Test':
-            loss = F.binary_cross_entropy_with_logits(output, target.unsqueeze(dim=1).float(),
-                                                      weight=torch.Tensor([loss_weights[i] for i in target]).unsqueeze(dim=1).to(device))
-            output = torch.sigmoid(output)
-        for i in target:
-            all_targets.append(i.item())
-        output = output.squeeze()
-        for i in output:
-            all_pred.append(i.item())
-    auc_result = roc_auc_score(all_targets, all_pred)
-    return auc_result, loss
-
-
-def get_optimizer(RECEIVED_PARAMS, model):
-    optimizer = RECEIVED_PARAMS['optimizer']
-    learning_rate = RECEIVED_PARAMS['learning_rate']
-    weight_decay = RECEIVED_PARAMS['regularization']
-    if optimizer == 'adam':
-        return optim.Adam(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
-    elif optimizer == 'SGD':
-        return optim.Adam(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
+# def _train(model, RECEIVED_PARAMS, train_loader, test_loader, loss_weights, device='cpu'):
+#     """
+#     The training function. We train our model for 10 epochs (like requested). Every epoch we zero
+#     the optimizer grad from the earlier epoch, calculate our model, calculate loss, do backpropagation
+#     and one optimizing step.
+#     """
+#     # settings.log_file.write("Training process started..")
+#     # for the plots afterwards
+#     train_loss_vec = []
+#     test_loss_vec = []
+#     # train_acc = []
+#     # test_acc = []
+#     test_auc_vec = []
+#     train_auc_vec = []
+#     optimizer = get_optimizer(RECEIVED_PARAMS, model)
+#     loss = 0
+#     epochs = RECEIVED_PARAMS['epochs']
+#     # run the main training loop
+#     for epoch in range(epochs):
+#         # settings.log_file.write(f"Epoch {epoch}")
+#         print(f"epoch {epoch}")
+#         model.train()
+#         for batch_idx, (A, data, target) in enumerate(train_loader):
+#             A, data, target = A.to(device), data.to(device), target.to(device)
+#             optimizer.zero_grad()
+#             net_out = model(data, A)
+#             loss = F.binary_cross_entropy_with_logits(net_out, target.unsqueeze(dim=1).float(),
+#                                                       weight=torch.Tensor([loss_weights[i] for i in target]).unsqueeze(dim=1).to(device))
+#             loss.backward()
+#             optimizer.step()
+#         # settings.log_file.write(f"Train loss {loss.item()}")
+#
+#         train_loss_vec.append(loss.item())
+#         train_auc, train_loss = _test(model, train_loader, loss_weights, device)
+#         print(f"Train AUC: {train_auc}, Train Loss: {train_loss}")
+#         # settings.log_file.write(f"Train auc {train_auc}")
+#
+#         test_auc, test_loss = _test(model, test_loader, loss_weights, device)
+#         test_auc_vec.append(test_auc)
+#         test_loss_vec.append(test_loss)
+#         print(f"Test AUC: {test_auc}, Test Loss: {test_loss}")
+#         # settings.log_file.write(f"Test loss {test_loss}")
+#         # settings.log_file.write(f"Test auc {test_auc}")
+#     # settings.log_file.write("Training process finished..")
+#     return train_loss_vec, train_auc_vec, test_loss_vec, test_auc_vec
+#
+#
+# def _binary_acc(y_pred, y_test):
+#     y_pred_tag = torch.round(torch.sigmoid(y_pred))
+#     correct_results_sum = (y_pred_tag == y_test).sum().float()
+#     acc = correct_results_sum / y_test.shape[0]
+#     acc = torch.round(acc * 100)
+#     return acc
+#
+#
+# def _test(model, set, loss_weights, device, job='Test'):
+#     """
+#     The test function. for every (data, traget) in our train set we calculate the output according
+#     to our model, calculating the loss, get the index of the max log-probability, and claculate
+#     "correct" variable to help us later calculate the accuracy.
+#     """
+#     model.eval()
+#     all_targets = []
+#     all_pred = []
+#     loss = 0
+#     for A, data, target in set:
+#         data, target = data.to(device), target.to(device)
+#         output = model(data, A)
+#         if job == 'Test':
+#             loss = F.binary_cross_entropy_with_logits(output, target.unsqueeze(dim=1).float(),
+#                                                       weight=torch.Tensor([loss_weights[i] for i in target]).unsqueeze(dim=1).to(device))
+#             output = torch.sigmoid(output)
+#         for i in target:
+#             all_targets.append(i.item())
+#         output = output.squeeze()
+#         for i in output:
+#             all_pred.append(i.item())
+#     auc_result = roc_auc_score(all_targets, all_pred)
+#     return auc_result, loss
+#
+#
+# def get_optimizer(RECEIVED_PARAMS, model):
+#     optimizer = RECEIVED_PARAMS['optimizer']
+#     learning_rate = RECEIVED_PARAMS['learning_rate']
+#     weight_decay = RECEIVED_PARAMS['regularization']
+#     if optimizer == 'adam':
+#         return optim.Adam(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
+#     elif optimizer == 'SGD':
+#         return optim.Adam(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
