@@ -3,7 +3,7 @@ from arrange_gdm_dataset import *
 
 
 class GDMDataset(ArrangeGDMDataset):
-    def __init__(self, data_file_path, tag_file_path, mission='just_values'):
+    def __init__(self, data_file_path, tag_file_path, mission):
         super().__init__(data_file_path, tag_file_path, mission)
 
     def __getitem__(self, index):
@@ -19,17 +19,20 @@ class GDMDataset(ArrangeGDMDataset):
         a, b = self._microbiome_df.shape
         return a
 
-    def get_vector_size(self):
+    def get_leaves_number(self):
         a, b = self._microbiome_df.shape
-        return b
+        return a
+
+    def get_vector_size(self):
+        nodes_dict = self.find_common_nodes()
+        vector_size = len(nodes_dict)
+        return vector_size
 
     def get_values_on_nodes_ordered_by_nodes(self, index):
         cur_graph = self.graphs_list[index]
         nodes_and_values = cur_graph.nodes()
         values = [value for node_name, value in nodes_and_values]
         return values
-
-
 
     # def check_graphs(self):
     ## check adjacency_matrix
@@ -38,8 +41,8 @@ class GDMDataset(ArrangeGDMDataset):
     #     [print(i) for i in nx.adjacency_matrix(self.graphs_list[-1]).todense()]
 
     ## check that all graphs contain all nodes in the same order
-        # f = open('nodes_check.txt', 'wt')
-        # for g in self.graphs_list:
-        #     f.write(';'.join([str(a) for a, b in g.nodes()]))
-        #     f.write('\n')
-        # f.close()
+    # f = open('nodes_check.txt', 'wt')
+    # for g in self.graphs_list:
+    #     f.write(';'.join([str(a) for a, b in g.nodes()]))
+    #     f.write('\n')
+    # f.close()

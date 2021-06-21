@@ -38,11 +38,10 @@ class TrainTestValKTimes:
 
             # device = "cuda:2" if torch.cuda.is_available() else "cpu"
             # print(self.device)
-            train_loader, test_loader, loss_weights = self.create_data_loaders()
+            train_loader, test_loader = self.create_data_loaders()
             model = self.get_model()
             model = model.to(self.device)
-            trainer_and_tester = TrainTestValOneTime(model, self.RECEIVED_PARAMS, train_loader, test_loader,
-                                                          loss_weights, self.device)
+            trainer_and_tester = TrainTestValOneTime(model, self.RECEIVED_PARAMS, train_loader, test_loader, self.device)
             final_results_vec.append(trainer_and_tester.test_auc_vec[-1])
             os.mkdir(os.path.join(directory_root, f"Run{i}"))
             root = os.path.join(directory_root, f"Run{i}")
@@ -60,18 +59,17 @@ class TrainTestValKTimes:
         #  and also trimesters!
         train_loader = DataLoader(train, batch_size=batch_size, shuffle=True)
         test_loader = DataLoader(test, batch_size=batch_size)
-
-        count_zeros, count_ones = self.count_pos_neg_train_set(train_loader)
-        loss_weights = [1 / count_zeros, 1 / count_ones]
-        return train_loader, test_loader, loss_weights
+        return train_loader, test_loader
 
     def get_model(self):
-        data_size = self.dataset.get_vector_size()
-        if self.mission == "JustNodes":
+        if self.mission == "JustValues":
+            data_size = self.dataset.get_leaves_number()
             model = JustValuesOnNodes(data_size, self.RECEIVED_PARAMS)
         elif self.mission == "JustGraphStructure":
+            data_size = self.dataset.get_vector_size()
             model = JustGraphStructure(data_size, self.RECEIVED_PARAMS)
         elif self.mission == "GraphStructure&Values":
+            data_size = self.dataset.get_vector_size()
             model = ValuesAndGraphStructure(data_size, self.RECEIVED_PARAMS)
         return model
 
@@ -118,14 +116,3 @@ class TrainTestValKTimes:
         # self.plot_measurement(root, date, ACCURACY_PLOT)
         self.plot_measurement(root, date, trainer_and_tester, AUC_PLOT)
 
-    @staticmethod
-    def count_pos_neg_train_set(train_loader):
-        count_ones = 0
-        count_zeros = 0
-        for batch_index, (A, data, target) in enumerate(train_loader):
-            for i in target:
-                if i.item() == 1:
-                    count_ones += 1
-                if i.item() == 0:
-                    count_zeros += 1
-        return count_zeros, count_ones

@@ -3,7 +3,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 from sklearn.metrics import roc_auc_score
-import settings
 
 
 class JustValuesOnNodes(nn.Module):
@@ -14,35 +13,22 @@ class JustValuesOnNodes(nn.Module):
         self.fc1 = nn.Linear(self.data_size, self.RECEIVED_PARAMS["layer_1"])  # input layer
         self.fc2 = nn.Linear(self.RECEIVED_PARAMS["layer_1"], self.RECEIVED_PARAMS["layer_2"])
         self.fc3 = nn.Linear(self.RECEIVED_PARAMS["layer_2"], 1)
-        # self.bn1 = nn.BatchNorm1d(self.RECEIVED_PARAMS["layer_1"])
-        # self.bn2 = nn.BatchNorm1d(self.RECEIVED_PARAMS["layer_2"])
         self.activation_func = self.RECEIVED_PARAMS['activation']
-        # self.write_to_log()
 
-    def forward(self, x):
+    def forward(self, x, A):
         # x = x.view(-1, self.data_size)
         if self.activation_func == 'relu':
             x = F.relu(self.fc1(x))
             x = F.relu(self.fc2(x))
-            # x = self.bn1(F.relu(self.fc1(x)))
-            # x = self.bn2(F.relu(self.fc2(x)))
         elif self.activation_func == 'elu':
             x = F.elu(self.fc1(x))
             x = F.elu(self.fc2(x))
-            # x = self.bn1((F.elu(self.fc1(x))))
-            # x = self.bn2((F.elu(self.fc2(x))))
         elif self.activation_func == 'tanh':
             x = torch.tanh(self.fc1(x))
             x = torch.tanh(self.fc2(x))
-            # x = self.bn1(torch.tanh(self.fc1(x)))
-            # x = self.bn2((torch.tanh(self.fc2(x))))
         # x = torch.sigmoid(x) # BCE loss automatically applies sigmoid
         x = self.fc3(x)
         return x
-
-    def write_to_log(self):
-        settings.log_file.write(f"Model name: {self.__class__.__name__}")
-        settings.log_file.write(f"Model parameters: {self.RECEIVED_PARAMS}")
 
 
 def _train(model, RECEIVED_PARAMS, train_loader, test_loader, loss_weights, device='cpu'):

@@ -19,6 +19,10 @@ class GDMDataset(ArrangeGDMDataset):
         a, b = self._microbiome_df.shape
         return a
 
+    def get_leaves_number(self):
+        a, b = self._microbiome_df.shape
+        return a
+
     def get_vector_size(self):
         nodes_dict = self.find_common_nodes()
         vector_size = len(nodes_dict)
