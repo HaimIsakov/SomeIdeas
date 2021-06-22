@@ -46,7 +46,7 @@ class TrainTestValKTimes:
             os.mkdir(os.path.join(directory_root, f"Run{i}"))
             root = os.path.join(directory_root, f"Run{i}")
             self.plot_acc_loss_auc(root, date, trainer_and_tester)
-        print(f"Average auc on test sets {np.mean(final_results_vec)}")
+        print(f"Auc on test set {np.mean(final_results_vec)}")
 
     def create_data_loaders(self):
         batch_size = self.RECEIVED_PARAMS['batch_size']
@@ -115,4 +115,3 @@ class TrainTestValKTimes:
         self.plot_measurement(root, date, trainer_and_tester, LOSS_PLOT)
         # self.plot_measurement(root, date, ACCURACY_PLOT)
         self.plot_measurement(root, date, trainer_and_tester, AUC_PLOT)
-

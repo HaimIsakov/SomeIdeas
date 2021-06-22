@@ -24,16 +24,14 @@ class TrainTestValOneTime:
         self.model.eval()
         all_targets = []
         all_pred = []
-        loss = 0
         for A, data, target in data_loader:
             data, target = data.to(self.device), target.to(self.device)
             output = self.model(data, A)
-            if job == TEST_JOB:
-                loss = F.binary_cross_entropy_with_logits(output, target.unsqueeze(dim=1).float(),
-                                                          weight=torch.Tensor(
-                                                              [self.loss_weights[i] for i in target]).unsqueeze(
-                                                              dim=1).to(self.device))
-                output = torch.sigmoid(output)
+            loss = F.binary_cross_entropy_with_logits(output, target.unsqueeze(dim=1).float(),
+                                                      weight=torch.Tensor(
+                                                          [self.loss_weights[i] for i in target]).unsqueeze(
+                                                          dim=1).to(self.device))
+            output = torch.sigmoid(output)
             for i in target:
                 all_targets.append(i.item())
             output = output.squeeze()
@@ -45,7 +43,6 @@ class TrainTestValOneTime:
     def train(self):
         optimizer = self.get_optimizer()
         epochs = self.RECEIVED_PARAMS['epochs']
-        loss = 0
         # run the main training loop
         for epoch in range(epochs):
             print(f"epoch {epoch}")

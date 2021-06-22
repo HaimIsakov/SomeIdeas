@@ -11,7 +11,9 @@ class ArrangeGDMDataset(Dataset):
         self._microbiome_df = pd.read_csv(data_file_path, index_col='ID')
         self._tags = pd.read_csv(tag_file_path, index_col='ID')
         self.graphs_list = []
-        self.arrange_dataframes()
+        # only repetition 1
+        lambda_func_repetition = lambda x: x == 1
+        self.arrange_dataframes(lambda_func_repetition=lambda_func_repetition)
         self.create_graphs_with_common_nodes()
 
     def arrange_dataframes(self, lambda_func_repetition=lambda x: True, lambda_func_trimester=lambda x: True):

@@ -9,7 +9,10 @@ class GDMDataset(ArrangeGDMDataset):
     def __getitem__(self, index):
         # need to return A - adjacency matrix as well as values on each node and label
         # values = self.get_values_on_nodes_ordered_by_nodes(index)
-        values = list(self._microbiome_df.iloc[index])
+        if self.mission == 'JustValues':
+            values = list(self._microbiome_df.iloc[index])
+        else:
+            values = self.get_values_on_nodes_ordered_by_nodes(index)
         adjacency_matrix = nx.adjacency_matrix(self.graphs_list[index]).todense()
         # adjacency_matrix = [5]  # random value only for speed
         label = int(self._tags.iloc[index]['Tag'])
@@ -21,7 +24,7 @@ class GDMDataset(ArrangeGDMDataset):
 
     def get_leaves_number(self):
         a, b = self._microbiome_df.shape
-        return a
+        return b
 
     def get_vector_size(self):
         nodes_dict = self.find_common_nodes()
