@@ -11,6 +11,7 @@ class ArrangeGDMDataset(Dataset):
         self._microbiome_df = pd.read_csv(data_file_path, index_col='ID')
         self._tags = pd.read_csv(tag_file_path, index_col='ID')
         self.graphs_list = []
+        self.groups = []  # for "from sklearn.model_selection import GroupShuffleSplit"
         # only repetition 1
         lambda_func_repetition = lambda x: x == 1
         self.arrange_dataframes(lambda_func_repetition=lambda_func_repetition)
@@ -21,16 +22,13 @@ class ArrangeGDMDataset(Dataset):
         self._tags['Tag'] = self._tags['Tag'].astype(int)
         self._tags['trimester'] = self._tags['trimester'].astype(int)
         self.split_id_col()
-        # self._microbiome_df = self._df[self._tags['trimester'] > 2]
-        # self._tags = self._tags[self._tags['trimester'] > 2]
         self._microbiome_df = self._microbiome_df[self._tags['trimester'].apply(lambda_func_trimester)]
         self._tags = self._tags[self._tags['trimester'].apply(lambda_func_trimester)]
-        # self._tags = self._tags[self._microbiome_df['Repetition'] == 1]
-        # self._microbiome_df = self._df[self._df['Repetition'] == 1]
         self._tags = self._tags[self._microbiome_df['Repetition'].apply(lambda_func_repetition)]
         self._microbiome_df = self._microbiome_df[self._microbiome_df['Repetition'].apply(lambda_func_repetition)]
         self._microbiome_df.sort_index(inplace=True)
         self._tags.sort_index(inplace=True)
+        self.add_groups()  # It is important to verify that the order of instances is correct
         del self._tags['trimester']
         del self._microbiome_df['Repetition']
         del self._microbiome_df['Code']
@@ -44,6 +42,9 @@ class ArrangeGDMDataset(Dataset):
     def split_id_col(self):
         self._microbiome_df['Code'] = [cur_id.split('-')[0] for cur_id in self._microbiome_df.index]
         self._microbiome_df['Repetition'] = [int(cur_id.split('-')[-1]) for cur_id in self._microbiome_df.index]
+
+    def add_groups(self):
+        self.groups = list(self._microbiome_df['Code'])
 
     def remove_na(self):
         index = self._tags['Tag'].index[self._tags['Tag'].apply(np.isnan)]

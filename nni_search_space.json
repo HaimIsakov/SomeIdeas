@@ -1,0 +1,13 @@
+{
+    "learning_rate":{"_type":"choice","_value":[0.000001, 0.00001, 0.0001, 0.001, 0.01, 0.1]},
+    "batch_size":{"_type":"choice","_value":[5, 10, 30, 50, 70, 100]},
+    "dropout":{"_type":"choice","_value":[0, 0.1, 0.3, 0.5, 0.6]},
+    "optimizer":{"_type":"choice","_value":["adam", "SGD"]},
+    "activation":{"_type":"choice","_value":["relu", "elu", "tanh"]},
+    "regularization":{"_type":"choice","_value":[0, 0.0000000001, 0.00000001, 0.0000001, 0.00001, 0.0001, 0.001, 0.01, 0.1]},
+    "layer_1":{"_type":"choice","_value":[20, 50, 100, 200, 300, 400]},
+    "layer_2":{"_type":"choice","_value":[10, 50, 100, 200, 300]},
+    "train_frac":0.7,
+    "test_frac": 0.15,
+
+}

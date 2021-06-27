@@ -1,6 +1,8 @@
 import json
 import os
 from datetime import datetime
+
+from sklearn.model_selection import GroupShuffleSplit
 from torch.utils.data import DataLoader, random_split
 import matplotlib.pyplot as plt
 import numpy as np
@@ -15,7 +17,7 @@ ACCURACY_PLOT = 'acc'
 AUC_PLOT = 'auc'
 TRAIN_JOB = 'train'
 TEST_JOB = 'test'
-
+RANDOM_STATE = 0
 
 class TrainTestValKTimes:
     def __init__(self, mission, RECEIVED_PARAMS, number_of_runs, device, dataset, result_directory_name):
@@ -27,7 +29,6 @@ class TrainTestValKTimes:
         self.number_of_runs = number_of_runs
 
     def train_k_splits_of_dataset(self):
-        final_results_vec = []
         for i in range(self.number_of_runs):
             print(f"Run {i}")
             if i == 0:
@@ -35,31 +36,62 @@ class TrainTestValKTimes:
                 date = datetime.today().strftime('%Y_%m_%d_%H_%M_%S')
                 directory_root = os.path.join(root, f'{self.mission}_{date}')
                 os.mkdir(directory_root)
-
-            # device = "cuda:2" if torch.cuda.is_available() else "cpu"
-            # print(self.device)
-            train_loader, test_loader = self.create_data_loaders()
+            gss = self.create_gss(k=1)
+            train_idx, test_idx = next(gss.split(self.dataset, groups=self.dataset.groups))
+            train_loader, val_loader, test_loader = self.create_data_loaders(train_idx, test_idx)
             model = self.get_model()
             model = model.to(self.device)
-            trainer_and_tester = TrainTestValOneTime(model, self.RECEIVED_PARAMS, train_loader, test_loader, self.device)
-            final_results_vec.append(trainer_and_tester.test_auc_vec[-1])
+            trainer_and_tester = TrainTestValOneTime(model, self.RECEIVED_PARAMS, train_loader, val_loader, test_loader,
+                                                     self.device)
             os.mkdir(os.path.join(directory_root, f"Run{i}"))
             root = os.path.join(directory_root, f"Run{i}")
             self.plot_acc_loss_auc(root, date, trainer_and_tester)
-        print(f"Auc on test set {np.mean(final_results_vec)}")
 
-    def create_data_loaders(self):
-        batch_size = self.RECEIVED_PARAMS['batch_size']
+    def train_k_cross_validation_of_dataset(self, k=5):
+        gss = self.create_gss(k=k)
+        run = 0
+        for train_idx, test_idx in gss.split(self.dataset, groups=self.dataset.groups):
+            print(f"Run {run}")
+            if run == 0:
+                root = self.result_directory_name
+                date = datetime.today().strftime('%Y_%m_%d_%H_%M_%S')
+                directory_root = os.path.join(root, f'{self.mission}_{date}')
+                os.mkdir(directory_root)
+            train_loader, val_loader, test_loader = self.create_data_loaders(train_idx, test_idx)
+            model = self.get_model()
+            model = model.to(self.device)
+            trainer_and_tester = TrainTestValOneTime(model, self.RECEIVED_PARAMS, train_loader, val_loader, test_loader,
+                                                     self.device)
+            os.mkdir(os.path.join(directory_root, f"Run{run}"))
+            root = os.path.join(directory_root, f"Run{run}")
+            self.plot_acc_loss_auc(root, date, trainer_and_tester)
+            run += 1
+
+    def create_gss(self, k=1):
+        train_frac = self.RECEIVED_PARAMS['train_frac']
+        test_frac = self.RECEIVED_PARAMS['test_frac']
+        gss = GroupShuffleSplit(n_splits=k, train_size=train_frac, test_size=test_frac, random_state=RANDOM_STATE)
+        return gss
+
+    def create_data_loaders(self, train_idx, test_idx):
+        # len_train = int(samples_len * self.RECEIVED_PARAMS['train_frac'])
+        # len_test = samples_len - len_train
+        # train, test = random_split(self.dataset, [len_train, len_test])
+        # train_loader = DataLoader(train, batch_size=batch_size, shuffle=True)
+        # test_loader = DataLoader(test, batch_size=batch_size)
         samples_len = len(self.dataset)
-        len_train = int(samples_len * self.RECEIVED_PARAMS['train_frac'])
-        len_test = samples_len - len_train
-
-        train, test = random_split(self.dataset, [len_train, len_test])
-        # ToDo:create dataloader by myself to separate train and test for moms with different repetitions
-        #  and also trimesters!
-        train_loader = DataLoader(train, batch_size=batch_size, shuffle=True)
-        test_loader = DataLoader(test, batch_size=batch_size)
-        return train_loader, test_loader
+        batch_size = self.RECEIVED_PARAMS['batch_size']
+        val_idx = np.array(list(set(range(samples_len)) - set(test_idx) - set(train_idx)))
+        # Datasets
+        train_data = torch.utils.data.Subset(self.dataset, train_idx)
+        test_data = torch.utils.data.Subset(self.dataset, test_idx)
+        val_data = torch.utils.data.Subset(self.dataset, val_idx)
+        # Dataloader
+        train_loader = torch.utils.data.DataLoader(train_data, shuffle=True, batch_size=batch_size)
+        val_loader = torch.utils.data.DataLoader(val_data, batch_size=batch_size, shuffle=False)
+        # Notice that the test data is loaded as one unit.
+        test_loader = torch.utils.data.DataLoader(test_data, shuffle=False, batch_size=len(test_data))
+        return train_loader, val_loader, test_loader
 
     def get_model(self):
         if self.mission == "JustValues":
@@ -67,10 +99,10 @@ class TrainTestValKTimes:
             model = JustValuesOnNodes(data_size, self.RECEIVED_PARAMS)
         elif self.mission == "JustGraphStructure":
             data_size = self.dataset.get_vector_size()
-            model = JustGraphStructure(data_size, self.RECEIVED_PARAMS)
+            model = JustGraphStructure(data_size, self.RECEIVED_PARAMS, self.device)
         elif self.mission == "GraphStructure&Values":
             data_size = self.dataset.get_vector_size()
-            model = ValuesAndGraphStructure(data_size, self.RECEIVED_PARAMS)
+            model = ValuesAndGraphStructure(data_size, self.RECEIVED_PARAMS, self.device)
         return model
 
     def plot_measurement(self, root, date, trainer_and_tester, measurement=LOSS_PLOT):

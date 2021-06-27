@@ -8,7 +8,8 @@
     "preweight":10,
     "layer_1":10,
     "layer_2":10,
-    "train_frac":0.8,
+    "train_frac":0.7,
+    "test_frac": 0.15,
     "runs_number": 10,
     "epochs": 2
 }
