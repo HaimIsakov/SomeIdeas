@@ -11,10 +11,11 @@ class GDMDataset(ArrangeGDMDataset):
         # values = self.get_values_on_nodes_ordered_by_nodes(index)
         if self.mission == 'JustValues':
             values = list(self._microbiome_df.iloc[index])
+            adjacency_matrix = [5]  # random value only for speed
         else:
             values = self.get_values_on_nodes_ordered_by_nodes(index)
-        adjacency_matrix = nx.adjacency_matrix(self.graphs_list[index]).todense()
-        # adjacency_matrix = [5]  # random value only for speed
+            adjacency_matrix = nx.adjacency_matrix(self.graphs_list[index]).todense()
+
         label = int(self._tags.iloc[index]['Tag'])
         return Tensor(adjacency_matrix), Tensor(values), label
 

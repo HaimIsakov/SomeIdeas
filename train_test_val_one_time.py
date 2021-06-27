@@ -10,6 +10,7 @@ TEST_JOB = 'test'
 VAL_JOB = 'validation'
 PATIENCE = 20
 
+
 class TrainTestValOneTime:
     def __init__(self, model, RECEIVED_PARAMS, train_loader, val_loader, test_loader, device):
         self.model = model
@@ -22,8 +23,9 @@ class TrainTestValOneTime:
         self.train_loss_vec, self.test_loss_vec = [], []
         self.train_auc_vec, self.test_auc_vec = [], []
         self.train_acc, self.test_acc = [], []
+        self.test_auc = 0.0
 
-        self.train()
+        # self.train()
 
     def calc_loss_test(self, data_loader, job=VAL_JOB):
         ######################
@@ -34,10 +36,11 @@ class TrainTestValOneTime:
         for A, data, target in data_loader:
             A, data, target = A.to(self.device), data.to(self.device), target.to(self.device)
             output = self.model(data, A)
-            loss = F.binary_cross_entropy_with_logits(output, target.unsqueeze(dim=1).float(),
-                                                      weight=torch.Tensor(
-                                                          [self.loss_weights[i] for i in target]).unsqueeze(
-                                                          dim=1).to(self.device))
+            loss = F.binary_cross_entropy_with_logits(output, target.unsqueeze(dim=1).float())
+            # loss = F.binary_cross_entropy_with_logits(output, target.unsqueeze(dim=1).float(),
+            #                                           weight=torch.Tensor(
+            #                                               [self.loss_weights[i] for i in target]).unsqueeze(
+            #                                               dim=1).to(self.device))
             batched_test_loss.append(loss.item())
         average_loss = np.average(batched_test_loss)
         return average_loss
@@ -75,10 +78,11 @@ class TrainTestValOneTime:
                 A, data, target = A.to(self.device), data.to(self.device), target.to(self.device)
                 optimizer.zero_grad()  # clear the gradients of all optimized variables
                 net_out = self.model(data, A)  # forward pass: compute predicted outputs by passing inputs to the model
-                loss = F.binary_cross_entropy_with_logits(net_out, target.unsqueeze(dim=1).float(),
-                                                          weight=torch.Tensor(
-                                                              [self.loss_weights[i] for i in target]).unsqueeze(
-                                                              dim=1).to(self.device))  # calculate the weighted loss
+                loss = F.binary_cross_entropy_with_logits(net_out, target.unsqueeze(dim=1).float())
+                # loss = F.binary_cross_entropy_with_logits(net_out, target.unsqueeze(dim=1).float(),
+                #                                           weight=torch.Tensor(
+                #                                               [self.loss_weights[i] for i in target]).unsqueeze(
+                #                                               dim=1).to(self.device))  # calculate the weighted loss
                 loss.backward()  # backward pass: compute gradient of the loss with respect to model parameters
                 optimizer.step()  # perform a single optimization step (parameter update)
                 batched_train_loss.append(loss.item())
@@ -96,8 +100,10 @@ class TrainTestValOneTime:
                          f'valid_loss: {val_loss:.6f} valid_auc: {val_auc:.6f}')
             if early_stopping.early_stop:
                 print("Early stopping")
+                self.test_auc = self.calc_auc(self.test_loader, job=TEST_JOB)
                 break
             print(print_msg)
+        self.test_auc = self.calc_auc(self.test_loader, job=TEST_JOB)
 
     def get_optimizer(self):
             optimizer = self.RECEIVED_PARAMS['optimizer']

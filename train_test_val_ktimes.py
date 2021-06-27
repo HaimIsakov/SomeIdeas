@@ -1,7 +1,6 @@
 import json
 import os
 from datetime import datetime
-
 from sklearn.model_selection import GroupShuffleSplit
 from torch.utils.data import DataLoader, random_split
 import matplotlib.pyplot as plt
@@ -18,6 +17,7 @@ AUC_PLOT = 'auc'
 TRAIN_JOB = 'train'
 TEST_JOB = 'test'
 RANDOM_STATE = 0
+
 
 class TrainTestValKTimes:
     def __init__(self, mission, RECEIVED_PARAMS, number_of_runs, device, dataset, result_directory_name):
@@ -43,8 +43,11 @@ class TrainTestValKTimes:
             model = model.to(self.device)
             trainer_and_tester = TrainTestValOneTime(model, self.RECEIVED_PARAMS, train_loader, val_loader, test_loader,
                                                      self.device)
+            trainer_and_tester.train()
             os.mkdir(os.path.join(directory_root, f"Run{i}"))
             root = os.path.join(directory_root, f"Run{i}")
+            f = open(os.path.join(root, f"Test Auc {trainer_and_tester.test_auc}"))
+            f.close()
             self.plot_acc_loss_auc(root, date, trainer_and_tester)
 
     def train_k_cross_validation_of_dataset(self, k=5):
@@ -62,8 +65,12 @@ class TrainTestValKTimes:
             model = model.to(self.device)
             trainer_and_tester = TrainTestValOneTime(model, self.RECEIVED_PARAMS, train_loader, val_loader, test_loader,
                                                      self.device)
+            trainer_and_tester.train()
+            print("Test Auc", trainer_and_tester.test_auc)
             os.mkdir(os.path.join(directory_root, f"Run{run}"))
             root = os.path.join(directory_root, f"Run{run}")
+            f = open(os.path.join(directory_root, f"Test_Auc_{trainer_and_tester.test_auc:.9f}.txt"), 'w')
+            f.close()
             self.plot_acc_loss_auc(root, date, trainer_and_tester)
             run += 1
 
@@ -122,12 +129,12 @@ class TrainTestValKTimes:
         #     plt.clf()
 
         if measurement == AUC_PLOT:
-            final_auc_test = trainer_and_tester.test_auc_vec[-1]
+            # final_auc_test = trainer_and_tester.test_auc_vec[-1]
             plt.plot(range(len(trainer_and_tester.train_auc_vec)), trainer_and_tester.train_auc_vec, label=TRAIN_JOB, color='b')
             plt.plot(range(len(trainer_and_tester.test_auc_vec)), trainer_and_tester.test_auc_vec, label=TEST_JOB, color='g')
             plt.ylim((0, 1))
             plt.legend(loc='best')
-            plt.savefig(os.path.join(root, f'auc_plot_{date}_last_{round(final_auc_test, 2)}.png'))
+            plt.savefig(os.path.join(root, f'auc_plot_{date}_last_{round(trainer_and_tester.test_auc, 2)}.png'))
             plt.clf()
 
     def _binary_acc(self, y_pred, y_test):

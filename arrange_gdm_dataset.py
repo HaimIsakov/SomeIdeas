@@ -12,9 +12,11 @@ class ArrangeGDMDataset(Dataset):
         self._tags = pd.read_csv(tag_file_path, index_col='ID')
         self.graphs_list = []
         self.groups = []  # for "from sklearn.model_selection import GroupShuffleSplit"
-        # only repetition 1
-        lambda_func_repetition = lambda x: x == 1
-        self.arrange_dataframes(lambda_func_repetition=lambda_func_repetition)
+        lambda_func_trimester = lambda x: True
+        # lambda_func_trimester = lambda x: x == 1
+        lambda_func_repetition = lambda x: True
+        # lambda_func_repetition = lambda x: x == 1
+        self.arrange_dataframes(lambda_func_repetition=lambda_func_repetition, lambda_func_trimester=lambda_func_trimester)
         self.create_graphs_with_common_nodes()
 
     def arrange_dataframes(self, lambda_func_repetition=lambda x: True, lambda_func_trimester=lambda x: True):
