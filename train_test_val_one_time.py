@@ -1,3 +1,4 @@
+import networkx as nx
 import torch
 import torch.nn.functional as F
 from sklearn.metrics import roc_auc_score
@@ -12,7 +13,7 @@ PATIENCE = 20
 
 
 class TrainTestValOneTime:
-    def __init__(self, model, RECEIVED_PARAMS, train_loader, val_loader, test_loader, device):
+    def __init__(self, model, RECEIVED_PARAMS, train_loader, val_loader, test_loader, device, node_order):
         self.model = model
         self.train_loader = train_loader
         self.val_loader = val_loader
@@ -24,7 +25,7 @@ class TrainTestValOneTime:
         self.train_auc_vec, self.test_auc_vec = [], []
         self.train_acc, self.test_acc = [], []
         self.test_auc = 0.0
-
+        self.node_order = node_order
         # self.train()
 
     def calc_loss_test(self, data_loader, job=VAL_JOB):
@@ -35,6 +36,7 @@ class TrainTestValOneTime:
         batched_test_loss = []
         for A, data, target in data_loader:
             A, data, target = A.to(self.device), data.to(self.device), target.to(self.device)
+            # normalized_A = torch.Tensor(normalize_adjacency(gnx, self.node_order))
             output = self.model(data, A)
             loss = F.binary_cross_entropy_with_logits(output, target.unsqueeze(dim=1).float())
             # loss = F.binary_cross_entropy_with_logits(output, target.unsqueeze(dim=1).float(),

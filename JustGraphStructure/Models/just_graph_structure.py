@@ -35,28 +35,17 @@ class JustGraphStructure(nn.Module):
             x = F.relu(self.pre_weighting(x))
             x = F.relu(self.fc1(x))
             x = F.relu(self.fc2(x))
-            # x = self.bn1(F.relu(self.fc1(x)))
-            # x = self.bn2(F.relu(self.fc2(x)))
         elif self.activation_func == 'elu':
             x = F.elu(self.pre_weighting(x))
             x = F.elu(self.fc1(x))
             x = F.elu(self.fc2(x))
-            # x = self.bn1((F.elu(self.fc1(x))))
-            # x = self.bn2((F.elu(self.fc2(x))))
         elif self.activation_func == 'tanh':
             x = torch.tanh(self.pre_weighting(x))
             x = torch.tanh(self.fc1(x))
             x = torch.tanh(self.fc2(x))
-            # x = self.bn1(torch.tanh(self.fc1(x)))
-            # x = self.bn2((torch.tanh(self.fc2(x))))
         # x = torch.sigmoid(x) # BCE loss automatically applies sigmoid
         x = self.fc3(x)
         return x
-
-    def write_to_log(self):
-        settings.log_file.write(f"Model name: {self.__class__.__name__}")
-        settings.log_file.write(f"Model parameters: {self.RECEIVED_PARAMS}")
-
 
 # def _train(model, RECEIVED_PARAMS, train_loader, test_loader, loss_weights, device='cpu'):
 #     """

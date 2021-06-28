@@ -6,7 +6,7 @@ from tqdm import tqdm
 
 
 class ArrangeGDMDataset(Dataset):
-    def __init__(self, data_file_path, tag_file_path, mission):
+    def __init__(self, data_file_path, tag_file_path, mission, adjacency_normalization):
         self.mission = mission
         self._microbiome_df = pd.read_csv(data_file_path, index_col='ID')
         self._tags = pd.read_csv(tag_file_path, index_col='ID')
@@ -18,6 +18,8 @@ class ArrangeGDMDataset(Dataset):
         # lambda_func_repetition = lambda x: x == 1
         self.arrange_dataframes(lambda_func_repetition=lambda_func_repetition, lambda_func_trimester=lambda_func_trimester)
         self.create_graphs_with_common_nodes()
+        self.node_order = self.set_node_order()
+        self.adjacency_normalization = adjacency_normalization
 
     def arrange_dataframes(self, lambda_func_repetition=lambda x: True, lambda_func_trimester=lambda x: True):
         self.remove_na()
@@ -96,3 +98,7 @@ class ArrangeGDMDataset(Dataset):
             # temp_graph.add_edges_from(sorted(graph.edges(data=True)))
             temp_graph_list.append(temp_graph)
         self.graphs_list = temp_graph_list
+
+    def set_node_order(self):
+        nodes_and_values = sorted(self.graphs_list[0].nodes())
+        return [node_name for node_name, value in nodes_and_values]

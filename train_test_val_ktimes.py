@@ -16,7 +16,6 @@ ACCURACY_PLOT = 'acc'
 AUC_PLOT = 'auc'
 TRAIN_JOB = 'train'
 TEST_JOB = 'test'
-RANDOM_STATE = 0
 
 
 class TrainTestValKTimes:
@@ -27,6 +26,7 @@ class TrainTestValKTimes:
         self.dataset = dataset
         self.result_directory_name = result_directory_name
         self.number_of_runs = number_of_runs
+        self.node_order = self.dataset.node_order
 
     def train_k_splits_of_dataset(self):
         for i in range(self.number_of_runs):
@@ -42,7 +42,7 @@ class TrainTestValKTimes:
             model = self.get_model()
             model = model.to(self.device)
             trainer_and_tester = TrainTestValOneTime(model, self.RECEIVED_PARAMS, train_loader, val_loader, test_loader,
-                                                     self.device)
+                                                     self.device, self.node_order)
             trainer_and_tester.train()
             os.mkdir(os.path.join(directory_root, f"Run{i}"))
             root = os.path.join(directory_root, f"Run{i}")
@@ -64,7 +64,7 @@ class TrainTestValKTimes:
             model = self.get_model()
             model = model.to(self.device)
             trainer_and_tester = TrainTestValOneTime(model, self.RECEIVED_PARAMS, train_loader, val_loader, test_loader,
-                                                     self.device)
+                                                     self.device, self.node_order)
             trainer_and_tester.train()
             print("Test Auc", trainer_and_tester.test_auc)
             os.mkdir(os.path.join(directory_root, f"Run{run}"))
@@ -77,7 +77,7 @@ class TrainTestValKTimes:
     def create_gss(self, k=1):
         train_frac = self.RECEIVED_PARAMS['train_frac']
         test_frac = self.RECEIVED_PARAMS['test_frac']
-        gss = GroupShuffleSplit(n_splits=k, train_size=train_frac, test_size=test_frac, random_state=RANDOM_STATE)
+        gss = GroupShuffleSplit(n_splits=k, train_size=train_frac, test_size=test_frac)
         return gss
 
     def create_data_loaders(self, train_idx, test_idx):
