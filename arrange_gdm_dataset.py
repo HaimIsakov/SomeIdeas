@@ -11,11 +11,11 @@ class ArrangeGDMDataset(Dataset):
         self._microbiome_df = pd.read_csv(data_file_path, index_col='ID')
         self._tags = pd.read_csv(tag_file_path, index_col='ID')
         self.graphs_list = []
-        self.groups = []  # for "from sklearn.model_selection import GroupShuffleSplit"
-        lambda_func_trimester = lambda x: True
-        # lambda_func_trimester = lambda x: x == 1
-        lambda_func_repetition = lambda x: True
-        # lambda_func_repetition = lambda x: x == 1
+        self.groups, self.labels = [], []  # for "sklearn.model_selection.GroupShuffleSplit, Stratify"
+        # lambda_func_trimester = lambda x: True
+        lambda_func_trimester = lambda x: x == 1
+        # lambda_func_repetition = lambda x: True
+        lambda_func_repetition = lambda x: x == 1
         self.arrange_dataframes(lambda_func_repetition=lambda_func_repetition, lambda_func_trimester=lambda_func_trimester)
         self.create_graphs_with_common_nodes()
         self.node_order = self.set_node_order()
@@ -33,6 +33,7 @@ class ArrangeGDMDataset(Dataset):
         self._microbiome_df.sort_index(inplace=True)
         self._tags.sort_index(inplace=True)
         self.add_groups()  # It is important to verify that the order of instances is correct
+        self.add_labels()
         del self._tags['trimester']
         del self._microbiome_df['Repetition']
         del self._microbiome_df['Code']
@@ -49,6 +50,15 @@ class ArrangeGDMDataset(Dataset):
 
     def add_groups(self):
         self.groups = list(self._microbiome_df['Code'])
+
+    def get_groups(self, indexes):
+        return [self.groups[i] for i in indexes]
+
+    def add_labels(self):
+        self.labels = list(self._tags['Tag'])
+
+    def get_labels(self, indexes):
+        return [self.labels[i] for i in indexes]
 
     def remove_na(self):
         index = self._tags['Tag'].index[self._tags['Tag'].apply(np.isnan)]

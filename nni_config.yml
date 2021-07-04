@@ -16,6 +16,6 @@ tuner:
     #choice: maximize, minimize
     optimize_mode: maximize
 trial:
-  command: python main_for_three_models.py
+  command: python nni_main_for_three_models.py
   codeDir: .
   gpuNum: 2

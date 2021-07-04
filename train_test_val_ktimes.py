@@ -1,7 +1,7 @@
 import json
 import os
 from datetime import datetime
-from sklearn.model_selection import GroupShuffleSplit
+from sklearn.model_selection import GroupShuffleSplit, RepeatedStratifiedKFold, train_test_split, StratifiedShuffleSplit
 from torch.utils.data import DataLoader, random_split
 import matplotlib.pyplot as plt
 import numpy as np
@@ -53,6 +53,7 @@ class TrainTestValKTimes:
     def train_k_cross_validation_of_dataset(self, k=5):
         gss = self.create_gss(k=k)
         run = 0
+        test_metric = []
         for train_idx, test_idx in gss.split(self.dataset, groups=self.dataset.groups):
             print(f"Run {run}")
             if run == 0:
@@ -60,19 +61,56 @@ class TrainTestValKTimes:
                 date = datetime.today().strftime('%Y_%m_%d_%H_%M_%S')
                 directory_root = os.path.join(root, f'{self.mission}_{date}')
                 os.mkdir(directory_root)
-            train_loader, val_loader, test_loader = self.create_data_loaders(train_idx, test_idx)
+
+            samples_len = len(self.dataset)
+            val_idx = np.array(list(set(range(samples_len)) - set(test_idx) - set(train_idx)))
+            train_loader, val_loader, test_loader = self.create_data_loaders(train_idx, val_idx, test_idx)
             model = self.get_model()
             model = model.to(self.device)
             trainer_and_tester = TrainTestValOneTime(model, self.RECEIVED_PARAMS, train_loader, val_loader, test_loader,
                                                      self.device, self.node_order)
             trainer_and_tester.train()
             print("Test Auc", trainer_and_tester.test_auc)
+            test_metric.append(trainer_and_tester.test_auc)
             os.mkdir(os.path.join(directory_root, f"Run{run}"))
             root = os.path.join(directory_root, f"Run{run}")
             f = open(os.path.join(directory_root, f"Test_Auc_{trainer_and_tester.test_auc:.9f}.txt"), 'w')
             f.close()
             self.plot_acc_loss_auc(root, date, trainer_and_tester)
             run += 1
+        return test_metric
+
+    def stratify_train_val_test_ksplits(self, n_splits=5, n_repeats=5):
+        test_metric = []
+        all_labels = self.dataset.labels
+        train_val_idx, test_idx, train_val_y, test_y = train_test_split(np.arange(len(self.dataset)), all_labels,
+                                                                        test_size=0.2, train_size=0.8,
+                                                                        stratify=all_labels, shuffle=True)
+        for run in range(n_repeats):
+            print(f"Run {run}")
+            if run == 0:
+                root = self.result_directory_name
+                date = datetime.today().strftime('%Y_%m_%d_%H_%M_%S')
+                directory_root = os.path.join(root, f'{self.mission}_{date}')
+                os.mkdir(directory_root)
+            # now we split again to get the validation
+            train_idx, val_idx, y_train, y_val = train_test_split(train_val_idx, train_val_y, train_size=0.84375,
+                                                                  stratify=train_val_y, shuffle=True)
+            train_loader, val_loader, test_loader = self.create_data_loaders(train_idx, val_idx, test_idx)
+            model = self.get_model()
+            model = model.to(self.device)
+            trainer_and_tester = TrainTestValOneTime(model, self.RECEIVED_PARAMS, train_loader, val_loader, test_loader,
+                                                     self.device, self.node_order)
+            trainer_and_tester.train()
+            print("Test Auc", trainer_and_tester.test_auc)
+            test_metric.append(trainer_and_tester.test_auc)
+            os.mkdir(os.path.join(directory_root, f"Run{run}"))
+            root = os.path.join(directory_root, f"Run{run}")
+            f = open(os.path.join(directory_root, f"Test_Auc_{trainer_and_tester.test_auc:.9f}.txt"), 'w')
+            f.close()
+            self.plot_acc_loss_auc(root, date, trainer_and_tester)
+            run += 1
+        return test_metric
 
     def create_gss(self, k=1):
         train_frac = self.RECEIVED_PARAMS['train_frac']
@@ -80,15 +118,15 @@ class TrainTestValKTimes:
         gss = GroupShuffleSplit(n_splits=k, train_size=train_frac, test_size=test_frac)
         return gss
 
-    def create_data_loaders(self, train_idx, test_idx):
+    def create_data_loaders(self, train_idx, val_idx, test_idx):
         # len_train = int(samples_len * self.RECEIVED_PARAMS['train_frac'])
         # len_test = samples_len - len_train
         # train, test = random_split(self.dataset, [len_train, len_test])
         # train_loader = DataLoader(train, batch_size=batch_size, shuffle=True)
         # test_loader = DataLoader(test, batch_size=batch_size)
-        samples_len = len(self.dataset)
+        # samples_len = len(self.dataset)
         batch_size = self.RECEIVED_PARAMS['batch_size']
-        val_idx = np.array(list(set(range(samples_len)) - set(test_idx) - set(train_idx)))
+        # val_idx = np.array(list(set(range(samples_len)) - set(test_idx) - set(train_idx)))
         # Datasets
         train_data = torch.utils.data.Subset(self.dataset, train_idx)
         test_data = torch.utils.data.Subset(self.dataset, test_idx)
