@@ -102,10 +102,10 @@ class TrainTestValOneTime:
                          f'valid_loss: {val_loss:.6f} valid_auc: {val_auc:.6f}')
             if early_stopping.early_stop:
                 print("Early stopping")
-                self.test_auc = self.calc_auc(self.test_loader, job=TEST_JOB)
+                self.test_auc = self.calc_auc(self.val_loader, job=TEST_JOB)
                 break
             print(print_msg)
-        self.test_auc = self.calc_auc(self.test_loader, job=TEST_JOB)
+        self.test_auc = self.calc_auc(self.val_loader, job=TEST_JOB)
 
     def get_optimizer(self):
             optimizer = self.RECEIVED_PARAMS['optimizer']

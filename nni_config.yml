@@ -19,3 +19,5 @@ trial:
   command: python nni_main_for_three_models.py
   codeDir: .
   gpuNum: 2
+localConfig:
+  useActiveGpu: true

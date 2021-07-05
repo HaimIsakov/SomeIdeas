@@ -51,14 +51,14 @@ if __name__ == '__main__':
         result_directory_name = os.path.join(directory_name, "Result_After_Proposal")
         date = datetime.today().strftime('%Y_%m_%d_%H_%M_%S')
 
-        device = "cuda:2" if torch.cuda.is_available() else "cpu"
+        device = "cuda:0" if torch.cuda.is_available() else "cpu"
         print("Device", device)
         number_of_runs = 1
         gdm_dataset = create_dataset(data_file_path, tag_file_path, mission, "symmetric_adjacency")
         # RECEIVED_PARAMS = load_params_file(params_file_path)
         trainer_and_tester = TrainTestValKTimes(mission, RECEIVED_PARAMS, number_of_runs, device, gdm_dataset, result_directory_name)
         # test_metric = trainer_and_tester.train_k_cross_validation_of_dataset(k=5)
-        test_metric = trainer_and_tester.stratify_train_val_test_ksplits(n_splits=2, n_repeats=1)
+        test_metric = trainer_and_tester.stratify_train_val_test_ksplits(n_splits=5, n_repeats=5)
         mean_test_metric = np.average(test_metric)
         # report final result
         LOG.debug("\n \n \n Mean_test_metric: ", mean_test_metric)
