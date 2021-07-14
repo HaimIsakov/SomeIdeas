@@ -1,6 +1,8 @@
 import json
 import os
 from datetime import datetime
+
+import pandas as pd
 from sklearn.model_selection import GroupShuffleSplit, RepeatedStratifiedKFold, train_test_split, StratifiedShuffleSplit
 from torch.utils.data import DataLoader, random_split
 import matplotlib.pyplot as plt
@@ -112,8 +114,6 @@ class TrainTestValKTimes:
             run += 1
         return test_metric
 
-
-
     def create_gss(self, k=1):
         train_frac = self.RECEIVED_PARAMS['train_frac']
         test_frac = self.RECEIVED_PARAMS['test_frac']
@@ -151,6 +151,18 @@ class TrainTestValKTimes:
             data_size = self.dataset.get_vector_size()
             model = ValuesAndGraphStructure(data_size, self.RECEIVED_PARAMS, self.device)
         return model
+
+    def stratified_group_train_test_split(self, samples: pd.DataFrame, group: str, stratify_by: str, test_size: float):
+        groups = samples[group].drop_duplicates()
+        stratify = samples.drop_duplicates(group)[stratify_by].to_numpy()
+        groups_train, groups_test = train_test_split(groups, stratify=stratify, test_size=test_size)
+
+        samples_train = samples.loc[lambda d: d[group].isin(groups_train)]
+        samples_test = samples.loc[lambda d: d[group].isin(groups_test)]
+
+        samples_train.sort_index(inplace=True)
+        samples_test.sort_index(inplace=True)
+        return samples_train, samples_test
 
     def plot_measurement(self, root, date, trainer_and_tester, measurement=LOSS_PLOT):
         if measurement == LOSS_PLOT:

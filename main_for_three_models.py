@@ -48,6 +48,8 @@ if __name__ == '__main__':
     trainer_and_tester = TrainTestValKTimes(mission, RECEIVED_PARAMS, number_of_runs, device, gdm_dataset, result_directory_name)
     # trainer_and_tester.train_k_splits_of_dataset()
     # test_metric = trainer_and_tester.train_k_cross_validation_of_dataset(k=5)
-    test_metric = trainer_and_tester.stratify_train_val_test_ksplits(n_splits=2, n_repeats=1)
-    mean_test_metric = np.average(test_metric)
-    print("\n \n \n Mean_test_metric: ", mean_test_metric)
+    # test_metric = trainer_and_tester.stratify_train_val_test_ksplits(n_splits=2, n_repeats=1)
+    # mean_test_metric = np.average(test_metric)
+    # print("\n \n \n Mean_test_metric: ", mean_test_metric)
+
+    trainer_and_tester.stratified_group_train_test_split()
