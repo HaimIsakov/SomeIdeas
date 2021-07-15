@@ -7,8 +7,8 @@
     "regularization": 0.00535,
     "layer_1":156,
     "layer_2":103,
-    "train_frac":0.7,
-    "test_frac": 0.15,
+    "train_frac":0.75,
+    "test_frac": 0.25,
     "runs_number": 2,
     "epochs":200
 }

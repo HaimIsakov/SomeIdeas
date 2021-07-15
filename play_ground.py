@@ -36,9 +36,18 @@ date = datetime.today().strftime('%Y_%m_%d_%H_%M_%S')
 
 gdm_dataset = create_dataset(data_file_path, tag_file_path, mission, "symmetric_adjacency")
 df_tag = gdm_dataset._tags
-for i in range(10):
+for i in range(1):
     # df_train, df_val = StratifiedGroupShuffleSplit(df_tag)
     df_train, df_val = stratified_group_train_test_split(df_tag, "Code", "Tag", 0.2)
+    f1 = open("test_gdm_indexes.txt", 'w')
+    for item in list(df_val.index):
+        f1.write("%s\n" % item)
+    f1.close()
+
+    f2 = open("train_val_gdm_indexes.txt", 'w')
+    for item in list(df_train.index):
+        f2.write("%s\n" % item)
+    f2.close()
     print("train \n", df_train['Tag'].value_counts())
     print("test \n", df_val['Tag'].value_counts())
 print()

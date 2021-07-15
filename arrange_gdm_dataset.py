@@ -1,5 +1,7 @@
+from torch import Tensor
 from torch.utils.data import Dataset
 import pandas as pd
+from create_microbiome_graphs import CreateMicrobiomeGraphs
 from taxonomy_tree import *
 import numpy as np
 from tqdm import tqdm
@@ -12,13 +14,12 @@ class ArrangeGDMDataset(Dataset):
         self._tags = pd.read_csv(tag_file_path, index_col='ID')
         self.graphs_list = []
         self.groups, self.labels = [], []  # for "sklearn.model_selection.GroupShuffleSplit, Stratify"
-        lambda_func_trimester = lambda x: True
-        # lambda_func_trimester = lambda x: x == 1
-        lambda_func_repetition = lambda x: True
-        # lambda_func_repetition = lambda x: x == 1
+        lambda_func_trimester = lambda x: True  # lambda_func_trimester = lambda x: x == 1
+        lambda_func_repetition = lambda x: True  # lambda_func_repetition = lambda x: x == 1
         self.arrange_dataframes(lambda_func_repetition=lambda_func_repetition, lambda_func_trimester=lambda_func_trimester)
-        self.create_graphs_with_common_nodes()
-        self.node_order = self.set_node_order()
+        self.microbiome_graphs_class = CreateMicrobiomeGraphs(self._microbiome_df)
+        # self.create_graphs_with_common_nodes()
+        # self.node_order = self.set_node_order()
         self.adjacency_normalization = adjacency_normalization
 
     def arrange_dataframes(self, lambda_func_repetition=lambda x: True, lambda_func_trimester=lambda x: True):
@@ -39,10 +40,31 @@ class ArrangeGDMDataset(Dataset):
         del self._microbiome_df['Code']
 
     def __getitem__(self, index):
-        pass
+        # need to return A - adjacency matrix as well as values on each node and label
+        gnx = self.microbiome_graphs_class[index]
+        if self.mission == 'JustValues':
+            values = list(self._microbiome_df.iloc[index])
+            # A = [5]  # random value only for speed
+        else:
+            # adjacency_matrix = nx.adjacency_matrix(self.graphs_list[index]).todense()
+            values = self.microbiome_graphs_class.get_values_on_nodes_ordered_by_nodes(gnx)
+        label = int(self._tags.iloc[index]['Tag'])
+        A = self.normalize_adjacency(gnx)
+        return Tensor(A), Tensor(values), label
+
+    def normalize_adjacency(self, gnx):
+        adjacency = nx.adjacency_matrix(gnx)
+        if self.adjacency_normalization == "symmetric_adjacency":
+            # D^(-0.5) * (A + A.T + I) * D^(-0.5)
+            D__minus_sqrt = np.diag([1 / np.sqrt(np.sum(adjacency[i, :])) for i in range(adjacency.shape[0])])
+            normalized_adjacency = D__minus_sqrt * np.matrix(adjacency + adjacency.T + np.identity(adjacency.shape[0])) * D__minus_sqrt
+        elif self.adjacency_normalization == 'just_A':
+            normalized_adjacency = adjacency
+        return normalized_adjacency.todense()
 
     def __len__(self):
-        pass
+        a, b = self._microbiome_df.shape
+        return a
 
     def split_id_col(self):
         self._microbiome_df['Code'] = [cur_id.split('-')[0] for cur_id in self._microbiome_df.index]
@@ -70,46 +92,54 @@ class ArrangeGDMDataset(Dataset):
         counter_dict = self._tags['Tag'].value_counts()
         return counter_dict[0], counter_dict[1]
 
-    def create_tax_trees(self):
-        for i, mom in tqdm(enumerate(self._microbiome_df.iterrows()), desc='Create graphs'):
-            cur_graph = create_tax_tree(self._microbiome_df.iloc[i], ignore_values=0, ignore_flag=True)
-            self.graphs_list.append(cur_graph)
+    def get_vector_size(self):
+        return self.microbiome_graphs_class.get_vector_size()
 
-    def find_common_nodes(self):
-        nodes_dict = {}
-        j = 0
-        for graph in self.graphs_list:
-            nodes = graph.nodes(data=False)
-            for name, value in nodes:
-                if name not in nodes_dict:
-                    nodes_dict[name] = j
-                    j = j + 1
-        return nodes_dict
+    def get_leaves_number(self):
+        a, b = self._microbiome_df.shape
+        return b
 
-    def create_graphs_with_common_nodes(self):
-        self.create_tax_trees()
-        nodes_dict = self.find_common_nodes()
-        for graph in tqdm(self.graphs_list, desc='Add to graphs the common nodes set'):
-            nodes_and_values = graph.nodes()
-            nodes = [node_name for node_name, value in nodes_and_values]
-            for node_name in nodes_dict:
-                # if there is a node that exists in other graph but not in the current graph we want to add it
-                if node_name not in nodes:
-                    graph.add_node((node_name, 0.0))
 
-        # sort the node, so that every graph has the same order of graph.nodes()
-        self.sort_all_graphs()
-
-    def sort_all_graphs(self):
-        temp_graph_list = []
-        for graph in self.graphs_list:
-            temp_graph = nx.Graph()
-            temp_graph.add_nodes_from(sorted(graph.nodes(data=True)))
-            temp_graph.add_edges_from(graph.edges(data=True))
-            # temp_graph.add_edges_from(sorted(graph.edges(data=True)))
-            temp_graph_list.append(temp_graph)
-        self.graphs_list = temp_graph_list
-
-    def set_node_order(self):
-        nodes_and_values = sorted(self.graphs_list[0].nodes())
-        return [node_name for node_name, value in nodes_and_values]
+    # def create_tax_trees(self):
+    #     for i, mom in tqdm(enumerate(self._microbiome_df.iterrows()), desc='Create graphs'):
+    #         cur_graph = create_tax_tree(self._microbiome_df.iloc[i], ignore_values=0, ignore_flag=True)
+    #         self.graphs_list.append(cur_graph)
+    #
+    # def find_common_nodes(self):
+    #     nodes_dict = {}
+    #     j = 0
+    #     for graph in self.graphs_list:
+    #         nodes = graph.nodes(data=False)
+    #         for name, value in nodes:
+    #             if name not in nodes_dict:
+    #                 nodes_dict[name] = j
+    #                 j = j + 1
+    #     return nodes_dict
+    #
+    # def create_graphs_with_common_nodes(self):
+    #     self.create_tax_trees()
+    #     nodes_dict = self.find_common_nodes()
+    #     for graph in tqdm(self.graphs_list, desc='Add to graphs the common nodes set'):
+    #         nodes_and_values = graph.nodes()
+    #         nodes = [node_name for node_name, value in nodes_and_values]
+    #         for node_name in nodes_dict:
+    #             # if there is a node that exists in other graph but not in the current graph we want to add it
+    #             if node_name not in nodes:
+    #                 graph.add_node((node_name, 0.0))
+    #
+    #     # sort the node, so that every graph has the same order of graph.nodes()
+    #     self.sort_all_graphs()
+    #
+    # def sort_all_graphs(self):
+    #     temp_graph_list = []
+    #     for graph in self.graphs_list:
+    #         temp_graph = nx.Graph()
+    #         temp_graph.add_nodes_from(sorted(graph.nodes(data=True)))
+    #         temp_graph.add_edges_from(graph.edges(data=True))
+    #         # temp_graph.add_edges_from(sorted(graph.edges(data=True)))
+    #         temp_graph_list.append(temp_graph)
+    #     self.graphs_list = temp_graph_list
+    #
+    # def set_node_order(self):
+    #     nodes_and_values = sorted(self.graphs_list[0].nodes())
+    #     return [node_name for node_name, value in nodes_and_values]

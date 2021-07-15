@@ -13,19 +13,19 @@ PATIENCE = 20
 
 
 class TrainTestValOneTime:
-    def __init__(self, model, RECEIVED_PARAMS, train_loader, val_loader, test_loader, device, node_order):
+    def __init__(self, model, RECEIVED_PARAMS, train_loader, val_loader, test_loader, device):
         self.model = model
         self.train_loader = train_loader
         self.val_loader = val_loader
         self.test_loader = test_loader
-        self.loss_weights = self.calc_weighs_for_loss()  # according to train loader
+        # self.loss_weights = self.calc_weighs_for_loss()  # according to train loader
         self.device = device
         self.RECEIVED_PARAMS = RECEIVED_PARAMS
         self.train_loss_vec, self.test_loss_vec = [], []
         self.train_auc_vec, self.test_auc_vec = [], []
         self.train_acc, self.test_acc = [], []
         self.test_auc = 0.0
-        self.node_order = node_order
+        # self.node_order = node_order
         # self.train()
 
     def calc_loss_test(self, data_loader, job=VAL_JOB):
@@ -76,7 +76,7 @@ class TrainTestValOneTime:
             ###################
             self.model.train()  # prep model for training
             batched_train_loss = []
-            for batch_idx, (A, data, target) in enumerate(self.train_loader):
+            for (A, data, target) in self.train_loader:
                 A, data, target = A.to(self.device), data.to(self.device), target.to(self.device)
                 optimizer.zero_grad()  # clear the gradients of all optimized variables
                 net_out = self.model(data, A)  # forward pass: compute predicted outputs by passing inputs to the model
@@ -102,10 +102,10 @@ class TrainTestValOneTime:
                          f'valid_loss: {val_loss:.6f} valid_auc: {val_auc:.6f}')
             if early_stopping.early_stop:
                 print("Early stopping")
-                self.test_auc = self.calc_auc(self.val_loader, job=TEST_JOB)
+                self.test_auc = self.calc_auc(self.val_loader, job=VAL_JOB)
                 break
             print(print_msg)
-        self.test_auc = self.calc_auc(self.val_loader, job=TEST_JOB)
+        self.test_auc = self.calc_auc(self.val_loader, job=VAL_JOB)
 
     def get_optimizer(self):
             optimizer = self.RECEIVED_PARAMS['optimizer']
