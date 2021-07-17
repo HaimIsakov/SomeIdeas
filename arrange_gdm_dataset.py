@@ -25,8 +25,8 @@ class ArrangeGDMDataset(Dataset):
     def arrange_dataframes(self, lambda_func_repetition=lambda x: True, lambda_func_trimester=lambda x: True):
         self.remove_na()
         self._tags['Tag'] = self._tags['Tag'].astype(int)
-        self._tags['trimester'] = self._tags['trimester'].astype(int)
         self.split_id_col()
+        self._tags['trimester'] = self._tags['trimester'].astype(int)
         self._microbiome_df = self._microbiome_df[self._tags['trimester'].apply(lambda_func_trimester)]
         self._tags = self._tags[self._tags['trimester'].apply(lambda_func_trimester)]
         self._tags = self._tags[self._microbiome_df['Repetition'].apply(lambda_func_repetition)]
@@ -50,7 +50,8 @@ class ArrangeGDMDataset(Dataset):
             values = self.microbiome_graphs_class.get_values_on_nodes_ordered_by_nodes(gnx)
         label = int(self._tags.iloc[index]['Tag'])
         A = self.normalize_adjacency(gnx)
-        return Tensor(A), Tensor(values), label
+        # return Tensor(A), Tensor(values), label
+        return Tensor(values), label
 
     def normalize_adjacency(self, gnx):
         adjacency = nx.adjacency_matrix(gnx)
@@ -70,6 +71,7 @@ class ArrangeGDMDataset(Dataset):
         self._microbiome_df['Code'] = [cur_id.split('-')[0] for cur_id in self._microbiome_df.index]
         self._microbiome_df['Repetition'] = [int(cur_id.split('-')[-1]) for cur_id in self._microbiome_df.index]
         self._tags['Code'] = [cur_id.split('-')[0] for cur_id in self._tags.index]
+        self._tags['trimester'] = [cur_id.split('-')[2][-1] for cur_id in self._tags.index]
 
     def add_groups(self):
         self.groups = list(self._microbiome_df['Code'])

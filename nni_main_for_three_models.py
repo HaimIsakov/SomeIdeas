@@ -2,7 +2,7 @@ import json
 from datetime import datetime
 import os
 import torch
-from gdm_dataset import GDMDataset
+from arrange_gdm_dataset import ArrangeGDMDataset
 from train_test_val_ktimes import TrainTestValKTimes
 import logging
 import numpy as np
@@ -17,8 +17,8 @@ def load_params_file(file_path):
     return RECEIVED_PARAMS
 
 
-def create_dataset(data_file_path, tag_file_path, mission, category):
-    gdm_dataset = GDMDataset(data_file_path, tag_file_path, mission, category)
+def create_gdm_dataset(data_file_path, tag_file_path, mission, category):
+    gdm_dataset = ArrangeGDMDataset(data_file_path, tag_file_path, mission, category)
     return gdm_dataset
 
 
@@ -46,20 +46,28 @@ if __name__ == '__main__':
         # mission = 'GraphStructure&Values'
         # params_file_path = os.path.join(directory_name, 'Models', "values_and_graph_structure_on_nodes_params_file.json")
 
-        data_file_path = os.path.join(directory_name, 'Data', 'OTU_merged_Mucositis_Genus_after_mipmlp_eps_1.csv')
-        tag_file_path = os.path.join(directory_name, 'Data', "tag_gdm_file.csv")
+        train_data_file_path = os.path.join('GDM_split_dataset', 'train_val_set_gdm_microbiome.csv')
+        train_tag_file_path = os.path.join('GDM_split_dataset', 'train_val_set_gdm_tags.csv')
+
+        test_data_file_path = os.path.join('GDM_split_dataset', 'test_set_gdm_microbiome.csv')
+        test_tag_file_path = os.path.join('GDM_split_dataset', 'test_set_gdm_tags.csv')
+
         result_directory_name = os.path.join(directory_name, "Result_After_Proposal")
         date = datetime.today().strftime('%Y_%m_%d_%H_%M_%S')
 
         device = "cuda:0" if torch.cuda.is_available() else "cpu"
-        print("Device", device)
+        print("device", device)
         number_of_runs = 1
-        gdm_dataset = create_dataset(data_file_path, tag_file_path, mission, "symmetric_adjacency")
-        # RECEIVED_PARAMS = load_params_file(params_file_path)
-        trainer_and_tester = TrainTestValKTimes(mission, RECEIVED_PARAMS, number_of_runs, device, gdm_dataset, result_directory_name)
-        # test_metric = trainer_and_tester.train_k_cross_validation_of_dataset(k=5)
-        test_metric = trainer_and_tester.stratify_train_val_test_ksplits(n_splits=5, n_repeats=5)
+
+        train_val_dataset = create_gdm_dataset(train_data_file_path, train_tag_file_path, mission, "just_A")
+        test_dataset = create_gdm_dataset(test_data_file_path, test_tag_file_path, mission, "just_A")
+
+        trainer_and_tester = TrainTestValKTimes(mission, RECEIVED_PARAMS, number_of_runs, device, train_val_dataset,
+                                                test_dataset, result_directory_name)
+        test_metric = trainer_and_tester.train__group_k_cross_validation(k=5)
+
         mean_test_metric = np.average(test_metric)
+        # print("\n \n \n Mean_test_metric: ", mean_test_metric)
         # report final result
         LOG.debug("\n \n \n Mean_test_metric: ", mean_test_metric)
         nni.report_final_result(mean_test_metric)
