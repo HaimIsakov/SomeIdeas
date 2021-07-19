@@ -18,6 +18,7 @@ class ArrangeGDMDataset(Dataset):
         lambda_func_repetition = lambda x: True  # lambda_func_repetition = lambda x: x == 1
         self.arrange_dataframes(lambda_func_repetition=lambda_func_repetition, lambda_func_trimester=lambda_func_trimester)
         self.microbiome_graphs_class = CreateMicrobiomeGraphs(self._microbiome_df)
+        self.graphs_list = self.microbiome_graphs_class.graphs_list
         # self.create_graphs_with_common_nodes()
         # self.node_order = self.set_node_order()
         self.adjacency_normalization = adjacency_normalization

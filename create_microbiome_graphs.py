@@ -44,10 +44,19 @@ class CreateMicrobiomeGraphs:
 
     def sort_all_graphs(self):
         temp_graph_list = []
+        print(f"Common nodes: {len(self.find_common_nodes())}")
         for graph in self.graphs_list:
             temp_graph = nx.Graph()
-            temp_graph.add_nodes_from(sorted(graph.nodes(data=True)))
+            sorted_nodes = sorted(graph.nodes(data=True))
+            print(f"Number of Nodes in unsorted graph {len(sorted_nodes)}")
+            # temp_graph.add_nodes_from(sorted_nodes)
+            for node_value, _ in sorted_nodes:
+                node_name = node_value[0]
+                value = node_value[1]
+                temp_graph.add_node(node_name, frequency=value)
+            print(f"Number of Nodes in after sorting graph {temp_graph.number_of_nodes()}")
             temp_graph.add_edges_from(graph.edges(data=True))
+
             # temp_graph.add_edges_from(sorted(graph.edges(data=True)))
             temp_graph_list.append(temp_graph)
         self.graphs_list = temp_graph_list
