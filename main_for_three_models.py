@@ -62,7 +62,7 @@ if __name__ == '__main__':
     RECEIVED_PARAMS = load_params_file(params_file_path)
     trainer_and_tester = TrainTestValKTimes(RECEIVED_PARAMS, number_of_runs, device, train_val_dataset,
                                             test_dataset, result_directory_name)
-    val_metric = trainer_and_tester.train_group_k_cross_validation(k=5)
+    val_metric = trainer_and_tester.train_group_k_cross_validation(k=10)
 
     mean_val_metric = np.average(val_metric)
     print("\n \n \n Mean_val_metric: ", mean_val_metric)

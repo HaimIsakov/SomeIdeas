@@ -47,12 +47,12 @@ class ValuesAndGraphStructure(nn.Module):
         x = self.fc3(x)
         return x
 
-    def calculate_adjacency_matrix(self, adjacency_matrix):
-        size = adjacency_matrix.shape[0]
+    def calculate_adjacency_matrix(self, batched_adjacency_matrix):
+        # size = adjacency_matrix.shape[0]
         # D^(-0.5)
         def calc_d_minus_root_sqr(batched_adjacency_matrix):
             # return np.diag([1 / np.sqrt(np.sum(adjacency_matrix[i, :])) for i in range(size)])
             return torch.stack([torch.diag(torch.pow(adjacency_matrix.sum(1), -0.5)) for adjacency_matrix in batched_adjacency_matrix])
-        D__minus_sqrt = torch.Tensor(calc_d_minus_root_sqr(adjacency_matrix)).to(self.device)
-        normalized_adjacency = torch.matmul(torch.matmul(D__minus_sqrt, adjacency_matrix), D__minus_sqrt)
+        D__minus_sqrt = torch.Tensor(calc_d_minus_root_sqr(batched_adjacency_matrix)).to(self.device)
+        normalized_adjacency = torch.matmul(torch.matmul(D__minus_sqrt, batched_adjacency_matrix), D__minus_sqrt)
         return normalized_adjacency

@@ -35,7 +35,7 @@ class TrainTestValKTimes:
         val_frac = self.RECEIVED_PARAMS['test_frac']
 
         val_metric = []
-        gss_train_val = GroupShuffleSplit(n_splits=k, train_size=0.82)
+        gss_train_val = GroupShuffleSplit(n_splits=k, train_size=0.80)
         run = 0
         for train_idx, val_idx in gss_train_val.split(self.train_val_dataset, groups=self.train_val_dataset.get_all_groups()):
             print(f"Run {run}")

@@ -4,7 +4,7 @@ from torch_geometric.data import DataLoader, Dataset
 from torch_geometric.utils.convert import from_networkx
 import os
 from arrange_gdm_dataset import ArrangeGDMDataset
-
+import torch_geometric
 
 def create_gdm_dataset(data_file_path, tag_file_path, mission, category):
     gdm_dataset = ArrangeGDMDataset(data_file_path, tag_file_path, mission, category)
@@ -12,6 +12,7 @@ def create_gdm_dataset(data_file_path, tag_file_path, mission, category):
 
 class GraphDataset(Dataset):
     def __init__(self, graphs_list):
+        super().__init__()
         self.graphs_list = graphs_list
 
     def __len__(self):

@@ -2,14 +2,15 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+
 class JustValuesOnNodes(nn.Module):
     def __init__(self, data_size, RECEIVED_PARAMS):
         super(JustValuesOnNodes, self).__init__()
         self.data_size = data_size
         self.RECEIVED_PARAMS = RECEIVED_PARAMS
-        self.fc1 = nn.Linear(self.data_size, self.RECEIVED_PARAMS["layer_1"])  # input layer
-        self.fc2 = nn.Linear(self.RECEIVED_PARAMS["layer_1"], self.RECEIVED_PARAMS["layer_2"])
-        self.fc3 = nn.Linear(self.RECEIVED_PARAMS["layer_2"], 1)
+        self.fc1 = nn.Linear(self.data_size, int(self.RECEIVED_PARAMS["layer_1"]))  # input layer
+        self.fc2 = nn.Linear(int(self.RECEIVED_PARAMS["layer_1"]), int(self.RECEIVED_PARAMS["layer_2"]))
+        self.fc3 = nn.Linear(int(self.RECEIVED_PARAMS["layer_2"]), 1)
 
         if RECEIVED_PARAMS["initialization"] == "xavier":
             torch.nn.init.xavier_normal_(self.fc1.weight)
