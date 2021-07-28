@@ -1,11 +1,18 @@
-import networkx as nx
-import matplotlib.pyplot as plt
+# from openpyxl import Workbook, load_workbook
 import re
+import math
+import pandas
+import networkx as nx
+import pickle
 
 
+"""
+every bacteria is an object to easily store it's information
+"""
 class Bacteria:
     def __init__(self, string, val):
-        lst = re.split("; |__| ", string)
+        string = string.replace(" ", "")
+        lst = re.split(";|__", string)
         self.val = val
         # removing letters and blank spaces
         for i in range(0, len(lst)):
@@ -15,43 +22,48 @@ class Bacteria:
         self.lst = lst
 
 
-# function from Ariel Rozen
-def create_tax_tree(series, ignore_values=-1, ignore_flag=False):
-    tempGraph = nx.Graph()
+def create_tax_tree(series, flag=None, keepFlagged=False):
+    graph = nx.Graph()
     """workbook = load_workbook(filename="random_Otus.xlsx")
     sheet = workbook.active"""
-    valdict = {}
+    graph.add_node(("Bacteria",), val=0)
+    graph.add_node(("Archaea",), val=0)
     bac = []
     for i, (tax, val) in enumerate(series.items()):
         # adding the bacteria in every column
         bac.append(Bacteria(tax, val))
         # connecting to the root of the tempGraph
-        tempGraph.add_edge(("anaerobe",), (bac[i].lst[0],))
+        graph.add_edge(("Anaerobe",), (bac[i].lst[0],))
         # connecting all levels of the taxonomy
         for j in range(0, len(bac[i].lst) - 1):
-            updateval(tempGraph, bac[i], valdict, j, True)
+            updateval(graph, bac[i], j, True)
         # adding the value of the last node in the chain
-        updateval(tempGraph, bac[i], valdict, len(bac[i].lst) - 1, False)
-    valdict[("anaerobe",)] = valdict[("Bacteria",)] + valdict[("Archaea",)]
-    return create_final_graph(tempGraph, valdict, ignore_values, ignore_flag)
+        updateval(graph, bac[i], len(bac[i].lst) - 1, False)
+    graph.nodes[("Anaerobe",)]["val"] = graph.nodes[("Bacteria",)]['val']+graph.nodes[("Archaea",)]['val']
+    return create_final_graph(graph, flag, keepFlagged)
 
 
-def updateval(graph, bac, vald, num, adde):
+def updateval(graph, bac, num, adde):
     if adde:
-        graph.add_edge(tuple(bac.lst[:num + 1]), tuple(bac.lst[:num + 2]))
-    # adding the value of the nodes
-    if tuple(bac.lst[:num + 1]) in vald:
-        vald[tuple(bac.lst[:num + 1])] += bac.val
-    else:
-        vald[tuple(bac.lst[:num + 1])] = bac.val
+        if tuple(bac.lst[:num+1]) not in graph:
+            graph.add_node(tuple(bac.lst[:num+1]), val=0)
+        if tuple(bac.lst[:num+2]) not in graph:
+            graph.add_node(tuple(bac.lst[:num+2]), val=0)
+
+        graph.add_edge(tuple(bac.lst[:num+1]), tuple(bac.lst[:num+2]))
+
+    new_val = graph.nodes[tuple(bac.lst[:num+1])]['val'] + bac.val
+    # set values
+    graph.nodes[tuple(bac.lst[:num+1])]['val'] = new_val
 
 
-def create_final_graph(tempGraph, valdict, ignore_values, ignore_flag):
-    graph = nx.Graph()
-    for e in tempGraph.edges():
-        # אם לא צריך להתעלם מאף אחד - תוסיף את כולם - אין בעיה, או אם צריך להתעלם אז תוסיף רק את אלה שהם לא מהערכים שצריך להתעלם מהם
-        if not ignore_flag or (ignore_flag and (valdict[e[0]] != ignore_values and valdict[e[1]] != ignore_values)):
-            graph.add_edge((e[0], valdict[e[0]]), (e[1], valdict[e[1]]))
+
+def create_final_graph(graph, flag, keepFlagged):
+    for e in graph.edges():
+        if flag is not None and (graph.nodes[e[0]]["val"] == flag or graph.nodes[e[1]]["val"] == flag):
+            graph.remove_edge(*e)
+    if not keepFlagged:
+        graph.remove_nodes_from(list(nx.isolates(graph)))
     return graph
 
 
@@ -90,3 +102,7 @@ def draw_tree(graph, threshold=0.0):
     plt.draw()
     plt.show()
     plt.savefig("taxtree.png")
+
+if __name__ == "__main__":
+    graph = create_tax_tree(pickle.load(open("graph152forAriel.p", "rb")), flag=0, keepFlagged=True)
+    print()

@@ -11,13 +11,15 @@ class JustValuesOnNodes(nn.Module):
         self.fc2 = nn.Linear(self.RECEIVED_PARAMS["layer_1"], self.RECEIVED_PARAMS["layer_2"])
         self.fc3 = nn.Linear(self.RECEIVED_PARAMS["layer_2"], 1)
 
-        torch.nn.init.xavier_normal(self.fc1.weight)
-        torch.nn.init.xavier_normal(self.fc2.weight)
-        torch.nn.init.xavier_normal(self.fc3.weight)
+        if RECEIVED_PARAMS["initialization"] == "xavier":
+            torch.nn.init.xavier_normal_(self.fc1.weight)
+            torch.nn.init.xavier_normal_(self.fc2.weight)
+            torch.nn.init.xavier_normal_(self.fc3.weight)
+
         self.dropout = nn.Dropout(p=self.RECEIVED_PARAMS["dropout"])
         self.activation_func = self.RECEIVED_PARAMS['activation']
 
-    def forward(self, x):
+    def forward(self, x, adjacency_matrix):
         # x = x.view(-1, self.data_size)
         if self.activation_func == 'relu':
             x = F.relu(self.fc1(x))

@@ -3,8 +3,7 @@ from datetime import datetime
 import os
 import numpy as np
 import torch
-from arrange_gdm_dataset import ArrangeGDMDataset
-from gdm_dataset import GDMDataset
+from GraphDataset import GraphDataset
 from train_test_val_ktimes import TrainTestValKTimes
 # import warnings
 # warnings.simplefilter(action='ignore', category=UserWarning)
@@ -15,8 +14,9 @@ def load_params_file(file_path):
     return RECEIVED_PARAMS
 
 
-def create_gdm_dataset(data_file_path, tag_file_path, mission, category):
-    gdm_dataset = ArrangeGDMDataset(data_file_path, tag_file_path, mission, category)
+def create_gdm_dataset(data_file_path, tag_file_path, mission):
+    # gdm_dataset = ArrangeGDMDataset(data_file_path, tag_file_path, mission)
+    gdm_dataset = GraphDataset(data_file_path, tag_file_path, mission)
     return gdm_dataset
 
 
@@ -49,13 +49,20 @@ if __name__ == '__main__':
     print("device", device)
     number_of_runs = 1
 
-    train_val_dataset = create_gdm_dataset(train_data_file_path, train_tag_file_path, mission, "just_A")
-    test_dataset = create_gdm_dataset(test_data_file_path, test_tag_file_path, mission, "just_A")
+    train_val_dataset = create_gdm_dataset(train_data_file_path, train_tag_file_path, mission)
+    test_dataset = create_gdm_dataset(test_data_file_path, test_tag_file_path, mission)
+
+    union_nodes_set_trainval = train_val_dataset.get_joint_nodes()
+    union_nodes_set_test = test_dataset.get_joint_nodes()
+
+    union_train_and_test = set(union_nodes_set_trainval) | set(union_nodes_set_test)
+    train_val_dataset.update_graphs(union_train_and_test)
+    test_dataset.update_graphs(union_train_and_test)
 
     RECEIVED_PARAMS = load_params_file(params_file_path)
-    trainer_and_tester = TrainTestValKTimes(mission, RECEIVED_PARAMS, number_of_runs, device, train_val_dataset,
+    trainer_and_tester = TrainTestValKTimes(RECEIVED_PARAMS, number_of_runs, device, train_val_dataset,
                                             test_dataset, result_directory_name)
-    test_metric = trainer_and_tester.train__group_k_cross_validation(k=5)
+    val_metric = trainer_and_tester.train_group_k_cross_validation(k=5)
 
-    mean_test_metric = np.average(test_metric)
-    print("\n \n \n Mean_test_metric: ", mean_test_metric)
+    mean_val_metric = np.average(val_metric)
+    print("\n \n \n Mean_val_metric: ", mean_val_metric)

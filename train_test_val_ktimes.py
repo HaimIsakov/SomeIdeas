@@ -1,13 +1,9 @@
 import json
 import os
 from datetime import datetime
-
-import networkx as nx
-import pandas as pd
 from sklearn.model_selection import GroupShuffleSplit
-from torch.utils.data import DataLoader, random_split
+from torch.utils.data import DataLoader
 import matplotlib.pyplot as plt
-import numpy as np
 import torch
 from train_test_val_one_time import TrainTestValOneTime
 from JustGraphStructure.Models.just_graph_structure import JustGraphStructure
@@ -22,9 +18,9 @@ TEST_JOB = 'test'
 
 
 class TrainTestValKTimes:
-    def __init__(self, mission, RECEIVED_PARAMS, number_of_runs, device, train_val_dataset, test_dataset,
+    def __init__(self, RECEIVED_PARAMS, number_of_runs, device, train_val_dataset, test_dataset,
                  result_directory_name, nni_flag=False):
-        self.mission = mission
+        # self.mission = mission
         self.RECEIVED_PARAMS = RECEIVED_PARAMS
         self.device = device
         self.train_val_dataset = train_val_dataset
@@ -34,14 +30,14 @@ class TrainTestValKTimes:
         self.nni_flag = nni_flag
         # self.node_order = self.dataset.node_order
 
-    def train__group_k_cross_validation(self, k=5):
+    def train_group_k_cross_validation(self, k=5):
         train_frac = self.RECEIVED_PARAMS['train_frac']
         val_frac = self.RECEIVED_PARAMS['test_frac']
 
-        test_metric = []
+        val_metric = []
         gss_train_val = GroupShuffleSplit(n_splits=k, train_size=0.82)
         run = 0
-        for train_idx, val_idx in gss_train_val.split(self.train_val_dataset, groups=self.train_val_dataset.groups):
+        for train_idx, val_idx in gss_train_val.split(self.train_val_dataset, groups=self.train_val_dataset.get_all_groups()):
             print(f"Run {run}")
             if run == 0 and not self.nni_flag:
                 date, directory_root = self.create_directory_to_save_results()
@@ -50,22 +46,22 @@ class TrainTestValKTimes:
             model = self.get_model().to(self.device)
             trainer_and_tester = TrainTestValOneTime(model, self.RECEIVED_PARAMS, train_loader, val_loader, test_loader,
                                                      self.device)
-            trainer_and_tester.train()
-            print("Test Auc", trainer_and_tester.val_auc)
-            test_metric.append(trainer_and_tester.val_auc)
+            early_training_results = trainer_and_tester.train()
+            print("Validation Auc", early_training_results['val_auc'])
+            val_metric.append(early_training_results['val_auc'])
             if not self.nni_flag:
                 os.mkdir(os.path.join(directory_root, f"Run{run}"))
                 root = os.path.join(directory_root, f"Run{run}")
-                f = open(os.path.join(directory_root, f"Test_Auc_{trainer_and_tester.val_auc:.9f}.txt"), 'w')
+                f = open(os.path.join(directory_root, f"Validation_Auc_{trainer_and_tester.val_auc:.9f}.txt"), 'w')
                 f.close()
                 self.plot_acc_loss_auc(root, date, trainer_and_tester)
             run += 1
-        return test_metric
+        return val_metric
 
     def create_directory_to_save_results(self):
         root = self.result_directory_name
         date = datetime.today().strftime('%Y_%m_%d_%H_%M_%S')
-        directory_root = os.path.join(root, f'{self.mission}_{date}')
+        directory_root = os.path.join(root, f'{self.train_val_dataset.mission}_{date}')
         if not os.path.exists(directory_root):
             os.mkdir(directory_root)
         else:
@@ -86,13 +82,13 @@ class TrainTestValKTimes:
         return train_loader, val_loader, test_loader
 
     def get_model(self):
-        if self.mission == "JustValues":
+        if self.train_val_dataset.mission == "JustValues":
             data_size = self.train_val_dataset.get_leaves_number()
             model = JustValuesOnNodes(data_size, self.RECEIVED_PARAMS)
-        elif self.mission == "JustGraphStructure":
+        elif self.train_val_dataset.mission == "JustGraphStructure":
             data_size = self.train_val_dataset.get_vector_size()
             model = JustGraphStructure(data_size, self.RECEIVED_PARAMS, self.device)
-        elif self.mission == "GraphStructure&Values":
+        elif self.train_val_dataset.mission == "GraphStructure&Values":
             data_size = self.train_val_dataset.get_vector_size()
             model = ValuesAndGraphStructure(data_size, self.RECEIVED_PARAMS, self.device)
         return model
@@ -139,65 +135,3 @@ class TrainTestValKTimes:
         self.plot_measurement(root, date, trainer_and_tester, LOSS_PLOT)
         # self.plot_measurement(root, date, ACCURACY_PLOT)
         self.plot_measurement(root, date, trainer_and_tester, AUC_PLOT)
-
-
-    # def stratify_train_val_test_ksplits(self, n_splits=5, n_repeats=5):
-    #     test_metric = []
-    #     all_labels = self.dataset.labels
-    #     train_val_idx, test_idx, train_val_y, test_y = train_test_split(np.arange(len(self.dataset)), all_labels,
-    #                                                                     test_size=0.2, train_size=0.8,
-    #                                                                     stratify=all_labels, shuffle=True)
-    #     for run in range(n_repeats):
-    #         print(f"Run {run}")
-    #         if run == 0:
-    #             root = self.result_directory_name
-    #             date = datetime.today().strftime('%Y_%m_%d_%H_%M_%S')
-    #             directory_root = os.path.join(root, f'{self.mission}_{date}')
-    #             os.mkdir(directory_root)
-    #         # now we split again to get the validation
-    #         train_idx, val_idx, y_train, y_val = train_test_split(train_val_idx, train_val_y, train_size=0.84375,
-    #                                                               stratify=train_val_y, shuffle=True)
-    #         train_loader, val_loader, test_loader = self.create_data_loaders(train_idx, val_idx, test_idx)
-    #         model = self.get_model()
-    #         model = model.to(self.device)
-    #         trainer_and_tester = TrainTestValOneTime(model, self.RECEIVED_PARAMS, train_loader, val_loader, test_loader,
-    #                                                  self.device)
-    #         trainer_and_tester.train()
-    #         print("Test Auc", trainer_and_tester.test_auc)
-    #         test_metric.append(trainer_and_tester.test_auc)
-    #         os.mkdir(os.path.join(directory_root, f"Run{run}"))
-    #         root = os.path.join(directory_root, f"Run{run}")
-    #         f = open(os.path.join(directory_root, f"Test_Auc_{trainer_and_tester.test_auc:.9f}.txt"), 'w')
-    #         f.close()
-    #         self.plot_acc_loss_auc(root, date, trainer_and_tester)
-    #         run += 1
-    #     return test_metric
-
-    # def collate_fn_adjacency_normalization(self, batch):
-    #     A_batch, values_batch, label_batch = zip(*batch)
-    #     A_batch = [torch.Tensor(self.normalize_adjacency(A.todense())) for A in A_batch]
-    #     values_batch = [torch.Tensor(values) for values in values_batch]
-    #     batch = zip(A_batch, values_batch, label_batch)
-    #     return batch
-
-    # def train_k_splits_of_dataset(self):
-    #     for i in range(self.number_of_runs):
-    #         print(f"Run {i}")
-    #         if i == 0:
-    #             root = self.result_directory_name
-    #             date = datetime.today().strftime('%Y_%m_%d_%H_%M_%S')
-    #             directory_root = os.path.join(root, f'{self.mission}_{date}')
-    #             os.mkdir(directory_root)
-    #         gss = self.create_gss(k=1)
-    #         train_idx, test_idx = next(gss.split(self.dataset, groups=self.dataset.groups))
-    #         train_loader, val_loader, test_loader = self.create_data_loaders(train_idx, test_idx)
-    #         model = self.get_model()
-    #         model = model.to(self.device)
-    #         trainer_and_tester = TrainTestValOneTime(model, self.RECEIVED_PARAMS, train_loader, val_loader, test_loader,
-    #                                                  self.device)
-    #         trainer_and_tester.train()
-    #         os.mkdir(os.path.join(directory_root, f"Run{i}"))
-    #         root = os.path.join(directory_root, f"Run{i}")
-    #         f = open(os.path.join(root, f"Test Auc {trainer_and_tester.test_auc}"))
-    #         f.close()
-    #         self.plot_acc_loss_auc(root, date, trainer_and_tester)

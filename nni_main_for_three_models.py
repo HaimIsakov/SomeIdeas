@@ -64,7 +64,7 @@ if __name__ == '__main__':
 
         trainer_and_tester = TrainTestValKTimes(mission, RECEIVED_PARAMS, number_of_runs, device, train_val_dataset,
                                                 test_dataset, result_directory_name)
-        test_metric = trainer_and_tester.train__group_k_cross_validation(k=5)
+        test_metric = trainer_and_tester.train_group_k_cross_validation(k=5)
 
         mean_test_metric = np.average(test_metric)
         # print("\n \n \n Mean_test_metric: ", mean_test_metric)
