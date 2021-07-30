@@ -1,14 +1,13 @@
 {
-    "learning_rate":0.01,
+    "learning_rate":0.001,
     "batch_size":30,
-    "dropout":0.3,
+    "dropout":0,
     "optimizer":"adam",
-    "activation":"tanh",
-    "regularization": 1e-3,
+    "activation":"relu",
+    "regularization": 0,
     "layer_1":100,
     "layer_2":200,
     "train_frac":0.75,
     "test_frac": 0.25,
-    "epochs":20,
-    "initialization":"xavier"
+    "epochs":10
 }

@@ -1,6 +1,6 @@
 authorName: Haim
 experimentName: NNI_Just_Values
-trialConcurrency: 1   # max GPUs to use simultaneously.
+trialConcurrency: 4   # max GPUs to use simultaneously.
 maxExecDuration: 100h
 maxTrialNum: 99999
 #choice: local, remote, pai
@@ -16,7 +16,7 @@ tuner:
     #choice: maximize, minimize
     optimize_mode: maximize
 trial:
-  command: python nni_main_for_three_models.py
+  command: python main_for_three_models.py
   codeDir: .
   gpuNum: 2
 localConfig:

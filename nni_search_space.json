@@ -1,10 +1,10 @@
 {
     "learning_rate":{"_type":"uniform","_value":[0.000001,0.5]},
     "batch_size":{"_type":"choice","_value":[5, 10, 30, 50, 70, 100]},
-    "dropout":{"_type":"uniform","_value":[0.05,0.6]},
+    "dropout":{"_type":"uniform","_value":[0,0.15]},
     "optimizer":{"_type":"choice","_value":["adam", "SGD"]},
     "activation":{"_type":"choice","_value":["relu", "elu", "tanh"]},
-    "regularization":{"_type":"uniform","_value":[0.0000001,0.1]},
+    "regularization":{"_type":"uniform","_value":[0,0.00001]},
     "layer_1":{"_type":"quniform","_value":[10, 200, 1]},
     "layer_2":{"_type":"quniform","_value":[10, 200, 1]},
     "train_frac":{"_type":"choice","_value":[0.7]},

@@ -34,7 +34,7 @@ class TrainTestValKTimes:
         train_frac = self.RECEIVED_PARAMS['train_frac']
         val_frac = self.RECEIVED_PARAMS['test_frac']
 
-        val_metric = []
+        val_metric, test_metric = [], []
         gss_train_val = GroupShuffleSplit(n_splits=k, train_size=0.80)
         run = 0
         for train_idx, val_idx in gss_train_val.split(self.train_val_dataset, groups=self.train_val_dataset.get_all_groups()):
@@ -46,9 +46,10 @@ class TrainTestValKTimes:
             model = self.get_model().to(self.device)
             trainer_and_tester = TrainTestValOneTime(model, self.RECEIVED_PARAMS, train_loader, val_loader, test_loader,
                                                      self.device)
-            early_training_results = trainer_and_tester.train()
-            print("Validation Auc", early_training_results['val_auc'])
-            val_metric.append(early_training_results['val_auc'])
+            early_stopping_results = trainer_and_tester.train()
+            print("Validation Auc", early_stopping_results['val_auc'])
+            val_metric.append(early_stopping_results['val_auc'])
+            test_metric.append(early_stopping_results['test_auc'])
             if not self.nni_flag:
                 os.mkdir(os.path.join(directory_root, f"Run{run}"))
                 root = os.path.join(directory_root, f"Run{run}")
@@ -56,7 +57,7 @@ class TrainTestValKTimes:
                 f.close()
                 self.plot_acc_loss_auc(root, date, trainer_and_tester)
             run += 1
-        return val_metric
+        return val_metric, test_metric
 
     def create_directory_to_save_results(self):
         root = self.result_directory_name

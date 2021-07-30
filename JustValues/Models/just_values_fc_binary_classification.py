@@ -12,10 +12,10 @@ class JustValuesOnNodes(nn.Module):
         self.fc2 = nn.Linear(int(self.RECEIVED_PARAMS["layer_1"]), int(self.RECEIVED_PARAMS["layer_2"]))
         self.fc3 = nn.Linear(int(self.RECEIVED_PARAMS["layer_2"]), 1)
 
-        if RECEIVED_PARAMS["initialization"] == "xavier":
-            torch.nn.init.xavier_normal_(self.fc1.weight)
-            torch.nn.init.xavier_normal_(self.fc2.weight)
-            torch.nn.init.xavier_normal_(self.fc3.weight)
+        # if RECEIVED_PARAMS["initialization"] == "xavier":
+        #     torch.nn.init.xavier_normal_(self.fc1.weight)
+        #     torch.nn.init.xavier_normal_(self.fc2.weight)
+        #     torch.nn.init.xavier_normal_(self.fc3.weight)
 
         self.dropout = nn.Dropout(p=self.RECEIVED_PARAMS["dropout"])
         self.activation_func = self.RECEIVED_PARAMS['activation']

@@ -63,8 +63,11 @@ class TrainTestValOneTime:
         optimizer = self.get_optimizer()
         epochs = self.RECEIVED_PARAMS['epochs']
         min_val_loss = float('inf')
+        best_model = copy.deepcopy(self.model)
+        max_val_auc = 0.5
         counter = 0
         early_training_results = {}
+        early_training_results['val_auc'] = 0.5
         # early_stopping = EarlyStopping(patience=EARLY_STOPPING_PATIENCE, verbose=True)
         # run the main training loop
         for epoch in range(epochs):
@@ -84,12 +87,9 @@ class TrainTestValOneTime:
                 batched_train_loss.append(loss.item())
 
             average_train_loss, train_auc, val_loss, val_auc = self.record_evaluations(batched_train_loss)
-            # scheduler.step(val_loss)
-
-            # early stopping
-            if val_loss < min_val_loss:
-                print(f"Validation loss decreased ({min_val_loss:.6f} --> {val_loss:.6f})")
-                min_val_loss = val_loss
+            if val_auc >= max_val_auc:
+                print(f"Validation AUC increased ({max_val_auc:.6f} --> {val_auc:.6f})")
+                max_val_auc = val_auc
                 counter = 0
                 early_training_results['val_auc'] = val_auc
                 early_training_results['val_loss'] = val_loss
@@ -102,6 +102,23 @@ class TrainTestValOneTime:
             else:
                 counter += 1
                 print(f'Early-Stopping counter: {counter} out of {EARLY_STOPPING_PATIENCE}')
+
+            # early stopping according to val_loss
+            # if val_loss =< min_val_loss:
+            #     print(f"Validation loss decreased ({min_val_loss:.6f} --> {val_loss:.6f})")
+            #     min_val_loss = val_loss
+            #     counter = 0
+            #     early_training_results['val_auc'] = val_auc
+            #     early_training_results['val_loss'] = val_loss
+            #     best_model = copy.deepcopy(self.model)
+            # elif self.early_stopping and counter == EARLY_STOPPING_PATIENCE:
+            #     print("Early stopping")
+            #     self.model = best_model
+            #     early_training_results['test_auc'] = self.calc_auc(self.test_loader, job=TEST_JOB)
+            #     break
+            # else:
+            #     counter += 1
+            #     print(f'Early-Stopping counter: {counter} out of {EARLY_STOPPING_PATIENCE}')
             # early_stopping(val_loss, self.model)
             print_msg = (f'[{epoch}/{epochs}] ' +
                          f'train_loss: {average_train_loss:.9f} train_auc: {train_auc:.9f} ' +
@@ -111,6 +128,8 @@ class TrainTestValOneTime:
             #     print("Early stopping")
             #     self.val_auc = self.calc_auc(self.val_loader, job=VAL_JOB)
             #     break
+        self.model = best_model
+        early_training_results['test_auc'] = self.calc_auc(self.test_loader, job=TEST_JOB)
         return early_training_results
 
     def record_evaluations(self, batched_train_loss):
