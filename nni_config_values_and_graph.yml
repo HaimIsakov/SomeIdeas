@@ -1,0 +1,23 @@
+authorName: Haim
+experimentName: NNI_Just_Values_and_Graph_Structure
+trialConcurrency: 4   # max GPUs to use simultaneously.
+maxExecDuration: 100h
+maxTrialNum: 99999
+#choice: local, remote, pai
+trainingServicePlatform: local
+searchSpacePath: nni_search_space.json
+#choice: true, false
+useAnnotation: false
+tuner:
+  #choice: TPE, Random, Anneal, Evolution, BatchTuner, MetisTuner
+  #SMAC (SMAC should be installed through nnictl)
+  builtinTunerName: TPE
+  classArgs:
+    #choice: maximize, minimize
+    optimize_mode: maximize
+trial:
+  command: python main_for_three_models.py 3
+  codeDir: .
+  gpuNum: 2
+localConfig:
+  useActiveGpu: true

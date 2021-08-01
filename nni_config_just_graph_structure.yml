@@ -1,5 +1,5 @@
 authorName: Haim
-experimentName: NNI_Just_Values
+experimentName: NNI_Just_Graph_Structure
 trialConcurrency: 4   # max GPUs to use simultaneously.
 maxExecDuration: 100h
 maxTrialNum: 99999
@@ -16,7 +16,7 @@ tuner:
     #choice: maximize, minimize
     optimize_mode: maximize
 trial:
-  command: python main_for_three_models.py
+  command: python main_for_three_models.py 2
   codeDir: .
   gpuNum: 2
 localConfig:

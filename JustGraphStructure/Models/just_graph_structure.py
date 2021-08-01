@@ -1,4 +1,3 @@
-import networkx as nx
 import numpy as np
 import torch
 import torch.nn as nn
@@ -11,13 +10,14 @@ class JustGraphStructure(nn.Module):
         self.data_size = data_size
         self.RECEIVED_PARAMS = RECEIVED_PARAMS
         # משקול לפני שמכניסים לרשת
-        self.pre_weighting = nn.Linear(self.data_size, self.RECEIVED_PARAMS["preweight"])
-        self.fc1 = nn.Linear(self.RECEIVED_PARAMS["preweight"], self.RECEIVED_PARAMS["layer_1"])  # input layer
-        self.fc2 = nn.Linear(self.RECEIVED_PARAMS["layer_1"], self.RECEIVED_PARAMS["layer_2"])
-        self.fc3 = nn.Linear(self.RECEIVED_PARAMS["layer_2"], 1)
+        self.pre_weighting = nn.Linear(self.data_size, int(self.RECEIVED_PARAMS["preweight"]))
+        self.fc1 = nn.Linear(int(self.RECEIVED_PARAMS["preweight"]), int(self.RECEIVED_PARAMS["layer_1"]))  # input layer
+        self.fc2 = nn.Linear(int(self.RECEIVED_PARAMS["layer_1"]), int(self.RECEIVED_PARAMS["layer_2"]))
+        self.fc3 = nn.Linear(int(self.RECEIVED_PARAMS["layer_2"]), 1)
         self.device = device
-        self.alpha = torch.rand(1, requires_grad=True).to(self.device)
+        self.alpha = nn.Parameter(torch.rand(1, requires_grad=True)).to(self.device)
         self.activation_func = self.RECEIVED_PARAMS['activation']
+        self.dropout = nn.Dropout(p=self.RECEIVED_PARAMS["dropout"])
 
     def forward(self, x, adjacency_matrix):
         # x = x.view(-1, self.data_size)
@@ -36,26 +36,28 @@ class JustGraphStructure(nn.Module):
         if self.activation_func == 'relu':
             x = F.relu(self.pre_weighting(x))
             x = F.relu(self.fc1(x))
+            x = self.dropout(x)
             x = F.relu(self.fc2(x))
         elif self.activation_func == 'elu':
             x = F.elu(self.pre_weighting(x))
             x = F.elu(self.fc1(x))
+            x = self.dropout(x)
             x = F.elu(self.fc2(x))
         elif self.activation_func == 'tanh':
             x = torch.tanh(self.pre_weighting(x))
             x = torch.tanh(self.fc1(x))
+            x = self.dropout(x)
             x = torch.tanh(self.fc2(x))
         # x = torch.sigmoid(x) # BCE loss automatically applies sigmoid
         x = self.fc3(x)
         return x
 
-    def calculate_adjacency_matrix(self, adjacency_matrix):
-        size = adjacency_matrix.shape[0]
+    def calculate_adjacency_matrix(self, batched_adjacency_matrix):
+        # size = adjacency_matrix.shape[0]
         # D^(-0.5)
-        def calc_d_minus_root_sqr(adjacency_matrix):
-            return np.diag([1 / np.sqrt(np.sum(adjacency_matrix[i, :])) for i in range(size)])
-
-        modified_adj = adjacency_matrix + np.identity(size)
-        D__minus_sqrt = calc_d_minus_root_sqr(modified_adj)
-        normalized_adjacency = D__minus_sqrt * np.matrix(modified_adj) * D__minus_sqrt
+        def calc_d_minus_root_sqr(batched_adjacency_matrix):
+            # return np.diag([1 / np.sqrt(np.sum(adjacency_matrix[i, :])) for i in range(size)])
+            return torch.stack([torch.diag(torch.pow(adjacency_matrix.sum(1), -0.5)) for adjacency_matrix in batched_adjacency_matrix])
+        D__minus_sqrt = calc_d_minus_root_sqr(batched_adjacency_matrix)
+        normalized_adjacency = torch.matmul(torch.matmul(D__minus_sqrt, batched_adjacency_matrix), D__minus_sqrt)
         return normalized_adjacency

@@ -63,7 +63,8 @@ class TrainTestValOneTime:
         optimizer = self.get_optimizer()
         epochs = self.RECEIVED_PARAMS['epochs']
         min_val_loss = float('inf')
-        best_model = copy.deepcopy(self.model)
+        # best_model = copy.deepcopy(self.model)
+        best_model = self.model.state_dict()
         max_val_auc = 0.5
         counter = 0
         early_training_results = {}
@@ -93,10 +94,12 @@ class TrainTestValOneTime:
                 counter = 0
                 early_training_results['val_auc'] = val_auc
                 early_training_results['val_loss'] = val_loss
-                best_model = copy.deepcopy(self.model)
+                # best_model = copy.deepcopy(self.model)
+                best_model = self.model.state_dict()
             elif self.early_stopping and counter == EARLY_STOPPING_PATIENCE:
                 print("Early stopping")
-                self.model = best_model
+                #self.model = best_model
+                self.model.load_state_dict(best_model)
                 early_training_results['test_auc'] = self.calc_auc(self.test_loader, job=TEST_JOB)
                 break
             else:
@@ -128,7 +131,8 @@ class TrainTestValOneTime:
             #     print("Early stopping")
             #     self.val_auc = self.calc_auc(self.val_loader, job=VAL_JOB)
             #     break
-        self.model = best_model
+        #self.model = best_model
+        self.model.load_state_dict(best_model)
         early_training_results['test_auc'] = self.calc_auc(self.test_loader, job=TEST_JOB)
         return early_training_results
 

@@ -2,7 +2,7 @@ import json
 import logging
 from datetime import datetime
 import os
-
+import sys
 import nni
 import numpy as np
 import torch
@@ -50,14 +50,19 @@ def gdm_files():
 
 
 if __name__ == '__main__':
-    nni_flag = True
+    nni_flag = False
     try:
-        # Just Values
-        directory_name, mission, params_file_path = just_values()
-        # # Just Graph Structure
-        # directory_name, mission, params_file_path = just_graph_structure()
-        # # Values And Graph Structure
-        # directory_name, mission, params_file_path = values_and_graph_structure()
+        mission_number = int(sys.argv[1])
+        if mission_number == 1:
+            # Just Values
+            directory_name, mission, params_file_path = just_values()
+        elif mission_number == 2:
+            # Just Graph Structure
+            directory_name, mission, params_file_path = just_graph_structure()
+        elif mission_number == 3:
+            # Values And Graph Structure
+            directory_name, mission, params_file_path = values_and_graph_structure()
+
         print("Mission:", mission)
 
         train_data_file_path, train_tag_file_path, test_data_file_path, test_tag_file_path = gdm_files()
