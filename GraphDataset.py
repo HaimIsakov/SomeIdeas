@@ -1,4 +1,6 @@
 import networkx as nx
+import numpy as np
+import torch
 from torch.utils.data import Dataset
 from torch import Tensor
 
@@ -10,8 +12,8 @@ class GraphDataset(Dataset):
     def __init__(self, data_file_path, tag_file_path, mission):
         # for dataset handling
         self.microbiome_dataset = MicrobiomeDataset(data_file_path, tag_file_path)
-        # for graphs' creation
         microbiome_df = self.microbiome_dataset.microbiome_df
+        # for graphs' creation
         self.create_microbiome_graphs = CreateMicrobiomeGraphs(microbiome_df)
         self.samples_len = microbiome_df.shape[0]
         self.dataset_dict = {}
@@ -24,7 +26,9 @@ class GraphDataset(Dataset):
             dataset_dict[i] = {'graph': graph,
                                'label': self.microbiome_dataset.get_label(i),
                                'values_on_leaves': self.microbiome_dataset.get_leaves_values(i),
-                               'values_on_nodes': self.create_microbiome_graphs.get_values_on_nodes_ordered_by_nodes(graph)}
+                               'values_on_nodes': self.create_microbiome_graphs.get_values_on_nodes_ordered_by_nodes(graph),
+                               'adjacency_matrix': nx.adjacency_matrix(graph).todense()
+                               }
         return dataset_dict
 
     def get_joint_nodes(self):
@@ -50,9 +54,22 @@ class GraphDataset(Dataset):
         index_value = self.dataset_dict[index]
         gnx = index_value['graph']
         label = index_value['label']
-        adjacency_matrix = nx.adjacency_matrix(gnx).todense()
+        # adjacency_matrix = nx.adjacency_matrix(gnx).todense()
+        adjacency_matrix = index_value['adjacency_matrix']
+
+        # sparse_adjacency_matrix = nx.adjacency_matrix(gnx).tocoo()
+        # values = sparse_adjacency_matrix.data
+        # indices = np.vstack((sparse_adjacency_matrix.row, sparse_adjacency_matrix.col))
+        #
+        # i = torch.LongTensor(indices)
+        # v = torch.FloatTensor(values)
+        # shape = sparse_adjacency_matrix.shape
+        #
+        # x = torch.sparse.FloatTensor(i, v, torch.Size(shape))
+
         if self.mission == "JustValues":
             values = index_value['values_on_leaves']
         else:
             values = index_value['values_on_nodes']
         return Tensor(values), Tensor(adjacency_matrix), label
+        # return Tensor(values), x, label

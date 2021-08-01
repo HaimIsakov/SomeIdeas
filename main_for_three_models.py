@@ -1,8 +1,10 @@
 import json
 import logging
-from datetime import datetime
+import time
 import os
 import sys
+from datetime import datetime
+
 import nni
 import numpy as np
 import torch
@@ -50,7 +52,7 @@ def gdm_files():
 
 
 if __name__ == '__main__':
-    nni_flag = False
+    nni_flag = True
     try:
         mission_number = int(sys.argv[1])
         if mission_number == 1:
@@ -87,10 +89,12 @@ if __name__ == '__main__':
             RECEIVED_PARAMS = nni.get_next_parameter()
         else:
             RECEIVED_PARAMS = load_params_file(params_file_path)
+        # start = time.time()
         trainer_and_tester = TrainTestValKTimes(RECEIVED_PARAMS, number_of_runs, device, train_val_dataset,
                                                 test_dataset, result_directory_name)
         val_metric, test_metric = trainer_and_tester.train_group_k_cross_validation(k=5)
-
+        # end = time.time()
+        # print(end-start)
         mean_val_metric = np.average(val_metric)
         std_val_metric = np.std(val_metric)
         mean_test_metric = np.average(test_metric)

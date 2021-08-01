@@ -11,5 +11,5 @@
     "train_frac":0.75,
     "test_frac": 0.25,
     "runs_number": 10,
-    "epochs": 50
+    "epochs": 200
 }

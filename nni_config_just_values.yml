@@ -1,6 +1,6 @@
 authorName: Haim
 experimentName: NNI_Just_Values_GDM
-trialConcurrency: 4   # max GPUs to use simultaneously.
+trialConcurrency: 1   # max GPUs to use simultaneously.
 maxExecDuration: 100h
 maxTrialNum: 99999
 #choice: local, remote, pai
