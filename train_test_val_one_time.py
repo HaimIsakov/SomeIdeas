@@ -94,6 +94,7 @@ class TrainTestValOneTime:
                 counter = 0
                 early_training_results['val_auc'] = val_auc
                 early_training_results['val_loss'] = val_loss
+                early_training_results['train_auc'] = train_auc
                 # best_model = copy.deepcopy(self.model)
                 best_model = self.model.state_dict()
             elif self.early_stopping and counter == EARLY_STOPPING_PATIENCE:
