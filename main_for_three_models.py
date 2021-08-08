@@ -1,7 +1,9 @@
+import os
+os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0,1,2,3"
 import json
 import logging
 import time
-import os
 import sys
 from datetime import datetime
 
@@ -52,7 +54,7 @@ def gdm_files():
 
 
 if __name__ == '__main__':
-    nni_flag = True
+    nni_flag = False
     try:
         mission_number = int(sys.argv[1])
         if mission_number == 1:
