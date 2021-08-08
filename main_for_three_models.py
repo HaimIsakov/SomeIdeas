@@ -78,7 +78,7 @@ if __name__ == '__main__':
     dataset_name = args.dataset
     mission_number = args.task_number
 
-    nni_flag = False
+    nni_flag = True
     try:
         # mission_number = int(sys.argv[1])
         if mission_number == 1:

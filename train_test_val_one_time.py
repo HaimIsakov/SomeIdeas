@@ -63,13 +63,14 @@ class TrainTestValOneTime:
     def train(self):
         optimizer = self.get_optimizer()
         epochs = self.RECEIVED_PARAMS['epochs']
-        min_val_loss = float('inf')
+        # min_val_loss = float('inf')
         # best_model = copy.deepcopy(self.model)
         best_model = self.model.state_dict()
-        max_val_auc = 0.5
+        # max_val_auc = 0.5
+        max_val_auc = 0
         counter = 0
         early_training_results = {}
-        early_training_results['val_auc'] = 0.5
+        # early_training_results['val_auc'] = 0.5
         # early_stopping = EarlyStopping(patience=EARLY_STOPPING_PATIENCE, verbose=True)
         # run the main training loop
         for epoch in range(epochs):
@@ -89,7 +90,7 @@ class TrainTestValOneTime:
                 batched_train_loss.append(loss.item())
 
             average_train_loss, train_auc, val_loss, val_auc = self.record_evaluations(batched_train_loss)
-            early_training_results['train_auc'] = train_auc
+            # early_training_results['train_auc'] = train_auc
             if val_auc >= max_val_auc:
                 print(f"Validation AUC increased ({max_val_auc:.6f} --> {val_auc:.6f})")
                 max_val_auc = val_auc

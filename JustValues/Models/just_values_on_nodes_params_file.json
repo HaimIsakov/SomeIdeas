@@ -9,5 +9,5 @@
     "layer_2":200,
     "train_frac":0.75,
     "test_frac": 0.25,
-    "epochs":10
+    "epochs":50
 }

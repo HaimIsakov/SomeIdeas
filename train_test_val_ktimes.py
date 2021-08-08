@@ -47,7 +47,7 @@ class TrainTestValKTimes:
             trainer_and_tester = TrainTestValOneTime(model, self.RECEIVED_PARAMS, train_loader, val_loader, test_loader,
                                                      self.device)
             early_stopping_results = trainer_and_tester.train()
-            min_val_train_auc = max(min(early_stopping_results['val_auc'], early_stopping_results['train_auc']), 0.5)
+            min_val_train_auc = min(early_stopping_results['val_auc'], early_stopping_results['train_auc'])
             print("Minimum Validation and Train Auc", min_val_train_auc)
             val_metric.append(min_val_train_auc)  # the minimum between the aucs between train set and validation set
             test_metric.append(early_stopping_results['test_auc'])

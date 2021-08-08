@@ -16,7 +16,7 @@ tuner:
     #choice: maximize, minimize
     optimize_mode: maximize
 trial:
-  command: python main_for_three_models.py 1
+  command: python main_for_three_models.py --task_number 1 --dataset gdm
   codeDir: .
   gpuNum: 2
 localConfig:
