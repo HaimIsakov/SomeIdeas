@@ -14,6 +14,7 @@ EARLY_STOPPING_PATIENCE = 20
 SCHEDULER_PATIENCE = 7
 SCHEDULER_FACTOR = 0.75
 
+
 class TrainTestValOneTime:
     def __init__(self, model, RECEIVED_PARAMS, train_loader, val_loader, test_loader, device, early_stopping=True):
         self.model = model
@@ -88,6 +89,7 @@ class TrainTestValOneTime:
                 batched_train_loss.append(loss.item())
 
             average_train_loss, train_auc, val_loss, val_auc = self.record_evaluations(batched_train_loss)
+            early_training_results['train_auc'] = train_auc
             if val_auc >= max_val_auc:
                 print(f"Validation AUC increased ({max_val_auc:.6f} --> {val_auc:.6f})")
                 max_val_auc = val_auc
