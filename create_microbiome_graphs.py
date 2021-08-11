@@ -8,14 +8,15 @@ class CreateMicrobiomeGraphs:
         self.graphs_list = []
         # self.create_graphs_with_common_nodes()
         self.create_tax_trees()
+        self.sort_all_graphs()
         self.union_nodes = []
 
     def create_tax_trees(self):
-        for i, mom in tqdm(enumerate(self.microbiome_df.iterrows()), desc='Create graphs'):
+        for i, mom in tqdm(enumerate(self.microbiome_df.iterrows()), desc='Create graphs', total=len(self.microbiome_df)):
             # cur_graph = create_tax_tree(self.microbiome_df.iloc[i], flag=0, keepFlagged=False)
             cur_graph = create_tax_tree(self.microbiome_df.iloc[i], zeroflag=True)
             self.graphs_list.append(cur_graph)
-            print("Number of Nodes in graph", cur_graph.number_of_nodes())
+            # print("Number of Nodes in graph", cur_graph.number_of_nodes())
 
     def find_common_nodes(self):
         nodes_dict = {}
@@ -46,7 +47,7 @@ class CreateMicrobiomeGraphs:
     def create_graphs_with_common_nodes(self):
         self.create_tax_trees()
         nodes_dict = self.find_common_nodes()
-        for graph in tqdm(self.graphs_list, desc='Add to graphs the common nodes set'):
+        for graph in tqdm(self.graphs_list, desc='Add to graphs the common nodes set', total=len(self.graphs_list)):
             nodes_and_values = graph.nodes()
             nodes = [node_name for node_name, value in nodes_and_values]
             for node_name in nodes_dict:
@@ -71,8 +72,8 @@ class CreateMicrobiomeGraphs:
         temp_graph_list = []
         for graph in self.graphs_list:
             temp_graph = nx.Graph()
-            temp_graph.add_nodes_from(sorted(graph.nodes(data=True)))
-            temp_graph.add_edges_from(graph.edges(data=True))
+            temp_graph.add_nodes_from(sorted(graph.nodes(data=False)))
+            temp_graph.add_edges_from(graph.edges(data=False))
             # temp_graph.add_edges_from(sorted(graph.edges(data=True)))
             temp_graph_list.append(temp_graph)
         self.graphs_list = temp_graph_list
@@ -81,7 +82,15 @@ class CreateMicrobiomeGraphs:
         return self.graphs_list[index]
 
     def get_vector_size(self):
-        return len(self.union_nodes)
+        nodes_number = []
+        return_number = 0
+        for g in self.graphs_list:
+            nodes_number.append(g.number_of_nodes())
+        if all(x == nodes_number[0] for x in nodes_number):
+            return_number = nodes_number[0]
+        else:
+            return_number = len(self.union_nodes)
+        return return_number
 
     # def get_values_on_nodes_ordered_by_nodes(self, gnx):
     #     nodes_and_values = gnx.nodes(data=True)

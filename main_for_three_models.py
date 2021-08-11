@@ -115,8 +115,8 @@ if __name__ == '__main__':
         # union_nodes_set_test = test_dataset.get_joint_nodes()
         #
         # union_train_and_test = set(union_nodes_set_trainval) | set(union_nodes_set_test)
-        # train_val_dataset.update_graphs(union_train_and_test)
-        # test_dataset.update_graphs(union_train_and_test)
+        train_val_dataset.update_graphs()
+        test_dataset.update_graphs()
 
         if nni_flag:
             RECEIVED_PARAMS = nni.get_next_parameter()

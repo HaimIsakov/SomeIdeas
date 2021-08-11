@@ -96,13 +96,13 @@ def create_tax_tree(series, zeroflag=True):
         # adding the bacteria in every column
         bac.append(Bacteria(tax, val))
         # connecting to the root of the tempGraph
-        tempGraph.add_edge("anaerobe", (bac[i].lst[0],))
+        tempGraph.add_edge(("anaerobe", ), (bac[i].lst[0],))
         # connecting all levels of the taxonomy
         for j in range(0, len(bac[i].lst) - 1):
             updateval(tempGraph, bac[i], valdict, j, True)
         # adding the value of the last node in the chain
         updateval(tempGraph, bac[i], valdict, len(bac[i].lst) - 1, False)
-    valdict["anaerobe"] = valdict[("Bacteria",)] + valdict[("Archaea",)]
+    valdict[("anaerobe", )] = valdict[("Bacteria",)] + valdict[("Archaea",)]
     return create_final_graph(tempGraph, valdict, zeroflag)
 
 

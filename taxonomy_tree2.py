@@ -40,13 +40,13 @@ def create_tax_tree(series, zeroflag=True):
         # adding the bacteria in every column
         bac.append(Bacteria(tax, val))
         # connecting to the root of the tempGraph
-        tempGraph.add_edge("anaerobe", (bac[i].lst[0],))
+        tempGraph.add_edge(("anaerobe",), (bac[i].lst[0],))
         # connecting all levels of the taxonomy
         for j in range(0, len(bac[i].lst) - 1):
             updateval(tempGraph, bac[i], valdict, j, True)
         # adding the value of the last node in the chain
         updateval(tempGraph, bac[i], valdict, len(bac[i].lst) - 1, False)
-    valdict["anaerobe"] = valdict[("Bacteria",)] + valdict[("Archaea",)]
+    valdict[("anaerobe",)] = valdict[("Bacteria",)] + valdict[("Archaea",)]
     return create_final_graph(tempGraph, valdict, zeroflag)
 
 
@@ -105,11 +105,32 @@ def draw_tree(graph, threshold=0.0):
 
 
 if __name__ == '__main__':
-    # data_file_path = os.path.join('Cirrhosis_split_dataset', 'train_val_set_Cirrhosis_microbiome.csv')
-    data_file_path = os.path.join('GDM_split_dataset', 'train_val_set_gdm_microbiome.csv')
+    data_file_path = os.path.join('Cirrhosis_split_dataset', 'train_val_set_Cirrhosis_microbiome.csv')
+    # data_file_path = os.path.join('GDM_split_dataset', 'train_val_set_gdm_microbiome.csv')
     microbiome_df = pd.read_csv(data_file_path, index_col='ID')
-    for i, mom in tqdm(enumerate(microbiome_df.iterrows()), desc='Create graphs'):
+    nodes_number = []
+    graphs = []
+    for i, mom in tqdm(enumerate(microbiome_df.iterrows()), desc='Create graphs', total=len(microbiome_df)):
         # cur_graph = create_tax_tree(microbiome_df.iloc[i], ignore_values=0, ignore_flag=True)
         cur_graph = create_tax_tree(microbiome_df.iloc[i])
+        graphs.append(cur_graph)
+        nodes_number.append(cur_graph.number_of_nodes())
         # print("Number of Nodes", cu)
-        print(cur_graph.number_of_nodes())
+        # print(cur_graph.nodes())
+        # print(cur_graph.number_of_nodes())
+
+    def sort_all_graphs(graphs_list):
+        temp_graph_list = []
+        for graph in graphs_list:
+            temp_graph = nx.Graph()
+            temp_graph.add_nodes_from(sorted(graph.nodes(data=True)))
+            temp_graph.add_edges_from(graph.edges(data=True))
+            # temp_graph.add_edges_from(sorted(graph.edges(data=True)))
+            temp_graph_list.append(temp_graph)
+        return temp_graph_list
+    graphs_list = sort_all_graphs(graphs)
+    for i in graphs_list:
+        values = [node_name for node_name, value in i.nodes()]
+        # print(values)
+        print("----------------------------------------------")
+    print(all(x==nodes_number[0] for x in nodes_number))
