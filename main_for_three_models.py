@@ -72,11 +72,13 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Main script of all models')
     parser.add_argument("--dataset", help="Dataset name", default="gdm", type=str)
     parser.add_argument("--task_number", help="Task number", default=1, type=int)
+    parser.add_argument("--device_num", help="Cuda Device Number", default=0, type=int)
 
     # Set some default values for the hyper-parameters
     args = parser.parse_args()
     dataset_name = args.dataset
     mission_number = args.task_number
+    cuda_number = args.device_num
 
     nni_flag = False
     try:
@@ -100,19 +102,21 @@ if __name__ == '__main__':
         result_directory_name = os.path.join(directory_name, "Result_After_Proposal")
         date = datetime.today().strftime('%Y_%m_%d_%H_%M_%S')
 
-        device = "cuda:2" if torch.cuda.is_available() else "cpu"
+        device = f"cuda:{cuda_number}" if torch.cuda.is_available() else "cpu"
         print("device", device)
         number_of_runs = 1
 
+        print("Train Graphs")
         train_val_dataset = create_dataset(train_data_file_path, train_tag_file_path, mission)
+        print("Test Graphs")
         test_dataset = create_dataset(test_data_file_path, test_tag_file_path, mission)
 
-        union_nodes_set_trainval = train_val_dataset.get_joint_nodes()
-        union_nodes_set_test = test_dataset.get_joint_nodes()
-
-        union_train_and_test = set(union_nodes_set_trainval) | set(union_nodes_set_test)
-        train_val_dataset.update_graphs(union_train_and_test)
-        test_dataset.update_graphs(union_train_and_test)
+        # union_nodes_set_trainval = train_val_dataset.get_joint_nodes()
+        # union_nodes_set_test = test_dataset.get_joint_nodes()
+        #
+        # union_train_and_test = set(union_nodes_set_trainval) | set(union_nodes_set_test)
+        # train_val_dataset.update_graphs(union_train_and_test)
+        # test_dataset.update_graphs(union_train_and_test)
 
         if nni_flag:
             RECEIVED_PARAMS = nni.get_next_parameter()

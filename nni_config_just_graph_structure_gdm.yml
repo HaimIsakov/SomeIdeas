@@ -16,7 +16,7 @@ tuner:
     #choice: maximize, minimize
     optimize_mode: maximize
 trial:
-  command: python main_for_three_models.py --task_number 2 --dataset cirrhosis
+  command: python main_for_three_models.py --task_number 2 --dataset gdm --device_num 1
   codeDir: .
   gpuNum: 2
 localConfig:
