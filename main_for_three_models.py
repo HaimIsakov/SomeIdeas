@@ -68,6 +68,24 @@ def corrhosis_files():
     return train_data_file_path, train_tag_file_path, test_data_file_path, test_tag_file_path
 
 
+def ibd_files():
+    train_data_file_path = os.path.join('IBD_split_dataset', 'train_val_set_IBD_microbiome.csv')
+    train_tag_file_path = os.path.join('IBD_split_dataset', 'train_val_set_IBD_tags.csv')
+
+    test_data_file_path = os.path.join('IBD_split_dataset', 'test_set_IBD_microbiome.csv')
+    test_tag_file_path = os.path.join('IBD_split_dataset', 'test_set_IBD_tags.csv')
+    return train_data_file_path, train_tag_file_path, test_data_file_path, test_tag_file_path
+
+
+def bw_files():
+    train_data_file_path = os.path.join('Black_vs_White_split_dataset', 'train_val_set_Black_vs_White_microbiome.csv')
+    train_tag_file_path = os.path.join('Black_vs_White_split_dataset', 'train_val_set_Black_vs_White_tags.csv')
+
+    test_data_file_path = os.path.join('Black_vs_White_split_dataset', 'test_set_Black_vs_White_microbiome.csv')
+    test_tag_file_path = os.path.join('Black_vs_White_split_dataset', 'test_set_Black_vs_White_tags.csv')
+    return train_data_file_path, train_tag_file_path, test_data_file_path, test_tag_file_path
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Main script of all models')
     parser.add_argument("--dataset", help="Dataset name", default="gdm", type=str)
@@ -92,12 +110,17 @@ if __name__ == '__main__':
         elif mission_number == 3:
             # Values And Graph Structure
             directory_name, mission, params_file_path = values_and_graph_structure()
-
         print("Mission:", mission)
+
+        print("Dataset:", dataset_name)
         if dataset_name == "gdm":
             train_data_file_path, train_tag_file_path, test_data_file_path, test_tag_file_path = gdm_files()
         if dataset_name == "cirrhosis":
             train_data_file_path, train_tag_file_path, test_data_file_path, test_tag_file_path = corrhosis_files()
+        if dataset_name == "IBD":
+            train_data_file_path, train_tag_file_path, test_data_file_path, test_tag_file_path = ibd_files()
+        if dataset_name == "bw":
+            train_data_file_path, train_tag_file_path, test_data_file_path, test_tag_file_path = bw_files()
 
         result_directory_name = os.path.join(directory_name, "Result_After_Proposal")
         date = datetime.today().strftime('%Y_%m_%d_%H_%M_%S')
@@ -139,9 +162,8 @@ if __name__ == '__main__':
             nni.report_intermediate_result(mean_test_metric)
             nni.report_final_result(mean_val_metric)
 
-        else:
-            print("\n \nMean Validation Set AUC: ", mean_val_metric, " +- ", std_val_metric)
-            print("Mean Test Set AUC: ", mean_test_metric, " +- ", std_test_metric)
+        print("\n \nMean Validation Set AUC: ", mean_val_metric, " +- ", std_val_metric)
+        print("Mean Test Set AUC: ", mean_test_metric, " +- ", std_test_metric)
 
     except Exception as e:
         LOG.exception(e)
