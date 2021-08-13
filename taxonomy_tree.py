@@ -95,6 +95,10 @@ def create_tax_tree(series, zeroflag=True):
     for i, (tax, val) in enumerate(series.items()):
         # adding the bacteria in every column
         bac.append(Bacteria(tax, val))
+        if len(bac[i].lst) == 1 and bac[i].lst[0] == "Bacteria":
+            valdict[("Bacteria",)] += bac[i].val
+        if len(bac[i].lst) == 1 and bac[i].lst[0] == "Archaea":
+            valdict[("Archaea",)] += bac[i].val
         # connecting to the root of the tempGraph
         tempGraph.add_edge(("anaerobe", ), (bac[i].lst[0],))
         # connecting all levels of the taxonomy
@@ -165,6 +169,6 @@ def draw_tree(graph, threshold=0.0):
     plt.savefig("taxtree.png")
 
 
-if __name__ == "__main__":
-    graph = create_tax_tree(pickle.load(open("graph152forAriel.p", "rb")), flag=0, keepFlagged=True)
-    print()
+# if __name__ == "__main__":
+#     graph = create_tax_tree(pickle.load(open("graph152forAriel.p", "rb")), flag=0, keepFlagged=True)
+#     print()

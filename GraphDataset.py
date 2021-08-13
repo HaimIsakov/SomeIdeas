@@ -1,6 +1,4 @@
 import networkx as nx
-import numpy as np
-import torch
 from torch.utils.data import Dataset
 from torch import Tensor
 

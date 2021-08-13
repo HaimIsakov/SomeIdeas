@@ -1,5 +1,5 @@
 authorName: Haim
-experimentName: NNI_Just_Values_and_Graph_Structure
+experimentName: NNI_Just_Values_and_Graph_Structure_GDM
 trialConcurrency: 1   # max GPUs to use simultaneously.
 maxExecDuration: 100h
 maxTrialNum: 99999
