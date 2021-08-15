@@ -24,8 +24,8 @@ def load_params_file(file_path):
     return RECEIVED_PARAMS
 
 
-def create_dataset(data_file_path, tag_file_path, mission):
-    full_dataset = GraphDataset(data_file_path, tag_file_path, mission)
+def create_dataset(data_file_path, tag_file_path, mission, geometric_or_not):
+    full_dataset = GraphDataset(data_file_path, tag_file_path, mission, geometric_or_not=geometric_or_not)
     return full_dataset
 
 
@@ -91,30 +91,35 @@ if __name__ == '__main__':
     parser.add_argument("--dataset", help="Dataset name", default="gdm", type=str)
     parser.add_argument("--task_number", help="Task number", default=1, type=int)
     parser.add_argument("--device_num", help="Cuda Device Number", default=0, type=int)
+    parser.add_argument("--nni", help="is nni mode", default=0, type=int)
 
     # Set some default values for the hyper-parameters
     args = parser.parse_args()
     dataset_name = args.dataset
     mission_number = args.task_number
     cuda_number = args.device_num
-
-    nni_flag = False
+    nni_flag = False if args.nni is 0 else True
+    pytorch_geometric_mode = False
     try:
         # mission_number = int(sys.argv[1])
-        if mission_number == 1:
+        # if mission_number == 1:
             # Just Values
-            directory_name, mission, params_file_path = just_values()
-        elif mission_number == 2:
+        directory_name, mission, params_file_path = just_values()
+        if mission_number == 2:
             # Just Graph Structure
             directory_name, mission, params_file_path = just_graph_structure()
         elif mission_number == 3:
             # Values And Graph Structure
             directory_name, mission, params_file_path = values_and_graph_structure()
+        elif mission_number == 4:
+            # pytorch geometric gcn
+            directory_name, mission, params_file_path = values_and_graph_structure()
+            pytorch_geometric_mode = True
         print("Mission:", mission)
 
         print("Dataset:", dataset_name)
-        if dataset_name == "gdm":
-            train_data_file_path, train_tag_file_path, test_data_file_path, test_tag_file_path = gdm_files()
+        # if dataset_name == "gdm":
+        train_data_file_path, train_tag_file_path, test_data_file_path, test_tag_file_path = gdm_files()
         if dataset_name == "cirrhosis":
             train_data_file_path, train_tag_file_path, test_data_file_path, test_tag_file_path = corrhosis_files()
         if dataset_name == "IBD":
@@ -130,9 +135,9 @@ if __name__ == '__main__':
         number_of_runs = 1
 
         print("Train Graphs")
-        train_val_dataset = create_dataset(train_data_file_path, train_tag_file_path, mission)
+        train_val_dataset = create_dataset(train_data_file_path, train_tag_file_path, mission, geometric_or_not=pytorch_geometric_mode)
         print("Test Graphs")
-        test_dataset = create_dataset(test_data_file_path, test_tag_file_path, mission)
+        test_dataset = create_dataset(test_data_file_path, test_tag_file_path, mission, geometric_or_not=pytorch_geometric_mode)
 
         # union_nodes_set_trainval = train_val_dataset.get_joint_nodes()
         # union_nodes_set_test = test_dataset.get_joint_nodes()
@@ -147,7 +152,9 @@ if __name__ == '__main__':
             RECEIVED_PARAMS = load_params_file(params_file_path)
         # start = time.time()
         trainer_and_tester = TrainTestValKTimes(RECEIVED_PARAMS, number_of_runs, device, train_val_dataset,
-                                                test_dataset, result_directory_name)
+                                                test_dataset, result_directory_name,
+                                                nni_flag=nni_flag,
+                                                geometric_or_not=pytorch_geometric_mode)
         val_metric, test_metric = trainer_and_tester.train_group_k_cross_validation(k=5)
         # end = time.time()
         # print(end-start)

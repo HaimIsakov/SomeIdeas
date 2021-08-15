@@ -9,7 +9,7 @@ from train_test_val_one_time import TrainTestValOneTime
 from JustGraphStructure.Models.just_graph_structure import JustGraphStructure
 from JustValues.Models.just_values_fc_binary_classification import JustValuesOnNodes
 from ValuesAndGraphStructure.Models.values_and_graph_structure import ValuesAndGraphStructure
-
+from pytorch_geometric import GCN
 LOSS_PLOT = 'loss'
 ACCURACY_PLOT = 'acc'
 AUC_PLOT = 'auc'
@@ -19,7 +19,7 @@ TEST_JOB = 'test'
 
 class TrainTestValKTimes:
     def __init__(self, RECEIVED_PARAMS, number_of_runs, device, train_val_dataset, test_dataset,
-                 result_directory_name, nni_flag=False):
+                 result_directory_name, nni_flag=False, geometric_or_not=False):
         # self.mission = mission
         self.RECEIVED_PARAMS = RECEIVED_PARAMS
         self.device = device
@@ -28,6 +28,7 @@ class TrainTestValKTimes:
         self.result_directory_name = result_directory_name
         self.number_of_runs = number_of_runs
         self.nni_flag = nni_flag
+        self.geometric_or_not = geometric_or_not
         # self.node_order = self.dataset.node_order
 
     def train_group_k_cross_validation(self, k=5):
@@ -84,15 +85,19 @@ class TrainTestValKTimes:
         return train_loader, val_loader, test_loader
 
     def get_model(self):
-        if self.train_val_dataset.mission == "JustValues":
-            data_size = self.train_val_dataset.get_leaves_number()
-            model = JustValuesOnNodes(data_size, self.RECEIVED_PARAMS)
-        elif self.train_val_dataset.mission == "JustGraphStructure":
+        if not self.geometric_or_not:
+            if self.train_val_dataset.mission == "JustValues":
+                data_size = self.train_val_dataset.get_leaves_number()
+                model = JustValuesOnNodes(data_size, self.RECEIVED_PARAMS)
+            elif self.train_val_dataset.mission == "JustGraphStructure":
+                data_size = self.train_val_dataset.get_vector_size()
+                model = JustGraphStructure(data_size, self.RECEIVED_PARAMS, self.device)
+            elif self.train_val_dataset.mission == "GraphStructure&Values":
+                data_size = self.train_val_dataset.get_vector_size()
+                model = ValuesAndGraphStructure(data_size, self.RECEIVED_PARAMS, self.device)
+        else:
             data_size = self.train_val_dataset.get_vector_size()
-            model = JustGraphStructure(data_size, self.RECEIVED_PARAMS, self.device)
-        elif self.train_val_dataset.mission == "GraphStructure&Values":
-            data_size = self.train_val_dataset.get_vector_size()
-            model = ValuesAndGraphStructure(data_size, self.RECEIVED_PARAMS, self.device)
+            model = GCN(data_size, self.RECEIVED_PARAMS, self.device)
         return model
 
     def plot_measurement(self, root, date, trainer_and_tester, measurement=LOSS_PLOT):

@@ -1,5 +1,6 @@
 from tqdm import tqdm
-from taxonomy_tree import *
+# from taxonomy_tree import *
+from taxonomy_tree_for_pytorch_geometric import *
 
 
 class CreateMicrobiomeGraphs:
@@ -72,7 +73,7 @@ class CreateMicrobiomeGraphs:
         temp_graph_list = []
         for graph in self.graphs_list:
             temp_graph = nx.Graph()
-            temp_graph.add_nodes_from(sorted(graph.nodes(data=False)))
+            temp_graph.add_nodes_from(sorted(graph.nodes(data=True)))
             temp_graph.add_edges_from(graph.edges(data=False))
             # temp_graph.add_edges_from(sorted(graph.edges(data=True)))
             temp_graph_list.append(temp_graph)

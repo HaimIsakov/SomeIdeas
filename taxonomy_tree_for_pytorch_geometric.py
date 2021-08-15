@@ -1,14 +1,13 @@
+import pickle
 # from openpyxl import Workbook, load_workbook
 import os
 import re
 import math
 import pandas
 import networkx as nx
-import pickle
-
 import pandas as pd
-from matplotlib import pyplot as plt
-from networkx.drawing.nx_agraph import graphviz_layout
+from torch_geometric.data import DataLoader
+from torch_geometric.utils.convert import from_networkx
 from tqdm import tqdm
 
 """
@@ -67,49 +66,18 @@ def updateval(graph, bac, vald, num, adde):
 def create_final_graph(tempGraph, valdict, zeroflag):
     graph = nx.Graph()
     for e in tempGraph.edges():
-        if not zeroflag or valdict[e[0]] * valdict[e[1]] != 0:
-            graph.add_edge((e[0], valdict[e[0]]),
-                           (e[1], valdict[e[1]]))
-        else:
-            graph.add_node((e[0], valdict[e[0]]))
-            graph.add_node((e[1], valdict[e[1]]))
+        node1_name = e[0]
+        node1_val = valdict[e[0]]
+        node2_name = e[1]
+        node2_val = valdict[e[1]]
+        graph.add_node(node1_name, val=node1_val)
+        graph.add_node(node2_name, val=node2_val)
+        if not zeroflag or node1_val * node2_val != 0:
+            graph.add_edge(node1_name, node2_name)
     return graph
 
 
-def draw_tree(graph, threshold=0.0):
-    labelg = {}
-    labelr = {}
-    colormap = []
-    sizemap = []
-    for node in graph:
-        if node[0] == "base":
-            colormap.append("white")
-            sizemap.append(0)
-        else:
-            if node[1] < -threshold:
-                colormap.append("red")
-                labelr[node] = node[0][-1]
-            elif node[1] > threshold:
-                colormap.append("green")
-                labelg[node] = node[0][-1]
-            else:
-                colormap.append("yellow")
-            sizemap.append(node[1] / 1000 + 5)
-    # drawing the graph
-    pos = graphviz_layout(graph, prog="twopi", root="base")
-    #pos = nx.spring_layout(graph)
-    lpos = {}
-    for key, loc in pos.items():
-        lpos[key] = (loc[0], loc[1] + 0.02)
-    nx.draw(graph, pos, node_size=sizemap, node_color=colormap, width=0.3)
-    nx.nx.draw_networkx_labels(graph, lpos, labelr, font_size=7, font_color="red")
-    nx.nx.draw_networkx_labels(graph, lpos, labelg, font_size=7, font_color="green")
-    plt.draw()
-    plt.savefig("taxtree.png")
-
-
 if __name__ == '__main__':
-
     # data_file_path = os.path.join('Cirrhosis_split_dataset', 'train_val_set_Cirrhosis_microbiome.csv')
     # data_file_path = os.path.join('GDM_split_dataset', 'train_val_set_gdm_microbiome.csv')
     # data_file_path = os.path.join('Allergy', 'OTU_Allergy_after_mipmlp_Genus_same_ids.csv')
@@ -123,22 +91,14 @@ if __name__ == '__main__':
         cur_graph = create_tax_tree(microbiome_df.iloc[i])
         graphs.append(cur_graph)
         nodes_number.append(cur_graph.number_of_nodes())
-        # print("Number of Nodes", cu)
-        # print(cur_graph.nodes())
-        # print(cur_graph.number_of_nodes())
+        # print("Nodes Number", cur_graph.number_of_nodes())
 
-    def sort_all_graphs(graphs_list):
-        temp_graph_list = []
-        for graph in graphs_list:
-            temp_graph = nx.Graph()
-            temp_graph.add_nodes_from(sorted(graph.nodes(data=True)))
-            temp_graph.add_edges_from(graph.edges(data=True))
-            # temp_graph.add_edges_from(sorted(graph.edges(data=True)))
-            temp_graph_list.append(temp_graph)
-        return temp_graph_list
-    graphs_list = sort_all_graphs(graphs)
-    for i in graphs_list:
-        values = [node_name for node_name, value in i.nodes()]
-        # print(values)
-        # print("----------------------------------------------")
-    print(all(x==nodes_number[0] for x in nodes_number))
+    data_list = []
+    for g in graphs:
+        data = from_networkx(g, group_node_attrs=['val'])  # Notice: convert file was changed explicitly
+        data_list.append(data)
+    loader = DataLoader(data_list, batch_size=32, exclude_keys=['val'], shuffle=True)
+
+    for step, data in enumerate(loader):
+        print(f'Step {step + 1}:')
+    print()

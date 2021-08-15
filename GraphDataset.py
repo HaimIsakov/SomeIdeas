@@ -1,13 +1,15 @@
 import networkx as nx
 from torch.utils.data import Dataset
-from torch import Tensor
+from torch import Tensor, FloatTensor
+from torch_geometric.utils import from_networkx
 
 from MicrobiomeDataset import MicrobiomeDataset
 from create_microbiome_graphs import CreateMicrobiomeGraphs
 
 
 class GraphDataset(Dataset):
-    def __init__(self, data_file_path, tag_file_path, mission):
+    def __init__(self, data_file_path, tag_file_path, mission, geometric_or_not=False):
+        super(GraphDataset, self).__init__()
         # for dataset handling
         self.microbiome_dataset = MicrobiomeDataset(data_file_path, tag_file_path)
         microbiome_df = self.microbiome_dataset.microbiome_df
@@ -16,17 +18,26 @@ class GraphDataset(Dataset):
         self.samples_len = microbiome_df.shape[0]
         self.dataset_dict = {}
         self.mission = mission
+        self.geometric_or_not = geometric_or_not
 
     def set_dataset_dict(self):
         dataset_dict = {}
         for i in range(self.samples_len):
             graph = self.create_microbiome_graphs.get_graphs_list(i)
-            dataset_dict[i] = {'graph': graph,
-                               'label': self.microbiome_dataset.get_label(i),
-                               'values_on_leaves': self.microbiome_dataset.get_leaves_values(i),
-                               'values_on_nodes': self.create_microbiome_graphs.get_values_on_nodes_ordered_by_nodes(graph),
-                               'adjacency_matrix': nx.adjacency_matrix(graph).todense()
-                               }
+            if not self.geometric_or_not:
+                dataset_dict[i] = {'graph': graph,
+                                   'label': self.microbiome_dataset.get_label(i),
+                                   'values_on_leaves': self.microbiome_dataset.get_leaves_values(i),
+                                   'values_on_nodes': self.create_microbiome_graphs.get_values_on_nodes_ordered_by_nodes(graph),
+                                   'adjacency_matrix': nx.adjacency_matrix(graph).todense()
+                                   }
+            else:
+                data = from_networkx(graph, group_node_attrs=['val'])  # Notice: convert file was changed explicitly
+                dataset_dict[i] = {'graph': graph,
+                                   'label': self.microbiome_dataset.get_label(i),
+                                   'values_on_nodes': data.x,
+                                   'adjacency_matrix': data.edge_index
+                                   }
         return dataset_dict
 
     def get_joint_nodes(self):
