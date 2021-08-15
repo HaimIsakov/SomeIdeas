@@ -1,6 +1,8 @@
 import json
 import os
 from datetime import datetime
+
+import torch_geometric.data
 from sklearn.model_selection import GroupShuffleSplit
 from torch.utils.data import DataLoader
 import matplotlib.pyplot as plt
@@ -47,7 +49,10 @@ class TrainTestValKTimes:
             model = self.get_model().to(self.device)
             trainer_and_tester = TrainTestValOneTime(model, self.RECEIVED_PARAMS, train_loader, val_loader, test_loader,
                                                      self.device)
-            early_stopping_results = trainer_and_tester.train()
+            if not self.geometric_or_not:
+                early_stopping_results = trainer_and_tester.train()
+            else:
+                early_stopping_results = trainer_and_tester.train_geometric()
             min_val_train_auc = min(early_stopping_results['val_auc'], early_stopping_results['train_auc'])
             print("Minimum Validation and Train Auc", min_val_train_auc)
             val_metric.append(min_val_train_auc)  # the minimum between the aucs between train set and validation set
@@ -74,14 +79,24 @@ class TrainTestValKTimes:
 
     def create_data_loaders(self, train_idx, val_idx):
         batch_size = self.RECEIVED_PARAMS['batch_size']
-        # Datasets
-        train_data = torch.utils.data.Subset(self.train_val_dataset, train_idx)
-        val_data = torch.utils.data.Subset(self.train_val_dataset, val_idx)
-        # Dataloader
-        train_loader = torch.utils.data.DataLoader(train_data, shuffle=True, batch_size=batch_size)
-        val_loader = torch.utils.data.DataLoader(val_data, batch_size=batch_size, shuffle=False)
-        # Notice that the test data is loaded as one unit.
-        test_loader = torch.utils.data.DataLoader(self.test_dataset, batch_size=len(self.test_dataset), shuffle=False)
+        if not self.geometric_or_not:
+            # Datasets
+            train_data = torch.utils.data.Subset(self.train_val_dataset, train_idx)
+            val_data = torch.utils.data.Subset(self.train_val_dataset, val_idx)
+            # Dataloader
+            train_loader = torch.utils.data.DataLoader(train_data, shuffle=True, batch_size=batch_size)
+            val_loader = torch.utils.data.DataLoader(val_data, batch_size=batch_size, shuffle=False)
+            # Notice that the test data is loaded as one unit.
+            test_loader = torch.utils.data.DataLoader(self.test_dataset, batch_size=len(self.test_dataset), shuffle=False)
+        else:
+            # Datasets
+            train_data = torch.utils.data.Subset(self.train_val_dataset, train_idx)
+            val_data = torch.utils.data.Subset(self.train_val_dataset, val_idx)
+            # Dataloader
+            train_loader = torch_geometric.data.DataLoader(train_data, shuffle=True, batch_size=batch_size, exclude_keys=['val'])
+            val_loader = torch_geometric.data.DataLoader(val_data, batch_size=batch_size, shuffle=False, exclude_keys=['val'])
+            # Notice that the test data is loaded as one unit.
+            test_loader = torch_geometric.data.DataLoader(self.test_dataset, batch_size=len(self.test_dataset), shuffle=False,exclude_keys=['val'])
         return train_loader, val_loader, test_loader
 
     def get_model(self):
@@ -97,7 +112,7 @@ class TrainTestValKTimes:
                 model = ValuesAndGraphStructure(data_size, self.RECEIVED_PARAMS, self.device)
         else:
             data_size = self.train_val_dataset.get_vector_size()
-            model = GCN(data_size, self.RECEIVED_PARAMS, self.device)
+            model = GCN(1, self.RECEIVED_PARAMS, self.device)
         return model
 
     def plot_measurement(self, root, date, trainer_and_tester, measurement=LOSS_PLOT):

@@ -46,6 +46,7 @@ class CreateMicrobiomeGraphs:
     #     self.sort_all_graphs()
 
     def create_graphs_with_common_nodes(self):
+        # old version of taxonomy tree format
         self.create_tax_trees()
         nodes_dict = self.find_common_nodes()
         for graph in tqdm(self.graphs_list, desc='Add to graphs the common nodes set', total=len(self.graphs_list)):
@@ -93,12 +94,13 @@ class CreateMicrobiomeGraphs:
             return_number = len(self.union_nodes)
         return return_number
 
+    def get_values_on_nodes_ordered_by_nodes(self, gnx):
+        nodes_and_values = gnx.nodes(data=True)
+        values = [value_dict['val'] for node, value_dict in nodes_and_values]
+        return values
+
     # def get_values_on_nodes_ordered_by_nodes(self, gnx):
-    #     nodes_and_values = gnx.nodes(data=True)
-    #     values = [value_dict['val'] for node, value_dict in nodes_and_values]
+    #     nodes_and_values = gnx.nodes()
+    #     values = [value for node_name, value in nodes_and_values]
     #     return values
 
-    def get_values_on_nodes_ordered_by_nodes(self, gnx):
-        nodes_and_values = gnx.nodes()
-        values = [value for node_name, value in nodes_and_values]
-        return values

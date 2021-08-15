@@ -1,4 +1,5 @@
 import networkx as nx
+import torch
 from torch.utils.data import Dataset
 from torch import Tensor, FloatTensor
 from torch_geometric.utils import from_networkx
@@ -33,11 +34,8 @@ class GraphDataset(Dataset):
                                    }
             else:
                 data = from_networkx(graph, group_node_attrs=['val'])  # Notice: convert file was changed explicitly
-                dataset_dict[i] = {'graph': graph,
-                                   'label': self.microbiome_dataset.get_label(i),
-                                   'values_on_nodes': data.x,
-                                   'adjacency_matrix': data.edge_index
-                                   }
+                data.y = torch.tensor(self.microbiome_dataset.get_label(i))
+                dataset_dict[i] = {'data': data}
         return dataset_dict
 
     def get_joint_nodes(self):
@@ -61,24 +59,20 @@ class GraphDataset(Dataset):
 
     def __getitem__(self, index):
         index_value = self.dataset_dict[index]
-        gnx = index_value['graph']
-        label = index_value['label']
-        # adjacency_matrix = nx.adjacency_matrix(gnx).todense()
-        adjacency_matrix = index_value['adjacency_matrix']
-
-        # sparse_adjacency_matrix = nx.adjacency_matrix(gnx).tocoo()
-        # values = sparse_adjacency_matrix.data
-        # indices = np.vstack((sparse_adjacency_matrix.row, sparse_adjacency_matrix.col))
-        #
-        # i = torch.LongTensor(indices)
-        # v = torch.FloatTensor(values)
-        # shape = sparse_adjacency_matrix.shape
-        #
-        # x = torch.sparse.FloatTensor(i, v, torch.Size(shape))
-
-        if self.mission == "JustValues":
-            values = index_value['values_on_leaves']
+        if not self.geometric_or_not:
+            label = index_value['label']
+            adjacency_matrix = index_value['adjacency_matrix']
+            # sparse_adjacency_matrix = nx.adjacency_matrix(gnx).tocoo()
+            # values = sparse_adjacency_matrix.data
+            # indices = np.vstack((sparse_adjacency_matrix.row, sparse_adjacency_matrix.col))
+            # i = torch.LongTensor(indices)
+            # v = torch.FloatTensor(values)
+            # shape = sparse_adjacency_matrix.shape
+            # x = torch.sparse.FloatTensor(i, v, torch.Size(shape))
+            if self.mission == "JustValues":
+                values = index_value['values_on_leaves']
+            else:
+                values = index_value['values_on_nodes']
+            return Tensor(values), Tensor(adjacency_matrix), label
         else:
-            values = index_value['values_on_nodes']
-        return Tensor(values), Tensor(adjacency_matrix), label
-        # return Tensor(values), x, label
+            return index_value['data']
