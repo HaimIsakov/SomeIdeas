@@ -16,10 +16,10 @@ from taxonomy_tree_for_pytorch_geometric import create_tax_tree
 class GCN(torch.nn.Module):
     def __init__(self, data_size, RECEIVED_PARAMS, device):
         super(GCN, self).__init__()
-        size = 3
-        self.att = GATConv(data_size, size)
-        self.conv1 = GCNConv(data_size, size, improved=True)
-        self.conv2 = GCNConv(32, 32)
+        size = 100
+        # self.att = GATConv(data_size, size)
+        self.conv1 = GCNConv(data_size, size, improved=False)
+        self.conv2 = GCNConv(size, size)
         self.conv3 = GCNConv(32, 32)
         num_classes = 1
         self.lin = Linear(size, num_classes)
@@ -30,8 +30,9 @@ class GCN(torch.nn.Module):
         # x = self.conv1(x, edge_index)
         x = self.conv1(x, edge_index)
         x = torch.tanh(x)
+        sh = x.shape
         # x = x.relu()
-        # x = self.conv2(x, edge_index)
+        x = self.conv2(x, edge_index)
         # x = x.relu()
         # x = self.conv3(x, edge_index)
 

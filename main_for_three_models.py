@@ -98,7 +98,7 @@ if __name__ == '__main__':
     dataset_name = args.dataset
     mission_number = args.task_number
     cuda_number = args.device_num
-    nni_flag = False if args.nni is 0 else True
+    nni_flag = False if args.nni == 0 else True
     pytorch_geometric_mode = False
     try:
         # mission_number = int(sys.argv[1])

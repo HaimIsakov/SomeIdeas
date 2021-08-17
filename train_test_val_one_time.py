@@ -188,7 +188,7 @@ class TrainTestValOneTime:
 
             average_train_loss, train_auc, val_loss, val_auc = self.record_evaluations_geometric(batched_train_loss)
             # early_training_results['train_auc'] = train_auc
-            if val_auc >= max_val_auc:
+            if val_auc > max_val_auc:
                 print(f"Validation AUC increased ({max_val_auc:.6f} --> {val_auc:.6f})")
                 max_val_auc = val_auc
                 counter = 0
