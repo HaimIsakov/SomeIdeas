@@ -1,0 +1,23 @@
+authorName: Haim
+experimentName: NNI_Just_Graph_Structure_IBD_Chrone
+trialConcurrency: 1   # max GPUs to use simultaneously.
+maxExecDuration: 100h
+maxTrialNum: 99999
+#choice: local, remote, pai
+trainingServicePlatform: local
+searchSpacePath: nni_search_space.json
+#choice: true, false
+useAnnotation: false
+tuner:
+  #choice: TPE, Random, Anneal, Evolution, BatchTuner, MetisTuner
+  #SMAC (SMAC should be installed through nnictl)
+  builtinTunerName: TPE
+  classArgs:
+    #choice: maximize, minimize
+    optimize_mode: maximize
+trial:
+  command: python main_for_three_models.py --nni 1 --task_number 2 --dataset IBD_Chrone --device_num 1
+  codeDir: .
+  gpuNum: 2
+localConfig:
+  useActiveGpu: true

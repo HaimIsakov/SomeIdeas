@@ -93,6 +93,13 @@ def bw_files():
     test_tag_file_path = os.path.join('Black_vs_White_split_dataset', 'test_set_Black_vs_White_tags.csv')
     return train_data_file_path, train_tag_file_path, test_data_file_path, test_tag_file_path
 
+def ibd_chrone_files():
+    train_data_file_path = os.path.join('IBD_Chrone_split_dataset', 'train_val_set_IBD_Chrone_microbiome.csv')
+    train_tag_file_path = os.path.join('IBD_Chrone_split_dataset', 'train_val_set_IBD_Chrone_tags.csv')
+
+    test_data_file_path = os.path.join('IBD_Chrone_split_dataset', 'test_set_IBD_Chrone_microbiome.csv')
+    test_tag_file_path = os.path.join('IBD_Chrone_split_dataset', 'test_set_IBD_Chrone_tags.csv')
+    return train_data_file_path, train_tag_file_path, test_data_file_path, test_tag_file_path
 
 def tasks_menu(task_number):
 
@@ -107,7 +114,7 @@ def tasks_menu(task_number):
     return directory_name, mission, params_file_path
 
 datasets_dict = {"gdm": gdm_files, "cirrhosis": corrhosis_files, "IBD": ibd_files,
-                 "bw": bw_files}
+                 "bw": bw_files, "IBD_Chrone": ibd_chrone_files}
 
 def datasets_menu(dataset_name):
     print("Dataset:", dataset_name)
