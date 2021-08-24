@@ -1,15 +1,30 @@
 from tqdm import tqdm
 # from taxonomy_tree import *
+from graph_measures_master.loggers import PrintLogger
 from taxonomy_tree_for_pytorch_geometric import *
+import numpy as np
 
+from graph_measures_master.features_algorithms.vertices.average_neighbor_degree import AverageNeighborDegreeCalculator
+from graph_measures_master.features_algorithms.vertices.closeness_centrality import ClosenessCentralityCalculator
+from graph_measures_master.features_algorithms.vertices.general import GeneralCalculator
+from graph_measures_master.features_algorithms.vertices.load_centrality import LoadCentralityCalculator
+from graph_measures_master.features_infra.feature_calculators import FeatureMeta
+from graph_measures_master.features_infra.graph_features import GraphFeatures
+from graph_measures_master.features_algorithms.vertices.louvain import LouvainCalculator
+from graph_measures_master.features_algorithms.vertices.betweenness_centrality import BetweennessCentralityCalculator
+
+from tqdm import tqdm
+from taxonomy_tree_for_pytorch_geometric import create_tax_tree
 
 class CreateMicrobiomeGraphs:
-    def __init__(self, df):
+    def __init__(self, df, add_attributes):
         self.microbiome_df = df
         self.graphs_list = []
         # self.create_graphs_with_common_nodes()
         self.create_tax_trees()
         self.sort_all_graphs()
+        if add_attributes:
+            self.add_nodes_attributes()
         self.union_nodes = []
 
     def create_tax_trees(self):
@@ -45,21 +60,6 @@ class CreateMicrobiomeGraphs:
     #     # sort the node, so that every graph has the same order of graph.nodes()
     #     self.sort_all_graphs()
 
-    def create_graphs_with_common_nodes(self):
-        # old version of taxonomy tree format
-        self.create_tax_trees()
-        nodes_dict = self.find_common_nodes()
-        for graph in tqdm(self.graphs_list, desc='Add to graphs the common nodes set', total=len(self.graphs_list)):
-            nodes_and_values = graph.nodes()
-            nodes = [node_name for node_name, value in nodes_and_values]
-            for node_name in nodes_dict:
-                # if there is a node that exists in other graph but not in the current graph we want to add it
-                if node_name not in nodes:
-                    graph.add_node((node_name, 0.0))
-
-        # sort the node, so that every graph has the same order of graph.nodes()
-        self.sort_all_graphs()
-
     # def sort_all_graphs(self):
     #     temp_graph_list = []
     #     for graph in self.graphs_list:
@@ -80,10 +80,35 @@ class CreateMicrobiomeGraphs:
             temp_graph_list.append(temp_graph)
         self.graphs_list = temp_graph_list
 
-    def get_graphs_list(self, index):
+    def add_nodes_attributes(self):
+        logger = PrintLogger("MyLogger")
+        for graph in self.graphs_list:
+            features_meta = {
+                "general": FeatureMeta(GeneralCalculator, {"general"}),
+                "average_neighbor_degree": FeatureMeta(AverageNeighborDegreeCalculator, {"nd_avg"}),
+                "louvain": FeatureMeta(LouvainCalculator, {"lov"}),
+                "closeness_centrality": FeatureMeta(ClosenessCentralityCalculator, {"closeness"}),
+                "load_centrality": FeatureMeta(LoadCentralityCalculator, {"load"}),
+                "betweenness_centrality": FeatureMeta(BetweennessCentralityCalculator, {"betweenness"})
+            }
+
+            features = GraphFeatures(graph, features_meta, dir_path="stamdir", logger=logger)
+            features.build()
+            mx_dict = features.to_dict()
+            for node, graph_feature_matrix in mx_dict.items():
+                feature_matrix_0 = graph_feature_matrix.tolist()[0]  # the first row in graph_feature_matrix
+                for ind, feature in enumerate(feature_matrix_0):
+                    cur_feature_name = f"feature{ind}"
+                    graph.nodes[node][cur_feature_name] = feature  # add node attributes
+
+    def get_graph(self, index):
         return self.graphs_list[index]
 
     def get_vector_size(self):
+        nodes_features_dimension = len(list(self.graphs_list[0].nodes(data=True))[0][1])  # the length of features dict of the first node in the nodes of the first graph in graph list
+        return nodes_features_dimension
+
+    def nodes_number(self):
         nodes_number = []
         return_number = 0
         for g in self.graphs_list:
@@ -96,11 +121,10 @@ class CreateMicrobiomeGraphs:
 
     def get_values_on_nodes_ordered_by_nodes(self, gnx):
         nodes_and_values = gnx.nodes(data=True)
-        values = [value_dict['val'] for node, value_dict in nodes_and_values]
-        return values
+        values_matrix = [[feature_value for feature_name, feature_value in value_dict.items()] for node, value_dict in nodes_and_values]
+        return values_matrix
 
     # def get_values_on_nodes_ordered_by_nodes(self, gnx):
     #     nodes_and_values = gnx.nodes()
     #     values = [value for node_name, value in nodes_and_values]
     #     return values
-

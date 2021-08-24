@@ -9,22 +9,23 @@ from create_microbiome_graphs import CreateMicrobiomeGraphs
 
 
 class GraphDataset(Dataset):
-    def __init__(self, data_file_path, tag_file_path, mission, geometric_or_not=False):
+    def __init__(self, data_file_path, tag_file_path, mission, add_attributes, geometric_or_not=False):
         super(GraphDataset, self).__init__()
         # for dataset handling
         self.microbiome_dataset = MicrobiomeDataset(data_file_path, tag_file_path)
         microbiome_df = self.microbiome_dataset.microbiome_df
         # for graphs' creation
-        self.create_microbiome_graphs = CreateMicrobiomeGraphs(microbiome_df)
+        self.create_microbiome_graphs = CreateMicrobiomeGraphs(microbiome_df, add_attributes)
         self.samples_len = microbiome_df.shape[0]
         self.dataset_dict = {}
         self.mission = mission
         self.geometric_or_not = geometric_or_not
+        self.add_attributes = add_attributes
 
     def set_dataset_dict(self):
         dataset_dict = {}
         for i in range(self.samples_len):
-            graph = self.create_microbiome_graphs.get_graphs_list(i)
+            graph = self.create_microbiome_graphs.get_graph(i)
             if not self.geometric_or_not:
                 dataset_dict[i] = {'graph': graph,
                                    'label': self.microbiome_dataset.get_label(i),
@@ -33,7 +34,7 @@ class GraphDataset(Dataset):
                                    'adjacency_matrix': nx.adjacency_matrix(graph).todense()
                                    }
             else:
-                data = from_networkx(graph, group_node_attrs=['val'])  # Notice: convert file was changed explicitly
+                data = from_networkx(graph, group_node_attrs=['val'])  # Notice: convert file has been changed explicitly
                 data.y = torch.tensor(self.microbiome_dataset.get_label(i))
                 dataset_dict[i] = {'data': data}
         return dataset_dict
@@ -53,6 +54,9 @@ class GraphDataset(Dataset):
 
     def get_vector_size(self):
         return self.create_microbiome_graphs.get_vector_size()
+
+    def nodes_number(self):
+        return self.create_microbiome_graphs.nodes_number()
 
     def __len__(self):
         return self.samples_len

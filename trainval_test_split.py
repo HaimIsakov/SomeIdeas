@@ -14,6 +14,7 @@ class StratifiedGroupSplit:
         self.test_size = test_size
 
     def stratified_group_train_test_split(self):
+        # origin : https://stackoverflow.com/questions/56872664/complex-dataset-split-stratifiedgroupshufflesplit
         groups = self.tags_df[self.group].drop_duplicates()
         stratify = self.tags_df.drop_duplicates(self.group)[self.stratify_by].to_numpy()
         groups_train, groups_test = train_test_split(groups, stratify=stratify, test_size=self.test_size)
@@ -43,17 +44,17 @@ if __name__ == "__main__":
     # microbiome_df_path = os.path.join("GDM_split_dataset", "final_OTU_merged_Mucositis_Genus_after_mipmlp_eps_1.csv")
     # tags_df_path = os.path.join("GDM_split_dataset", "tag_gdm_file_final.csv")
 
-    # dataset_name = "Cirrhosis"
-    # microbiome_df_path = os.path.join("Cirrhosis_split_dataset", "OTU_Cirrhosis_after_mipmlp_Genus.csv")
-    # tags_df_path = os.path.join("Cirrhosis_split_dataset", "tag_healthy_cirrhosis_file.csv")
+    dataset_name = "Cirrhosis"
+    microbiome_df_path = os.path.join("Cirrhosis_split_dataset", "OTU_Cirrhosis_after_mipmlp_Genus_no_viruses.csv")
+    tags_df_path = os.path.join("Cirrhosis_split_dataset", "tag_healthy_cirrhosis_file.csv")
 
     # dataset_name = "IBD_split_dataset"
     # microbiome_df_path = os.path.join('IBD_split_dataset', 'OTU_IBD_after_mipmlp_Genus.csv')
     # tags_df_path = os.path.join('IBD_split_dataset', 'tag_ibd_file.csv')
-
-    dataset_name = "Black_vs_White_split_dataset"
-    microbiome_df_path = os.path.join('Black_vs_White_split_dataset', 'OTU_Black_vs_White_after_mipmlp_Genus_same_ids.csv')
-    tags_df_path = os.path.join('Black_vs_White_split_dataset', 'tag_bw_file.csv')
+    #
+    # dataset_name = "Black_vs_White_split_dataset"
+    # microbiome_df_path = os.path.join('Black_vs_White_split_dataset', 'OTU_Black_vs_White_after_mipmlp_Genus_same_ids.csv')
+    # tags_df_path = os.path.join('Black_vs_White_split_dataset', 'tag_bw_file.csv')
 
     microbiome_df = pd.read_csv(microbiome_df_path, index_col='ID')
     tags_df = pd.read_csv(tags_df_path, index_col='ID')  # ha

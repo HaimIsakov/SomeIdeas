@@ -7,6 +7,8 @@ from sklearn.model_selection import GroupShuffleSplit, GroupKFold
 from torch.utils.data import DataLoader
 import matplotlib.pyplot as plt
 import torch
+
+from ValuesAndGraphStructure.Models.graph_attention_layer import GraphAttentionLayer, GAT
 from train_test_val_one_time import TrainTestValOneTime
 from JustGraphStructure.Models.just_graph_structure import JustGraphStructure
 from JustValues.Models.just_values_fc_binary_classification import JustValuesOnNodes
@@ -20,7 +22,7 @@ TEST_JOB = 'test'
 
 
 class TrainTestValKTimes:
-    def __init__(self, RECEIVED_PARAMS, number_of_runs, device, train_val_dataset, test_dataset,
+    def __init__(self, RECEIVED_PARAMS, device, train_val_dataset, test_dataset,
                  result_directory_name, nni_flag=False, geometric_or_not=False):
         # self.mission = mission
         self.RECEIVED_PARAMS = RECEIVED_PARAMS
@@ -28,7 +30,6 @@ class TrainTestValKTimes:
         self.train_val_dataset = train_val_dataset
         self.test_dataset = test_dataset
         self.result_directory_name = result_directory_name
-        self.number_of_runs = number_of_runs
         self.nni_flag = nni_flag
         self.geometric_or_not = geometric_or_not
         # self.node_order = self.dataset.node_order
@@ -79,14 +80,14 @@ class TrainTestValKTimes:
         return date, directory_root
 
     def create_data_loaders(self, train_idx, val_idx):
-        batch_size = self.RECEIVED_PARAMS['batch_size']
+        batch_size = int(self.RECEIVED_PARAMS['batch_size'])
         if not self.geometric_or_not:
             # Datasets
             train_data = torch.utils.data.Subset(self.train_val_dataset, train_idx)
             val_data = torch.utils.data.Subset(self.train_val_dataset, val_idx)
             # Dataloader
             train_loader = torch.utils.data.DataLoader(train_data, shuffle=True, batch_size=batch_size)
-            val_loader = torch.utils.data.DataLoader(val_data, batch_size=batch_size, shuffle=False)
+            val_loader = torch.utils.data.DataLoader(val_data, batch_size=len(val_data), shuffle=False)
             # Notice that the test data is loaded as one unit.
             test_loader = torch.utils.data.DataLoader(self.test_dataset, batch_size=len(self.test_dataset), shuffle=False)
         else:
@@ -110,7 +111,15 @@ class TrainTestValKTimes:
                 model = JustGraphStructure(data_size, self.RECEIVED_PARAMS, self.device)
             elif self.train_val_dataset.mission == "GraphStructure&Values":
                 data_size = self.train_val_dataset.get_vector_size()
-                model = ValuesAndGraphStructure(data_size, self.RECEIVED_PARAMS, self.device)
+                nodes_number = self.train_val_dataset.nodes_number()
+                # model = ValuesAndGraphStructure(nodes_number, data_size, self.RECEIVED_PARAMS, self.device)
+                nfeat = data_size
+                nhid = 1
+                nclass = 1
+                dropout = 0.2
+                alpha = 0.2
+                nheads = 1
+                model = GAT(nodes_number, nfeat, nhid, nclass, dropout, alpha, nheads)
         else:
             data_size = self.train_val_dataset.get_vector_size()
             model = GCN(1, self.RECEIVED_PARAMS, self.device)

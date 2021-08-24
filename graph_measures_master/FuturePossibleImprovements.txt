@@ -1,0 +1,6 @@
+The following features can be accelerated using the existing C++ code, with some additions:
+    - betweenness centrality
+    - closeness centrality
+    - eccentricity
+    - load centrality
+

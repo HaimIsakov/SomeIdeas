@@ -1,4 +1,3 @@
-import copy
 import torch
 import torch.nn.functional as F
 from sklearn.metrics import roc_auc_score
@@ -57,7 +56,10 @@ class TrainTestValOneTime:
                 output = torch.sigmoid(output)
                 true_labels += target.tolist()
                 pred += output.squeeze(dim=1).tolist()
-        auc_result = roc_auc_score(true_labels, pred)
+        # if job != TRAIN_JOB:
+        #     auc_result = roc_auc_score(true_labels, [1 - i for i in pred])  # TODO: Change
+        # else:
+            auc_result = roc_auc_score(true_labels, pred)
         return auc_result
 
     def train(self):
@@ -91,7 +93,7 @@ class TrainTestValOneTime:
 
             average_train_loss, train_auc, val_loss, val_auc = self.record_evaluations(batched_train_loss)
             # early_training_results['train_auc'] = train_auc
-            if val_auc >= max_val_auc:
+            if val_auc > max_val_auc:
                 print(f"Validation AUC increased ({max_val_auc:.6f} --> {val_auc:.6f})")
                 max_val_auc = val_auc
                 counter = 0
@@ -271,8 +273,6 @@ class TrainTestValOneTime:
                 pred += output.squeeze(dim=1).tolist()
         auc_result = roc_auc_score(true_labels, pred)
         return auc_result
-
-
 
     #
     # def calc_weighs_for_loss(self):
