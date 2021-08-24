@@ -5,8 +5,8 @@ import torch
 from torch.nn import Linear
 import torch.nn.functional as F
 from torch_geometric.data import DataLoader
-from torch_geometric.nn import GCNConv, global_max_pool, GATConv
-from torch_geometric.nn import global_mean_pool
+# from torch_geometric.nn import GCNConv, global_max_pool, GATConv
+# from torch_geometric.nn import global_mean_pool
 from torch_geometric.utils import from_networkx
 from tqdm import tqdm
 

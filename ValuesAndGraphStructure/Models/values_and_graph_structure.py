@@ -39,11 +39,13 @@ class ValuesAndGraphStructure(nn.Module):
             x = F.relu(self.fc2(x))
         elif self.activation_func == 'elu':
             x = F.elu(self.pre_weighting(x))
+            x = x.squeeze()
             x = F.elu(self.fc1(x))
             x = self.dropout(x)
             x = F.elu(self.fc2(x))
         elif self.activation_func == 'tanh':
             x = torch.tanh(self.pre_weighting(x))
+            x = x.squeeze()
             x = torch.tanh(self.fc1(x))
             x = self.dropout(x)
             x = torch.tanh(self.fc2(x))

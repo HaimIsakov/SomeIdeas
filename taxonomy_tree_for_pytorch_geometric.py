@@ -6,8 +6,8 @@ import math
 import pandas
 import networkx as nx
 import pandas as pd
-from torch_geometric.data import DataLoader
-from torch_geometric.utils.convert import from_networkx
+# from torch_geometric.data import DataLoader
+# from torch_geometric.utils.convert import from_networkx
 from tqdm import tqdm
 
 """

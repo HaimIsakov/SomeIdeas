@@ -21,6 +21,7 @@ TRAIN_JOB = 'train'
 TEST_JOB = 'test'
 
 
+
 class TrainTestValKTimes:
     def __init__(self, RECEIVED_PARAMS, device, train_val_dataset, test_dataset,
                  result_directory_name, nni_flag=False, geometric_or_not=False):
@@ -108,18 +109,19 @@ class TrainTestValKTimes:
                 model = JustValuesOnNodes(data_size, self.RECEIVED_PARAMS)
             elif self.train_val_dataset.mission == "JustGraphStructure":
                 data_size = self.train_val_dataset.get_vector_size()
-                model = JustGraphStructure(data_size, self.RECEIVED_PARAMS, self.device)
+                nodes_number = self.train_val_dataset.nodes_number()
+                model = JustGraphStructure(nodes_number, data_size, self.RECEIVED_PARAMS, self.device)
             elif self.train_val_dataset.mission == "GraphStructure&Values":
                 data_size = self.train_val_dataset.get_vector_size()
                 nodes_number = self.train_val_dataset.nodes_number()
-                # model = ValuesAndGraphStructure(nodes_number, data_size, self.RECEIVED_PARAMS, self.device)
+                model = ValuesAndGraphStructure(nodes_number, data_size, self.RECEIVED_PARAMS, self.device)
                 nfeat = data_size
                 nhid = 1
                 nclass = 1
                 dropout = 0.2
                 alpha = 0.2
                 nheads = 1
-                model = GAT(nodes_number, nfeat, nhid, nclass, dropout, alpha, nheads)
+                # model = GAT(nodes_number, nfeat, nhid, nclass, dropout, alpha, nheads)
         else:
             data_size = self.train_val_dataset.get_vector_size()
             model = GCN(1, self.RECEIVED_PARAMS, self.device)

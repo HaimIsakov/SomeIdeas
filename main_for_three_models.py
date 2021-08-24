@@ -1,10 +1,9 @@
-import argparse
 import os
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
 os.environ["CUDA_VISIBLE_DEVICES"] = "0,1,2,3"
 import pandas as pd
 import numpy
-
+import argparse
 import json
 import logging
 import csv
@@ -148,10 +147,15 @@ def prepare_datasets_from_maim(train_data_file_path, train_tag_file_path, test_d
     test_dataset.update_graphs()
     return train_val_dataset, test_dataset
 
-def main(dataset_name, mission_number, nni_flag, pytorch_geometric_mode, cuda_number, add_attributes, RECEIVED_PARAMS):
+def main(dataset_name, mission_number, nni_flag, pytorch_geometric_mode, cuda_number, add_attributes):
     train_data_file_path, train_tag_file_path, test_data_file_path, test_tag_file_path = datasets_menu(dataset_name)
     directory_name, mission, params_file_path = tasks_menu(mission_number)
     result_directory_name = os.path.join(directory_name, "Result_After_Proposal")
+
+    if nni_flag:
+        RECEIVED_PARAMS = nni.get_next_parameter()
+    else:
+        RECEIVED_PARAMS = load_params_file(params_file_path)
 
     device = f"cuda:{cuda_number}" if torch.cuda.is_available() else "cpu"
     print("device", device)
@@ -187,8 +191,7 @@ def results_dealing(val_metric, test_metric, nni_flag, RECEIVED_PARAMS, result_f
         for key, value in RECEIVED_PARAMS.items():
             writer.writerow([key, value])
         f.close()
-    print("\n \nMean Validation Set AUC: ", mean_val_metric, " +- ", std_val_metric)
-    print("Mean Test Set AUC: ", mean_test_metric, " +- ", std_test_metric)
+
 
 def run_again_from_nni_results_csv(file, n_rows=10):
     result_df = pd.read_csv(file, header=0)
@@ -216,39 +219,37 @@ if __name__ == '__main__':
     add_attributes = False
     try:
 
-        nni_result_file = os.path.join("nni_results", "bw", "bw_nni_just_values.csv")
-        params_list = run_again_from_nni_results_csv(nni_result_file, n_rows=10)
-        dataset_name = "bw"
-        mission_number = 3
-        nni_flag = False
-        pytorch_geometric_mode = False
-        result_file_name = "bw_nni_graph_and_values"
-        for RECEIVED_PARAMS in params_list:
-            val_metric, test_metric = \
-                main(dataset_name, mission_number, nni_flag, pytorch_geometric_mode, cuda_number, add_attributes,
-                     RECEIVED_PARAMS)
-            results_dealing(val_metric, test_metric, nni_flag, RECEIVED_PARAMS, result_file_name)
-
-        # if nni_flag:
-        #     RECEIVED_PARAMS = nni.get_next_parameter()
-        # else:
-        #     RECEIVED_PARAMS = load_params_file(params_file_path)
-
-        # if mission_number == 4:
-        #     pytorch_geometric_mode = True
-
-        # if dataset_name == 'all':
-        #     for dataset in datasets_dict:
-        #         val_metric, test_metric = \
-        #             main(dataset, mission_number, nni_flag, pytorch_geometric_mode, cuda_number, add_attributes,
-        #             RECEIVED_PARAMS)
-        #         results_dealing(val_metric, test_metric, nni_flag, RECEIVED_PARAMS, result_file_name)
-        # else:
+        # nni_result_file = os.path.join("nni_results", "bw", "bw_nni_just_values.csv")
+        # params_list = run_again_from_nni_results_csv(nni_result_file, n_rows=10)
+        # dataset_name = "bw"
+        # mission_number = 3
+        # nni_flag = False
+        # pytorch_geometric_mode = False
+        # result_file_name = "bw_nni_graph_and_values"
+        # for RECEIVED_PARAMS in params_list:
         #     val_metric, test_metric = \
         #         main(dataset_name, mission_number, nni_flag, pytorch_geometric_mode, cuda_number, add_attributes,
-        #         RECEIVED_PARAMS)
+        #              RECEIVED_PARAMS)
         #     results_dealing(val_metric, test_metric, nni_flag, RECEIVED_PARAMS, result_file_name)
+        if mission_number == 4:
+            pytorch_geometric_mode = True
 
+        if dataset_name == 'all':
+            for dataset in datasets_dict:
+                val_metric, test_metric = \
+                    main(dataset, mission_number, nni_flag, pytorch_geometric_mode, cuda_number, add_attributes)
+                # results_dealing(val_metric, test_metric, nni_flag, RECEIVED_PARAMS, result_file_name)
+        else:
+            val_metric, test_metric = main(dataset_name, mission_number, nni_flag, pytorch_geometric_mode, cuda_number, add_attributes)
+            # results_dealing(val_metric, test_metric, nni_flag, RECEIVED_PARAMS, result_file_name)
+
+        mean_val_metric = np.average(val_metric)
+        std_val_metric = np.std(val_metric)
+        mean_test_metric = np.average(test_metric)
+        std_test_metric = np.std(test_metric)
+
+        print("\n \nMean Validation Set AUC: ", mean_val_metric, " +- ", std_val_metric)
+        print("Mean Test Set AUC: ", mean_test_metric, " +- ", std_test_metric)
     except Exception as e:
         LOG.exception(e)
         raise

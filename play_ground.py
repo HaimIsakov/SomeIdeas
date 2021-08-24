@@ -1,23 +1,23 @@
 import numpy as np
 
-from graph_measures_master.features_algorithms.vertices.average_neighbor_degree import AverageNeighborDegreeCalculator
-from graph_measures_master.features_algorithms.vertices.closeness_centrality import ClosenessCentralityCalculator
-from graph_measures_master.features_algorithms.vertices.communicability_betweenness_centrality import \
+from graph_measures.features_algorithms.vertices.average_neighbor_degree import AverageNeighborDegreeCalculator
+from graph_measures.features_algorithms.vertices.closeness_centrality import ClosenessCentralityCalculator
+from graph_measures.features_algorithms.vertices.communicability_betweenness_centrality import \
     CommunicabilityBetweennessCentralityCalculator
-from graph_measures_master.features_algorithms.vertices.general import GeneralCalculator
-from graph_measures_master.features_algorithms.vertices.load_centrality import LoadCentralityCalculator
-from graph_measures_master.features_infra.feature_calculators import FeatureMeta
-from graph_measures_master.loggers import PrintLogger
+from graph_measures.features_algorithms.vertices.general import GeneralCalculator
+from graph_measures.features_algorithms.vertices.load_centrality import LoadCentralityCalculator
+from graph_measures.features_infra.feature_calculators import FeatureMeta
+from graph_measures.loggers import PrintLogger
 from taxonomy_tree_for_pytorch_geometric import create_tax_tree
 import os
 import pandas as pd
 from torch_geometric.data import DataLoader
 from torch_geometric.utils.convert import from_networkx
 from tqdm import tqdm
-from graph_measures_master.features_infra.graph_features import GraphFeatures
+from graph_measures.features_infra.graph_features import GraphFeatures
 
-from graph_measures_master.features_algorithms.vertices.louvain import LouvainCalculator
-from graph_measures_master.features_algorithms.vertices.betweenness_centrality import BetweennessCentralityCalculator
+from graph_measures.features_algorithms.vertices.louvain import LouvainCalculator
+from graph_measures.features_algorithms.vertices.betweenness_centrality import BetweennessCentralityCalculator
 
 if __name__ == '__main__':
     # data_file_path = os.path.join('Cirrhosis_split_dataset', 'train_val_set_Cirrhosis_microbiome.csv')
