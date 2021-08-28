@@ -20,8 +20,6 @@ AUC_PLOT = 'auc'
 TRAIN_JOB = 'train'
 TEST_JOB = 'test'
 
-
-
 class TrainTestValKTimes:
     def __init__(self, RECEIVED_PARAMS, device, train_val_dataset, test_dataset,
                  result_directory_name, nni_flag=False, geometric_or_not=False):
@@ -36,15 +34,17 @@ class TrainTestValKTimes:
         # self.node_order = self.dataset.node_order
 
     def train_group_k_cross_validation(self, k=5):
-        train_frac = self.RECEIVED_PARAMS['train_frac']
-        val_frac = self.RECEIVED_PARAMS['test_frac']
+        train_frac = float(self.RECEIVED_PARAMS['train_frac'])
+        val_frac = float(self.RECEIVED_PARAMS['test_frac'])
 
-        val_metric, test_metric = [], []
-        # gss_train_val = GroupShuffleSplit(n_splits=k, train_size=0.80)
-        gss_train_val = GroupKFold(n_splits=k)
+        train_metric, val_metric, test_metric, min_train_val_metric = [], [], [], []
+        gss_train_val = GroupShuffleSplit(n_splits=k, train_size=0.75)
+        # gss_train_val = GroupKFold(n_splits=k)
         run = 0
         for train_idx, val_idx in gss_train_val.split(self.train_val_dataset, groups=self.train_val_dataset.get_all_groups()):
             print(f"Run {run}")
+            print("len of train set:", len(train_idx))
+            print("len of val set:", len(val_idx))
             if run == 0 and not self.nni_flag:
                 date, directory_root = self.create_directory_to_save_results()
 
@@ -58,7 +58,9 @@ class TrainTestValKTimes:
                 early_stopping_results = trainer_and_tester.train_geometric()
             min_val_train_auc = min(early_stopping_results['val_auc'], early_stopping_results['train_auc'])
             print("Minimum Validation and Train Auc", min_val_train_auc)
-            val_metric.append(min_val_train_auc)  # the minimum between the aucs between train set and validation set
+            min_train_val_metric.append(min_val_train_auc)  # the minimum between the aucs between train set and validation set
+            train_metric.append(early_stopping_results['train_auc'])
+            val_metric.append(early_stopping_results['val_auc'])
             test_metric.append(early_stopping_results['test_auc'])
             if not self.nni_flag:
                 os.mkdir(os.path.join(directory_root, f"Run{run}"))
@@ -67,7 +69,7 @@ class TrainTestValKTimes:
                 f.close()
                 self.plot_acc_loss_auc(root, date, trainer_and_tester)
             run += 1
-        return val_metric, test_metric
+        return train_metric, val_metric, test_metric, min_train_val_metric
 
     def create_directory_to_save_results(self):
         root = self.result_directory_name
@@ -91,6 +93,8 @@ class TrainTestValKTimes:
             val_loader = torch.utils.data.DataLoader(val_data, batch_size=len(val_data), shuffle=False)
             # Notice that the test data is loaded as one unit.
             test_loader = torch.utils.data.DataLoader(self.test_dataset, batch_size=len(self.test_dataset), shuffle=False)
+            print("train loader size:", len(train_loader))
+            print("val loader size:", len(val_loader))
         else:
             # Datasets
             train_data = torch.utils.data.Subset(self.train_val_dataset, train_idx)

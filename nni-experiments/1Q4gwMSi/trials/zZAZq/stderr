@@ -1,0 +1,18 @@
+Traceback (most recent call last):
+  File "main_for_three_models.py", line 14, in <module>
+    from GraphDataset import GraphDataset
+  File "/home/dsi/haimisakov/NeuralNetworksAfterProposalLab/GraphDataset.py", line 5, in <module>
+    from torch_geometric.utils import from_networkx
+  File "/home/dsi/haimisakov/anaconda3/envs/qgcn/lib/python3.8/site-packages/torch_geometric/__init__.py", line 5, in <module>
+    import torch_geometric.data
+  File "/home/dsi/haimisakov/anaconda3/envs/qgcn/lib/python3.8/site-packages/torch_geometric/data/__init__.py", line 1, in <module>
+    from .data import Data
+  File "/home/dsi/haimisakov/anaconda3/envs/qgcn/lib/python3.8/site-packages/torch_geometric/data/data.py", line 8, in <module>
+    from torch_sparse import coalesce, SparseTensor
+  File "/home/dsi/haimisakov/anaconda3/envs/qgcn/lib/python3.8/site-packages/torch_sparse/__init__.py", line 14, in <module>
+    torch.ops.load_library(importlib.machinery.PathFinder().find_spec(
+  File "/home/dsi/haimisakov/anaconda3/envs/qgcn/lib/python3.8/site-packages/torch/_ops.py", line 104, in load_library
+    ctypes.CDLL(path)
+  File "/home/dsi/haimisakov/anaconda3/envs/qgcn/lib/python3.8/ctypes/__init__.py", line 381, in __init__
+    self._handle = _dlopen(self._name, mode)
+OSError: libtorch_cuda_cu.so: cannot open shared object file: No such file or directory

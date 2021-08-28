@@ -1,0 +1,721 @@
+[2021-08-27 14:53:07] PRINT Dataset: cirrhosis
+[2021-08-27 14:53:07] PRINT Mission: GraphStructure&Values
+[2021-08-27 14:53:07] PRINT device cuda:0
+[2021-08-27 14:53:07] PRINT Train Graphs
+[2021-08-27 14:53:14] PRINT Test Graphs
+[2021-08-27 14:53:17] PRINT Run 0
+[2021-08-27 14:53:26] PRINT Validation AUC increased (0.000000 --> 0.533333)
+[2021-08-27 14:53:26] PRINT [0/200] train_loss: 0.702715218 train_auc: 0.561111111 valid_loss: 0.695015 valid_auc: 0.533333
+[2021-08-27 14:53:28] PRINT Validation AUC increased (0.533333 --> 0.566667)
+[2021-08-27 14:53:28] PRINT [1/200] train_loss: 0.692631632 train_auc: 0.622685185 valid_loss: 0.693308 valid_auc: 0.566667
+[2021-08-27 14:53:30] PRINT Validation AUC increased (0.566667 --> 0.666667)
+[2021-08-27 14:53:30] PRINT [2/200] train_loss: 0.686086297 train_auc: 0.688888889 valid_loss: 0.690954 valid_auc: 0.666667
+[2021-08-27 14:53:33] PRINT Validation AUC increased (0.666667 --> 0.700000)
+[2021-08-27 14:53:33] PRINT [3/200] train_loss: 0.690619260 train_auc: 0.731944444 valid_loss: 0.688462 valid_auc: 0.700000
+[2021-08-27 14:53:35] PRINT Early-Stopping counter: 1 out of 20
+[2021-08-27 14:53:35] PRINT [4/200] train_loss: 0.692066729 train_auc: 0.762037037 valid_loss: 0.684947 valid_auc: 0.700000
+[2021-08-27 14:53:36] PRINT Early-Stopping counter: 2 out of 20
+[2021-08-27 14:53:36] PRINT [5/200] train_loss: 0.685350299 train_auc: 0.782870370 valid_loss: 0.682238 valid_auc: 0.700000
+[2021-08-27 14:53:37] PRINT Early-Stopping counter: 3 out of 20
+[2021-08-27 14:53:37] PRINT [6/200] train_loss: 0.685137957 train_auc: 0.795833333 valid_loss: 0.680134 valid_auc: 0.700000
+[2021-08-27 14:53:39] PRINT Validation AUC increased (0.700000 --> 0.733333)
+[2021-08-27 14:53:39] PRINT [7/200] train_loss: 0.681962490 train_auc: 0.811574074 valid_loss: 0.678782 valid_auc: 0.733333
+[2021-08-27 14:53:40] PRINT Early-Stopping counter: 1 out of 20
+[2021-08-27 14:53:40] PRINT [8/200] train_loss: 0.679196864 train_auc: 0.814351852 valid_loss: 0.675933 valid_auc: 0.733333
+[2021-08-27 14:53:42] PRINT Early-Stopping counter: 2 out of 20
+[2021-08-27 14:53:42] PRINT [9/200] train_loss: 0.676606357 train_auc: 0.829166667 valid_loss: 0.674631 valid_auc: 0.733333
+[2021-08-27 14:53:44] PRINT Validation AUC increased (0.733333 --> 0.766667)
+[2021-08-27 14:53:44] PRINT [10/200] train_loss: 0.672283262 train_auc: 0.837037037 valid_loss: 0.672826 valid_auc: 0.766667
+[2021-08-27 14:53:46] PRINT Early-Stopping counter: 1 out of 20
+[2021-08-27 14:53:46] PRINT [11/200] train_loss: 0.674646318 train_auc: 0.843981481 valid_loss: 0.670889 valid_auc: 0.766667
+[2021-08-27 14:53:48] PRINT Early-Stopping counter: 2 out of 20
+[2021-08-27 14:53:48] PRINT [12/200] train_loss: 0.677263677 train_auc: 0.853240741 valid_loss: 0.669878 valid_auc: 0.766667
+[2021-08-27 14:53:50] PRINT Early-Stopping counter: 3 out of 20
+[2021-08-27 14:53:50] PRINT [13/200] train_loss: 0.671060413 train_auc: 0.858796296 valid_loss: 0.668234 valid_auc: 0.766667
+[2021-08-27 14:53:51] PRINT Early-Stopping counter: 4 out of 20
+[2021-08-27 14:53:51] PRINT [14/200] train_loss: 0.663171828 train_auc: 0.857870370 valid_loss: 0.666248 valid_auc: 0.766667
+[2021-08-27 14:53:52] PRINT Validation AUC increased (0.766667 --> 0.800000)
+[2021-08-27 14:53:52] PRINT [15/200] train_loss: 0.674085677 train_auc: 0.868518519 valid_loss: 0.664888 valid_auc: 0.800000
+[2021-08-27 14:53:53] PRINT Early-Stopping counter: 1 out of 20
+[2021-08-27 14:53:53] PRINT [16/200] train_loss: 0.673096597 train_auc: 0.875925926 valid_loss: 0.663743 valid_auc: 0.800000
+[2021-08-27 14:53:55] PRINT Early-Stopping counter: 2 out of 20
+[2021-08-27 14:53:55] PRINT [17/200] train_loss: 0.667043209 train_auc: 0.880092593 valid_loss: 0.662642 valid_auc: 0.800000
+[2021-08-27 14:53:56] PRINT Early-Stopping counter: 3 out of 20
+[2021-08-27 14:53:56] PRINT [18/200] train_loss: 0.658555031 train_auc: 0.881018519 valid_loss: 0.660390 valid_auc: 0.800000
+[2021-08-27 14:53:58] PRINT Early-Stopping counter: 4 out of 20
+[2021-08-27 14:53:58] PRINT [19/200] train_loss: 0.663968265 train_auc: 0.885185185 valid_loss: 0.658777 valid_auc: 0.800000
+[2021-08-27 14:54:00] PRINT Early-Stopping counter: 5 out of 20
+[2021-08-27 14:54:00] PRINT [20/200] train_loss: 0.655361742 train_auc: 0.888888889 valid_loss: 0.656241 valid_auc: 0.800000
+[2021-08-27 14:54:01] PRINT Early-Stopping counter: 6 out of 20
+[2021-08-27 14:54:01] PRINT [21/200] train_loss: 0.657723457 train_auc: 0.886574074 valid_loss: 0.653719 valid_auc: 0.800000
+[2021-08-27 14:54:03] PRINT Early-Stopping counter: 7 out of 20
+[2021-08-27 14:54:03] PRINT [22/200] train_loss: 0.659859419 train_auc: 0.892592593 valid_loss: 0.651923 valid_auc: 0.800000
+[2021-08-27 14:54:05] PRINT Early-Stopping counter: 8 out of 20
+[2021-08-27 14:54:05] PRINT [23/200] train_loss: 0.645016819 train_auc: 0.896296296 valid_loss: 0.649334 valid_auc: 0.800000
+[2021-08-27 14:54:07] PRINT Early-Stopping counter: 9 out of 20
+[2021-08-27 14:54:07] PRINT [24/200] train_loss: 0.656314701 train_auc: 0.893981481 valid_loss: 0.647217 valid_auc: 0.800000
+[2021-08-27 14:54:08] PRINT Early-Stopping counter: 10 out of 20
+[2021-08-27 14:54:08] PRINT [25/200] train_loss: 0.645794749 train_auc: 0.894907407 valid_loss: 0.645043 valid_auc: 0.800000
+[2021-08-27 14:54:10] PRINT Early-Stopping counter: 11 out of 20
+[2021-08-27 14:54:10] PRINT [26/200] train_loss: 0.633108914 train_auc: 0.899074074 valid_loss: 0.642254 valid_auc: 0.800000
+[2021-08-27 14:54:12] PRINT Early-Stopping counter: 12 out of 20
+[2021-08-27 14:54:12] PRINT [27/200] train_loss: 0.632559150 train_auc: 0.902314815 valid_loss: 0.639392 valid_auc: 0.800000
+[2021-08-27 14:54:13] PRINT Early-Stopping counter: 13 out of 20
+[2021-08-27 14:54:13] PRINT [28/200] train_loss: 0.622087300 train_auc: 0.905092593 valid_loss: 0.636354 valid_auc: 0.800000
+[2021-08-27 14:54:14] PRINT Early-Stopping counter: 14 out of 20
+[2021-08-27 14:54:14] PRINT [29/200] train_loss: 0.638783336 train_auc: 0.908333333 valid_loss: 0.634218 valid_auc: 0.800000
+[2021-08-27 14:54:16] PRINT Early-Stopping counter: 15 out of 20
+[2021-08-27 14:54:16] PRINT [30/200] train_loss: 0.626316547 train_auc: 0.908796296 valid_loss: 0.631555 valid_auc: 0.800000
+[2021-08-27 14:54:17] PRINT Early-Stopping counter: 16 out of 20
+[2021-08-27 14:54:17] PRINT [31/200] train_loss: 0.628072709 train_auc: 0.907870370 valid_loss: 0.628586 valid_auc: 0.800000
+[2021-08-27 14:54:19] PRINT Early-Stopping counter: 17 out of 20
+[2021-08-27 14:54:19] PRINT [32/200] train_loss: 0.617718846 train_auc: 0.908333333 valid_loss: 0.625741 valid_auc: 0.800000
+[2021-08-27 14:54:21] PRINT Early-Stopping counter: 18 out of 20
+[2021-08-27 14:54:21] PRINT [33/200] train_loss: 0.619964212 train_auc: 0.907407407 valid_loss: 0.623456 valid_auc: 0.800000
+[2021-08-27 14:54:23] PRINT Early-Stopping counter: 19 out of 20
+[2021-08-27 14:54:23] PRINT [34/200] train_loss: 0.616269052 train_auc: 0.904166667 valid_loss: 0.622725 valid_auc: 0.800000
+[2021-08-27 14:54:25] PRINT Early-Stopping counter: 20 out of 20
+[2021-08-27 14:54:25] PRINT [35/200] train_loss: 0.623430789 train_auc: 0.904166667 valid_loss: 0.621957 valid_auc: 0.800000
+[2021-08-27 14:54:26] PRINT Early stopping
+[2021-08-27 14:54:27] PRINT Minimum Validation and Train Auc 0.8
+[2021-08-27 14:54:27] PRINT Run 1
+[2021-08-27 14:54:28] PRINT Validation AUC increased (0.000000 --> 0.785714)
+[2021-08-27 14:54:28] PRINT [0/200] train_loss: 0.703672916 train_auc: 0.635522664 valid_loss: 0.674266 valid_auc: 0.785714
+[2021-08-27 14:54:30] PRINT Early-Stopping counter: 1 out of 20
+[2021-08-27 14:54:30] PRINT [1/200] train_loss: 0.693796337 train_auc: 0.678075856 valid_loss: 0.675065 valid_auc: 0.785714
+[2021-08-27 14:54:31] PRINT Early-Stopping counter: 2 out of 20
+[2021-08-27 14:54:31] PRINT [2/200] train_loss: 0.685423493 train_auc: 0.710915819 valid_loss: 0.673059 valid_auc: 0.785714
+[2021-08-27 14:54:33] PRINT Early-Stopping counter: 3 out of 20
+[2021-08-27 14:54:33] PRINT [3/200] train_loss: 0.692309946 train_auc: 0.740980574 valid_loss: 0.673374 valid_auc: 0.785714
+[2021-08-27 14:54:34] PRINT Validation AUC increased (0.785714 --> 0.892857)
+[2021-08-27 14:54:34] PRINT [4/200] train_loss: 0.690150470 train_auc: 0.769657724 valid_loss: 0.675185 valid_auc: 0.892857
+[2021-08-27 14:54:35] PRINT Early-Stopping counter: 1 out of 20
+[2021-08-27 14:54:35] PRINT [5/200] train_loss: 0.688599944 train_auc: 0.802960222 valid_loss: 0.678559 valid_auc: 0.892857
+[2021-08-27 14:54:36] PRINT Validation AUC increased (0.892857 --> 0.964286)
+[2021-08-27 14:54:36] PRINT [6/200] train_loss: 0.688754976 train_auc: 0.822849214 valid_loss: 0.677849 valid_auc: 0.964286
+[2021-08-27 14:54:38] PRINT Early-Stopping counter: 1 out of 20
+[2021-08-27 14:54:38] PRINT [7/200] train_loss: 0.682309806 train_auc: 0.833024977 valid_loss: 0.676400 valid_auc: 0.964286
+[2021-08-27 14:54:39] PRINT Validation AUC increased (0.964286 --> 1.000000)
+[2021-08-27 14:54:39] PRINT [8/200] train_loss: 0.678320378 train_auc: 0.835337650 valid_loss: 0.671192 valid_auc: 1.000000
+[2021-08-27 14:54:41] PRINT Early-Stopping counter: 1 out of 20
+[2021-08-27 14:54:41] PRINT [9/200] train_loss: 0.683960795 train_auc: 0.845050879 valid_loss: 0.672079 valid_auc: 1.000000
+[2021-08-27 14:54:43] PRINT Early-Stopping counter: 2 out of 20
+[2021-08-27 14:54:43] PRINT [10/200] train_loss: 0.681837171 train_auc: 0.852913969 valid_loss: 0.669548 valid_auc: 1.000000
+[2021-08-27 14:54:45] PRINT Early-Stopping counter: 3 out of 20
+[2021-08-27 14:54:45] PRINT [11/200] train_loss: 0.685714066 train_auc: 0.867252544 valid_loss: 0.673522 valid_auc: 1.000000
+[2021-08-27 14:54:46] PRINT Early-Stopping counter: 4 out of 20
+[2021-08-27 14:54:46] PRINT [12/200] train_loss: 0.684489399 train_auc: 0.876503238 valid_loss: 0.674995 valid_auc: 1.000000
+[2021-08-27 14:54:47] PRINT Early-Stopping counter: 5 out of 20
+[2021-08-27 14:54:47] PRINT [13/200] train_loss: 0.682696760 train_auc: 0.885291397 valid_loss: 0.677425 valid_auc: 1.000000
+[2021-08-27 14:54:48] PRINT Early-Stopping counter: 6 out of 20
+[2021-08-27 14:54:48] PRINT [14/200] train_loss: 0.678729653 train_auc: 0.888066605 valid_loss: 0.679596 valid_auc: 1.000000
+[2021-08-27 14:54:50] PRINT Early-Stopping counter: 7 out of 20
+[2021-08-27 14:54:50] PRINT [15/200] train_loss: 0.678471327 train_auc: 0.889916744 valid_loss: 0.678491 valid_auc: 1.000000
+[2021-08-27 14:54:52] PRINT Early-Stopping counter: 8 out of 20
+[2021-08-27 14:54:52] PRINT [16/200] train_loss: 0.666503668 train_auc: 0.887141536 valid_loss: 0.673911 valid_auc: 1.000000
+[2021-08-27 14:54:54] PRINT Early-Stopping counter: 9 out of 20
+[2021-08-27 14:54:54] PRINT [17/200] train_loss: 0.671617717 train_auc: 0.888066605 valid_loss: 0.673203 valid_auc: 1.000000
+[2021-08-27 14:54:55] PRINT Early-Stopping counter: 10 out of 20
+[2021-08-27 14:54:55] PRINT [18/200] train_loss: 0.668760598 train_auc: 0.890379278 valid_loss: 0.671270 valid_auc: 1.000000
+[2021-08-27 14:54:56] PRINT Early-Stopping counter: 11 out of 20
+[2021-08-27 14:54:56] PRINT [19/200] train_loss: 0.671695352 train_auc: 0.892691952 valid_loss: 0.670557 valid_auc: 1.000000
+[2021-08-27 14:54:58] PRINT Early-Stopping counter: 12 out of 20
+[2021-08-27 14:54:58] PRINT [20/200] train_loss: 0.667853028 train_auc: 0.889916744 valid_loss: 0.664850 valid_auc: 1.000000
+[2021-08-27 14:55:00] PRINT Early-Stopping counter: 13 out of 20
+[2021-08-27 14:55:00] PRINT [21/200] train_loss: 0.671913356 train_auc: 0.891304348 valid_loss: 0.664310 valid_auc: 1.000000
+[2021-08-27 14:55:01] PRINT Early-Stopping counter: 14 out of 20
+[2021-08-27 14:55:01] PRINT [22/200] train_loss: 0.661077589 train_auc: 0.892229417 valid_loss: 0.663131 valid_auc: 1.000000
+[2021-08-27 14:55:03] PRINT Early-Stopping counter: 15 out of 20
+[2021-08-27 14:55:03] PRINT [23/200] train_loss: 0.667609900 train_auc: 0.895004625 valid_loss: 0.663247 valid_auc: 1.000000
+[2021-08-27 14:55:04] PRINT Early-Stopping counter: 16 out of 20
+[2021-08-27 14:55:04] PRINT [24/200] train_loss: 0.659590065 train_auc: 0.889916744 valid_loss: 0.659442 valid_auc: 1.000000
+[2021-08-27 14:55:06] PRINT Early-Stopping counter: 17 out of 20
+[2021-08-27 14:55:06] PRINT [25/200] train_loss: 0.661300629 train_auc: 0.894079556 valid_loss: 0.659974 valid_auc: 1.000000
+[2021-08-27 14:55:07] PRINT Early-Stopping counter: 18 out of 20
+[2021-08-27 14:55:07] PRINT [26/200] train_loss: 0.660593003 train_auc: 0.891766883 valid_loss: 0.655760 valid_auc: 1.000000
+[2021-08-27 14:55:09] PRINT Early-Stopping counter: 19 out of 20
+[2021-08-27 14:55:09] PRINT [27/200] train_loss: 0.663339436 train_auc: 0.891766883 valid_loss: 0.653617 valid_auc: 1.000000
+[2021-08-27 14:55:11] PRINT Early-Stopping counter: 20 out of 20
+[2021-08-27 14:55:11] PRINT [28/200] train_loss: 0.654773355 train_auc: 0.894542091 valid_loss: 0.653147 valid_auc: 1.000000
+[2021-08-27 14:55:13] PRINT Early stopping
+[2021-08-27 14:55:14] PRINT Minimum Validation and Train Auc 0.8353376503237743
+[2021-08-27 14:55:14] PRINT Run 2
+[2021-08-27 14:55:16] PRINT Validation AUC increased (0.000000 --> 0.333333)
+[2021-08-27 14:55:16] PRINT [0/200] train_loss: 0.697489083 train_auc: 0.317592593 valid_loss: 0.691624 valid_auc: 0.333333
+[2021-08-27 14:55:17] PRINT Early-Stopping counter: 1 out of 20
+[2021-08-27 14:55:17] PRINT [1/200] train_loss: 0.691515535 train_auc: 0.372222222 valid_loss: 0.689961 valid_auc: 0.333333
+[2021-08-27 14:55:18] PRINT Validation AUC increased (0.333333 --> 0.466667)
+[2021-08-27 14:55:18] PRINT [2/200] train_loss: 0.692532122 train_auc: 0.440740741 valid_loss: 0.689556 valid_auc: 0.466667
+[2021-08-27 14:55:20] PRINT Early-Stopping counter: 1 out of 20
+[2021-08-27 14:55:20] PRINT [3/200] train_loss: 0.717375815 train_auc: 0.374074074 valid_loss: 0.691953 valid_auc: 0.333333
+[2021-08-27 14:55:22] PRINT Early-Stopping counter: 2 out of 20
+[2021-08-27 14:55:22] PRINT [4/200] train_loss: 0.699851155 train_auc: 0.387037037 valid_loss: 0.693532 valid_auc: 0.400000
+[2021-08-27 14:55:24] PRINT Early-Stopping counter: 3 out of 20
+[2021-08-27 14:55:24] PRINT [5/200] train_loss: 0.694359660 train_auc: 0.416203704 valid_loss: 0.693040 valid_auc: 0.433333
+[2021-08-27 14:55:25] PRINT Early-Stopping counter: 4 out of 20
+[2021-08-27 14:55:25] PRINT [6/200] train_loss: 0.694060385 train_auc: 0.496296296 valid_loss: 0.689849 valid_auc: 0.433333
+[2021-08-27 14:55:27] PRINT Validation AUC increased (0.466667 --> 0.466667)
+[2021-08-27 14:55:27] PRINT [7/200] train_loss: 0.691749066 train_auc: 0.517129630 valid_loss: 0.689516 valid_auc: 0.466667
+[2021-08-27 14:55:28] PRINT Validation AUC increased (0.466667 --> 0.533333)
+[2021-08-27 14:55:28] PRINT [8/200] train_loss: 0.684751809 train_auc: 0.544444444 valid_loss: 0.688943 valid_auc: 0.533333
+[2021-08-27 14:55:29] PRINT Early-Stopping counter: 1 out of 20
+[2021-08-27 14:55:29] PRINT [9/200] train_loss: 0.694363743 train_auc: 0.566203704 valid_loss: 0.688765 valid_auc: 0.533333
+[2021-08-27 14:55:30] PRINT Validation AUC increased (0.533333 --> 0.533333)
+[2021-08-27 14:55:30] PRINT [10/200] train_loss: 0.688376933 train_auc: 0.583796296 valid_loss: 0.688695 valid_auc: 0.533333
+[2021-08-27 14:55:31] PRINT Early-Stopping counter: 1 out of 20
+[2021-08-27 14:55:31] PRINT [11/200] train_loss: 0.694898754 train_auc: 0.596759259 valid_loss: 0.688721 valid_auc: 0.533333
+[2021-08-27 14:55:33] PRINT Early-Stopping counter: 2 out of 20
+[2021-08-27 14:55:33] PRINT [12/200] train_loss: 0.691286296 train_auc: 0.615740741 valid_loss: 0.688844 valid_auc: 0.533333
+[2021-08-27 14:55:34] PRINT Validation AUC increased (0.533333 --> 0.566667)
+[2021-08-27 14:55:34] PRINT [13/200] train_loss: 0.693225294 train_auc: 0.639351852 valid_loss: 0.688688 valid_auc: 0.566667
+[2021-08-27 14:55:36] PRINT Validation AUC increased (0.566667 --> 0.600000)
+[2021-08-27 14:55:36] PRINT [14/200] train_loss: 0.694891453 train_auc: 0.656018519 valid_loss: 0.689372 valid_auc: 0.600000
+[2021-08-27 14:55:37] PRINT Validation AUC increased (0.600000 --> 0.633333)
+[2021-08-27 14:55:37] PRINT [15/200] train_loss: 0.693736911 train_auc: 0.667592593 valid_loss: 0.689036 valid_auc: 0.633333
+[2021-08-27 14:55:38] PRINT Early-Stopping counter: 1 out of 20
+[2021-08-27 14:55:38] PRINT [16/200] train_loss: 0.688265413 train_auc: 0.676388889 valid_loss: 0.688908 valid_auc: 0.633333
+[2021-08-27 14:55:39] PRINT Early-Stopping counter: 2 out of 20
+[2021-08-27 14:55:39] PRINT [17/200] train_loss: 0.695191562 train_auc: 0.697222222 valid_loss: 0.689356 valid_auc: 0.633333
+[2021-08-27 14:55:41] PRINT Early-Stopping counter: 3 out of 20
+[2021-08-27 14:55:41] PRINT [18/200] train_loss: 0.689907312 train_auc: 0.713425926 valid_loss: 0.688564 valid_auc: 0.633333
+[2021-08-27 14:55:42] PRINT Early-Stopping counter: 4 out of 20
+[2021-08-27 14:55:42] PRINT [19/200] train_loss: 0.689063370 train_auc: 0.712500000 valid_loss: 0.687978 valid_auc: 0.633333
+[2021-08-27 14:55:43] PRINT Early-Stopping counter: 5 out of 20
+[2021-08-27 14:55:43] PRINT [20/200] train_loss: 0.697561473 train_auc: 0.732870370 valid_loss: 0.688612 valid_auc: 0.633333
+[2021-08-27 14:55:45] PRINT Early-Stopping counter: 6 out of 20
+[2021-08-27 14:55:45] PRINT [21/200] train_loss: 0.693946123 train_auc: 0.754629630 valid_loss: 0.689192 valid_auc: 0.633333
+[2021-08-27 14:55:46] PRINT Validation AUC increased (0.633333 --> 0.666667)
+[2021-08-27 14:55:46] PRINT [22/200] train_loss: 0.700906605 train_auc: 0.781944444 valid_loss: 0.690808 valid_auc: 0.666667
+[2021-08-27 14:55:48] PRINT Validation AUC increased (0.666667 --> 0.700000)
+[2021-08-27 14:55:48] PRINT [23/200] train_loss: 0.693796247 train_auc: 0.798148148 valid_loss: 0.691998 valid_auc: 0.700000
+[2021-08-27 14:55:50] PRINT Early-Stopping counter: 1 out of 20
+[2021-08-27 14:55:50] PRINT [24/200] train_loss: 0.695476562 train_auc: 0.801851852 valid_loss: 0.691245 valid_auc: 0.666667
+[2021-08-27 14:55:52] PRINT Early-Stopping counter: 2 out of 20
+[2021-08-27 14:55:52] PRINT [25/200] train_loss: 0.689085037 train_auc: 0.797222222 valid_loss: 0.688765 valid_auc: 0.666667
+[2021-08-27 14:55:54] PRINT Early-Stopping counter: 3 out of 20
+[2021-08-27 14:55:54] PRINT [26/200] train_loss: 0.695438772 train_auc: 0.807870370 valid_loss: 0.689745 valid_auc: 0.633333
+[2021-08-27 14:55:56] PRINT Early-Stopping counter: 4 out of 20
+[2021-08-27 14:55:56] PRINT [27/200] train_loss: 0.701080054 train_auc: 0.825231481 valid_loss: 0.692477 valid_auc: 0.666667
+[2021-08-27 14:55:58] PRINT Early-Stopping counter: 5 out of 20
+[2021-08-27 14:55:58] PRINT [28/200] train_loss: 0.690739661 train_auc: 0.833333333 valid_loss: 0.693282 valid_auc: 0.700000
+[2021-08-27 14:56:00] PRINT Early-Stopping counter: 6 out of 20
+[2021-08-27 14:56:00] PRINT [29/200] train_loss: 0.686595291 train_auc: 0.834259259 valid_loss: 0.691113 valid_auc: 0.700000
+[2021-08-27 14:56:02] PRINT Early-Stopping counter: 7 out of 20
+[2021-08-27 14:56:02] PRINT [30/200] train_loss: 0.691128552 train_auc: 0.830092593 valid_loss: 0.688723 valid_auc: 0.700000
+[2021-08-27 14:56:03] PRINT Early-Stopping counter: 8 out of 20
+[2021-08-27 14:56:03] PRINT [31/200] train_loss: 0.689349532 train_auc: 0.831018519 valid_loss: 0.687898 valid_auc: 0.700000
+[2021-08-27 14:56:05] PRINT Early-Stopping counter: 9 out of 20
+[2021-08-27 14:56:05] PRINT [32/200] train_loss: 0.683650583 train_auc: 0.815277778 valid_loss: 0.686451 valid_auc: 0.666667
+[2021-08-27 14:56:06] PRINT Early-Stopping counter: 10 out of 20
+[2021-08-27 14:56:06] PRINT [33/200] train_loss: 0.683004946 train_auc: 0.811111111 valid_loss: 0.686315 valid_auc: 0.666667
+[2021-08-27 14:56:08] PRINT Early-Stopping counter: 11 out of 20
+[2021-08-27 14:56:08] PRINT [34/200] train_loss: 0.704663575 train_auc: 0.831944444 valid_loss: 0.686874 valid_auc: 0.700000
+[2021-08-27 14:56:09] PRINT Early-Stopping counter: 12 out of 20
+[2021-08-27 14:56:09] PRINT [35/200] train_loss: 0.684493780 train_auc: 0.829629630 valid_loss: 0.686183 valid_auc: 0.700000
+[2021-08-27 14:56:10] PRINT Early-Stopping counter: 13 out of 20
+[2021-08-27 14:56:10] PRINT [36/200] train_loss: 0.690257251 train_auc: 0.833796296 valid_loss: 0.686134 valid_auc: 0.700000
+[2021-08-27 14:56:11] PRINT Early-Stopping counter: 14 out of 20
+[2021-08-27 14:56:11] PRINT [37/200] train_loss: 0.698221922 train_auc: 0.850925926 valid_loss: 0.687944 valid_auc: 0.633333
+[2021-08-27 14:56:13] PRINT Early-Stopping counter: 15 out of 20
+[2021-08-27 14:56:13] PRINT [38/200] train_loss: 0.688404292 train_auc: 0.853703704 valid_loss: 0.687530 valid_auc: 0.633333
+[2021-08-27 14:56:15] PRINT Early-Stopping counter: 16 out of 20
+[2021-08-27 14:56:15] PRINT [39/200] train_loss: 0.698980331 train_auc: 0.865277778 valid_loss: 0.691042 valid_auc: 0.666667
+[2021-08-27 14:56:16] PRINT Early-Stopping counter: 17 out of 20
+[2021-08-27 14:56:16] PRINT [40/200] train_loss: 0.682380646 train_auc: 0.859259259 valid_loss: 0.688157 valid_auc: 0.633333
+[2021-08-27 14:56:18] PRINT Early-Stopping counter: 18 out of 20
+[2021-08-27 14:56:18] PRINT [41/200] train_loss: 0.691625953 train_auc: 0.852314815 valid_loss: 0.686965 valid_auc: 0.666667
+[2021-08-27 14:56:20] PRINT Early-Stopping counter: 19 out of 20
+[2021-08-27 14:56:20] PRINT [42/200] train_loss: 0.696385175 train_auc: 0.867129630 valid_loss: 0.688772 valid_auc: 0.666667
+[2021-08-27 14:56:21] PRINT Early-Stopping counter: 20 out of 20
+[2021-08-27 14:56:21] PRINT [43/200] train_loss: 0.686280072 train_auc: 0.861574074 valid_loss: 0.687562 valid_auc: 0.700000
+[2021-08-27 14:56:22] PRINT Early stopping
+[2021-08-27 14:56:23] PRINT Minimum Validation and Train Auc 0.7
+[2021-08-27 14:56:23] PRINT Run 3
+[2021-08-27 14:56:24] PRINT Validation AUC increased (0.000000 --> 0.600000)
+[2021-08-27 14:56:24] PRINT [0/200] train_loss: 0.701763183 train_auc: 0.569573284 valid_loss: 0.690906 valid_auc: 0.600000
+[2021-08-27 14:56:25] PRINT Validation AUC increased (0.600000 --> 0.633333)
+[2021-08-27 14:56:25] PRINT [1/200] train_loss: 0.689365119 train_auc: 0.645640074 valid_loss: 0.695918 valid_auc: 0.633333
+[2021-08-27 14:56:27] PRINT Validation AUC increased (0.633333 --> 0.700000)
+[2021-08-27 14:56:27] PRINT [2/200] train_loss: 0.692405879 train_auc: 0.736085343 valid_loss: 0.693611 valid_auc: 0.700000
+[2021-08-27 14:56:28] PRINT Validation AUC increased (0.700000 --> 0.733333)
+[2021-08-27 14:56:28] PRINT [3/200] train_loss: 0.689385265 train_auc: 0.778756957 valid_loss: 0.694188 valid_auc: 0.733333
+[2021-08-27 14:56:29] PRINT Early-Stopping counter: 1 out of 20
+[2021-08-27 14:56:29] PRINT [4/200] train_loss: 0.697212607 train_auc: 0.821428571 valid_loss: 0.690447 valid_auc: 0.700000
+[2021-08-27 14:56:30] PRINT Early-Stopping counter: 2 out of 20
+[2021-08-27 14:56:30] PRINT [5/200] train_loss: 0.694727421 train_auc: 0.842300557 valid_loss: 0.689825 valid_auc: 0.666667
+[2021-08-27 14:56:32] PRINT Early-Stopping counter: 3 out of 20
+[2021-08-27 14:56:32] PRINT [6/200] train_loss: 0.678948522 train_auc: 0.850185529 valid_loss: 0.693899 valid_auc: 0.666667
+[2021-08-27 14:56:33] PRINT Early-Stopping counter: 4 out of 20
+[2021-08-27 14:56:33] PRINT [7/200] train_loss: 0.681796730 train_auc: 0.868274583 valid_loss: 0.690569 valid_auc: 0.700000
+[2021-08-27 14:56:35] PRINT Early-Stopping counter: 5 out of 20
+[2021-08-27 14:56:35] PRINT [8/200] train_loss: 0.682025433 train_auc: 0.875231911 valid_loss: 0.689079 valid_auc: 0.700000
+[2021-08-27 14:56:36] PRINT Early-Stopping counter: 6 out of 20
+[2021-08-27 14:56:36] PRINT [9/200] train_loss: 0.678888887 train_auc: 0.886827458 valid_loss: 0.688250 valid_auc: 0.700000
+[2021-08-27 14:56:37] PRINT Early-Stopping counter: 7 out of 20
+[2021-08-27 14:56:37] PRINT [10/200] train_loss: 0.673649162 train_auc: 0.889146568 valid_loss: 0.686764 valid_auc: 0.700000
+[2021-08-27 14:56:38] PRINT Early-Stopping counter: 8 out of 20
+[2021-08-27 14:56:38] PRINT [11/200] train_loss: 0.674034476 train_auc: 0.888682746 valid_loss: 0.683809 valid_auc: 0.700000
+[2021-08-27 14:56:40] PRINT Early-Stopping counter: 9 out of 20
+[2021-08-27 14:56:40] PRINT [12/200] train_loss: 0.675744414 train_auc: 0.892393321 valid_loss: 0.685261 valid_auc: 0.700000
+[2021-08-27 14:56:41] PRINT Early-Stopping counter: 10 out of 20
+[2021-08-27 14:56:41] PRINT [13/200] train_loss: 0.668470174 train_auc: 0.891001855 valid_loss: 0.681030 valid_auc: 0.700000
+[2021-08-27 14:56:43] PRINT Early-Stopping counter: 11 out of 20
+[2021-08-27 14:56:43] PRINT [14/200] train_loss: 0.666678846 train_auc: 0.889610390 valid_loss: 0.679463 valid_auc: 0.700000
+[2021-08-27 14:56:45] PRINT Early-Stopping counter: 12 out of 20
+[2021-08-27 14:56:45] PRINT [15/200] train_loss: 0.670323282 train_auc: 0.891465677 valid_loss: 0.677001 valid_auc: 0.700000
+[2021-08-27 14:56:47] PRINT Early-Stopping counter: 13 out of 20
+[2021-08-27 14:56:47] PRINT [16/200] train_loss: 0.666446954 train_auc: 0.890538033 valid_loss: 0.682429 valid_auc: 0.700000
+[2021-08-27 14:56:48] PRINT Early-Stopping counter: 14 out of 20
+[2021-08-27 14:56:48] PRINT [17/200] train_loss: 0.668606281 train_auc: 0.891929499 valid_loss: 0.671294 valid_auc: 0.700000
+[2021-08-27 14:56:50] PRINT Early-Stopping counter: 15 out of 20
+[2021-08-27 14:56:50] PRINT [18/200] train_loss: 0.661687911 train_auc: 0.891465677 valid_loss: 0.670978 valid_auc: 0.700000
+[2021-08-27 14:56:51] PRINT Early-Stopping counter: 16 out of 20
+[2021-08-27 14:56:51] PRINT [19/200] train_loss: 0.658922940 train_auc: 0.891929499 valid_loss: 0.674032 valid_auc: 0.700000
+[2021-08-27 14:56:53] PRINT Early-Stopping counter: 17 out of 20
+[2021-08-27 14:56:53] PRINT [20/200] train_loss: 0.666801274 train_auc: 0.892393321 valid_loss: 0.686136 valid_auc: 0.700000
+[2021-08-27 14:56:55] PRINT Early-Stopping counter: 18 out of 20
+[2021-08-27 14:56:55] PRINT [21/200] train_loss: 0.649881303 train_auc: 0.894248609 valid_loss: 0.686327 valid_auc: 0.700000
+[2021-08-27 14:56:56] PRINT Early-Stopping counter: 19 out of 20
+[2021-08-27 14:56:56] PRINT [22/200] train_loss: 0.665591359 train_auc: 0.895176252 valid_loss: 0.673383 valid_auc: 0.700000
+[2021-08-27 14:56:58] PRINT Early-Stopping counter: 20 out of 20
+[2021-08-27 14:56:58] PRINT [23/200] train_loss: 0.651533157 train_auc: 0.896567718 valid_loss: 0.683447 valid_auc: 0.700000
+[2021-08-27 14:56:59] PRINT Early stopping
+[2021-08-27 14:57:00] PRINT Minimum Validation and Train Auc 0.7333333333333333
+[2021-08-27 14:57:00] PRINT Run 4
+[2021-08-27 14:57:02] PRINT Validation AUC increased (0.000000 --> 0.560000)
+[2021-08-27 14:57:02] PRINT [0/200] train_loss: 0.701202244 train_auc: 0.447619048 valid_loss: 0.693275 valid_auc: 0.560000
+[2021-08-27 14:57:03] PRINT Validation AUC increased (0.560000 --> 0.680000)
+[2021-08-27 14:57:03] PRINT [1/200] train_loss: 0.696783721 train_auc: 0.500226757 valid_loss: 0.691743 valid_auc: 0.680000
+[2021-08-27 14:57:04] PRINT Validation AUC increased (0.680000 --> 0.760000)
+[2021-08-27 14:57:04] PRINT [2/200] train_loss: 0.696749032 train_auc: 0.530158730 valid_loss: 0.690814 valid_auc: 0.760000
+[2021-08-27 14:57:06] PRINT Validation AUC increased (0.760000 --> 0.840000)
+[2021-08-27 14:57:06] PRINT [3/200] train_loss: 0.694201112 train_auc: 0.579138322 valid_loss: 0.689467 valid_auc: 0.840000
+[2021-08-27 14:57:07] PRINT Validation AUC increased (0.840000 --> 0.920000)
+[2021-08-27 14:57:07] PRINT [4/200] train_loss: 0.695463806 train_auc: 0.636734694 valid_loss: 0.688528 valid_auc: 0.920000
+[2021-08-27 14:57:08] PRINT Validation AUC increased (0.920000 --> 1.000000)
+[2021-08-27 14:57:08] PRINT [5/200] train_loss: 0.685102135 train_auc: 0.678911565 valid_loss: 0.688047 valid_auc: 1.000000
+[2021-08-27 14:57:10] PRINT Early-Stopping counter: 1 out of 20
+[2021-08-27 14:57:10] PRINT [6/200] train_loss: 0.712688297 train_auc: 0.703854875 valid_loss: 0.686205 valid_auc: 1.000000
+[2021-08-27 14:57:11] PRINT Early-Stopping counter: 2 out of 20
+[2021-08-27 14:57:11] PRINT [7/200] train_loss: 0.692915052 train_auc: 0.740589569 valid_loss: 0.685059 valid_auc: 1.000000
+[2021-08-27 14:57:13] PRINT Early-Stopping counter: 3 out of 20
+[2021-08-27 14:57:13] PRINT [8/200] train_loss: 0.692925364 train_auc: 0.767800454 valid_loss: 0.684050 valid_auc: 1.000000
+[2021-08-27 14:57:15] PRINT Early-Stopping counter: 4 out of 20
+[2021-08-27 14:57:15] PRINT [9/200] train_loss: 0.690982133 train_auc: 0.790929705 valid_loss: 0.683128 valid_auc: 1.000000
+[2021-08-27 14:57:17] PRINT Early-Stopping counter: 5 out of 20
+[2021-08-27 14:57:17] PRINT [10/200] train_loss: 0.685703695 train_auc: 0.806802721 valid_loss: 0.683070 valid_auc: 1.000000
+[2021-08-27 14:57:18] PRINT Early-Stopping counter: 6 out of 20
+[2021-08-27 14:57:18] PRINT [11/200] train_loss: 0.681139708 train_auc: 0.809523810 valid_loss: 0.684221 valid_auc: 1.000000
+[2021-08-27 14:57:19] PRINT Early-Stopping counter: 7 out of 20
+[2021-08-27 14:57:19] PRINT [12/200] train_loss: 0.692068487 train_auc: 0.820861678 valid_loss: 0.681792 valid_auc: 1.000000
+[2021-08-27 14:57:21] PRINT Early-Stopping counter: 8 out of 20
+[2021-08-27 14:57:21] PRINT [13/200] train_loss: 0.691442668 train_auc: 0.839455782 valid_loss: 0.679431 valid_auc: 1.000000
+[2021-08-27 14:57:23] PRINT Early-Stopping counter: 9 out of 20
+[2021-08-27 14:57:23] PRINT [14/200] train_loss: 0.679532230 train_auc: 0.854421769 valid_loss: 0.678064 valid_auc: 1.000000
+[2021-08-27 14:57:24] PRINT Early-Stopping counter: 10 out of 20
+[2021-08-27 14:57:24] PRINT [15/200] train_loss: 0.686963618 train_auc: 0.867573696 valid_loss: 0.676383 valid_auc: 1.000000
+[2021-08-27 14:57:26] PRINT Early-Stopping counter: 11 out of 20
+[2021-08-27 14:57:26] PRINT [16/200] train_loss: 0.683721989 train_auc: 0.878911565 valid_loss: 0.675034 valid_auc: 1.000000
+[2021-08-27 14:57:28] PRINT Early-Stopping counter: 12 out of 20
+[2021-08-27 14:57:28] PRINT [17/200] train_loss: 0.681865603 train_auc: 0.891156463 valid_loss: 0.674904 valid_auc: 1.000000
+[2021-08-27 14:57:30] PRINT Early-Stopping counter: 13 out of 20
+[2021-08-27 14:57:30] PRINT [18/200] train_loss: 0.679917246 train_auc: 0.895691610 valid_loss: 0.673824 valid_auc: 1.000000
+[2021-08-27 14:57:32] PRINT Early-Stopping counter: 14 out of 20
+[2021-08-27 14:57:32] PRINT [19/200] train_loss: 0.681904376 train_auc: 0.896598639 valid_loss: 0.671516 valid_auc: 1.000000
+[2021-08-27 14:57:34] PRINT Early-Stopping counter: 15 out of 20
+[2021-08-27 14:57:34] PRINT [20/200] train_loss: 0.682310253 train_auc: 0.896598639 valid_loss: 0.670630 valid_auc: 1.000000
+[2021-08-27 14:57:35] PRINT Early-Stopping counter: 16 out of 20
+[2021-08-27 14:57:35] PRINT [21/200] train_loss: 0.683015704 train_auc: 0.901587302 valid_loss: 0.669441 valid_auc: 1.000000
+[2021-08-27 14:57:38] PRINT Early-Stopping counter: 17 out of 20
+[2021-08-27 14:57:38] PRINT [22/200] train_loss: 0.686746210 train_auc: 0.897052154 valid_loss: 0.668282 valid_auc: 1.000000
+[2021-08-27 14:57:40] PRINT Early-Stopping counter: 18 out of 20
+[2021-08-27 14:57:40] PRINT [23/200] train_loss: 0.692441940 train_auc: 0.906575964 valid_loss: 0.667125 valid_auc: 1.000000
+[2021-08-27 14:57:42] PRINT Early-Stopping counter: 19 out of 20
+[2021-08-27 14:57:42] PRINT [24/200] train_loss: 0.679206699 train_auc: 0.908390023 valid_loss: 0.665947 valid_auc: 1.000000
+[2021-08-27 14:57:43] PRINT Early-Stopping counter: 20 out of 20
+[2021-08-27 14:57:43] PRINT [25/200] train_loss: 0.677675962 train_auc: 0.893877551 valid_loss: 0.665431 valid_auc: 1.000000
+[2021-08-27 14:57:44] PRINT Early stopping
+[2021-08-27 14:57:45] PRINT Minimum Validation and Train Auc 0.6789115646258503
+[2021-08-27 14:57:45] PRINT Run 5
+[2021-08-27 14:57:46] PRINT Validation AUC increased (0.000000 --> 0.480000)
+[2021-08-27 14:57:46] PRINT [0/200] train_loss: 0.889723122 train_auc: 0.464852608 valid_loss: 2.358365 valid_auc: 0.480000
+[2021-08-27 14:57:48] PRINT Validation AUC increased (0.480000 --> 0.640000)
+[2021-08-27 14:57:48] PRINT [1/200] train_loss: 1.493054450 train_auc: 0.471201814 valid_loss: 0.741772 valid_auc: 0.640000
+[2021-08-27 14:57:49] PRINT Validation AUC increased (0.640000 --> 0.760000)
+[2021-08-27 14:57:49] PRINT [2/200] train_loss: 0.666875720 train_auc: 0.786848073 valid_loss: 0.692213 valid_auc: 0.760000
+[2021-08-27 14:57:51] PRINT Early-Stopping counter: 1 out of 20
+[2021-08-27 14:57:51] PRINT [3/200] train_loss: 0.746680796 train_auc: 0.756462585 valid_loss: 0.770556 valid_auc: 0.480000
+[2021-08-27 14:57:52] PRINT Validation AUC increased (0.760000 --> 0.920000)
+[2021-08-27 14:57:52] PRINT [4/200] train_loss: 0.699554443 train_auc: 0.767346939 valid_loss: 0.638110 valid_auc: 0.920000
+[2021-08-27 14:57:54] PRINT Early-Stopping counter: 1 out of 20
+[2021-08-27 14:57:54] PRINT [5/200] train_loss: 0.662892282 train_auc: 0.837641723 valid_loss: 0.630346 valid_auc: 0.920000
+[2021-08-27 14:57:56] PRINT Early-Stopping counter: 2 out of 20
+[2021-08-27 14:57:56] PRINT [6/200] train_loss: 0.651345253 train_auc: 0.835374150 valid_loss: 0.674664 valid_auc: 0.560000
+[2021-08-27 14:57:57] PRINT Early-Stopping counter: 3 out of 20
+[2021-08-27 14:57:57] PRINT [7/200] train_loss: 0.700193107 train_auc: 0.622675737 valid_loss: 0.814644 valid_auc: 0.840000
+[2021-08-27 14:57:59] PRINT Early-Stopping counter: 4 out of 20
+[2021-08-27 14:57:59] PRINT [8/200] train_loss: 0.757488787 train_auc: 0.798185941 valid_loss: 0.682198 valid_auc: 0.520000
+[2021-08-27 14:58:00] PRINT Early-Stopping counter: 5 out of 20
+[2021-08-27 14:58:00] PRINT [9/200] train_loss: 0.689347684 train_auc: 0.800000000 valid_loss: 0.672735 valid_auc: 0.840000
+[2021-08-27 14:58:01] PRINT Early-Stopping counter: 6 out of 20
+[2021-08-27 14:58:01] PRINT [10/200] train_loss: 0.691250175 train_auc: 0.852154195 valid_loss: 0.650083 valid_auc: 0.880000
+[2021-08-27 14:58:03] PRINT Early-Stopping counter: 7 out of 20
+[2021-08-27 14:58:03] PRINT [11/200] train_loss: 0.646473050 train_auc: 0.821768707 valid_loss: 0.622953 valid_auc: 0.880000
+[2021-08-27 14:58:05] PRINT Early-Stopping counter: 8 out of 20
+[2021-08-27 14:58:05] PRINT [12/200] train_loss: 0.703393131 train_auc: 0.849433107 valid_loss: 0.692204 valid_auc: 0.720000
+[2021-08-27 14:58:08] PRINT Early-Stopping counter: 9 out of 20
+[2021-08-27 14:58:08] PRINT [13/200] train_loss: 0.636711985 train_auc: 0.853061224 valid_loss: 0.676922 valid_auc: 0.560000
+[2021-08-27 14:58:09] PRINT Early-Stopping counter: 10 out of 20
+[2021-08-27 14:58:09] PRINT [14/200] train_loss: 0.621545911 train_auc: 0.847619048 valid_loss: 0.688792 valid_auc: 0.560000
+[2021-08-27 14:58:10] PRINT Early-Stopping counter: 11 out of 20
+[2021-08-27 14:58:10] PRINT [15/200] train_loss: 0.707808733 train_auc: 0.839002268 valid_loss: 0.715157 valid_auc: 0.600000
+[2021-08-27 14:58:12] PRINT Early-Stopping counter: 12 out of 20
+[2021-08-27 14:58:12] PRINT [16/200] train_loss: 0.710301608 train_auc: 0.825396825 valid_loss: 0.689221 valid_auc: 0.360000
+[2021-08-27 14:58:13] PRINT Early-Stopping counter: 13 out of 20
+[2021-08-27 14:58:13] PRINT [17/200] train_loss: 0.690393299 train_auc: 0.800453515 valid_loss: 0.708486 valid_auc: 0.440000
+[2021-08-27 14:58:15] PRINT Early-Stopping counter: 14 out of 20
+[2021-08-27 14:58:15] PRINT [18/200] train_loss: 0.695883244 train_auc: 0.809523810 valid_loss: 0.702730 valid_auc: 0.360000
+[2021-08-27 14:58:16] PRINT Early-Stopping counter: 15 out of 20
+[2021-08-27 14:58:16] PRINT [19/200] train_loss: 0.646768600 train_auc: 0.840362812 valid_loss: 0.708889 valid_auc: 0.520000
+[2021-08-27 14:58:18] PRINT Early-Stopping counter: 16 out of 20
+[2021-08-27 14:58:18] PRINT [20/200] train_loss: 0.665802121 train_auc: 0.818594104 valid_loss: 0.783051 valid_auc: 0.320000
+[2021-08-27 14:58:20] PRINT Early-Stopping counter: 17 out of 20
+[2021-08-27 14:58:20] PRINT [21/200] train_loss: 0.646406174 train_auc: 0.839455782 valid_loss: 0.705610 valid_auc: 0.480000
+[2021-08-27 14:58:22] PRINT Early-Stopping counter: 18 out of 20
+[2021-08-27 14:58:22] PRINT [22/200] train_loss: 0.620137602 train_auc: 0.856689342 valid_loss: 0.674705 valid_auc: 0.440000
+[2021-08-27 14:58:23] PRINT Early-Stopping counter: 19 out of 20
+[2021-08-27 14:58:23] PRINT [23/200] train_loss: 0.596523464 train_auc: 0.856235828 valid_loss: 0.660447 valid_auc: 0.480000
+[2021-08-27 14:58:24] PRINT Early-Stopping counter: 20 out of 20
+[2021-08-27 14:58:24] PRINT [24/200] train_loss: 0.586860061 train_auc: 0.870294785 valid_loss: 0.704192 valid_auc: 0.520000
+[2021-08-27 14:58:26] PRINT Early stopping
+[2021-08-27 14:58:26] PRINT Minimum Validation and Train Auc 0.7673469387755102
+[2021-08-27 14:58:26] PRINT Run 6
+[2021-08-27 14:58:28] PRINT Validation AUC increased (0.000000 --> 0.640000)
+[2021-08-27 14:58:28] PRINT [0/200] train_loss: 0.695805490 train_auc: 0.469841270 valid_loss: 0.690972 valid_auc: 0.640000
+[2021-08-27 14:58:29] PRINT Validation AUC increased (0.640000 --> 0.680000)
+[2021-08-27 14:58:29] PRINT [1/200] train_loss: 0.716785252 train_auc: 0.600453515 valid_loss: 0.717682 valid_auc: 0.680000
+[2021-08-27 14:58:30] PRINT Validation AUC increased (0.680000 --> 0.800000)
+[2021-08-27 14:58:30] PRINT [2/200] train_loss: 0.710138321 train_auc: 0.653968254 valid_loss: 0.686388 valid_auc: 0.800000
+[2021-08-27 14:58:32] PRINT Early-Stopping counter: 1 out of 20
+[2021-08-27 14:58:32] PRINT [3/200] train_loss: 0.692958862 train_auc: 0.700680272 valid_loss: 0.684781 valid_auc: 0.800000
+[2021-08-27 14:58:34] PRINT Early-Stopping counter: 2 out of 20
+[2021-08-27 14:58:34] PRINT [4/200] train_loss: 0.683264434 train_auc: 0.657142857 valid_loss: 0.689093 valid_auc: 0.760000
+[2021-08-27 14:58:35] PRINT Validation AUC increased (0.800000 --> 0.840000)
+[2021-08-27 14:58:35] PRINT [5/200] train_loss: 0.686054587 train_auc: 0.702494331 valid_loss: 0.682308 valid_auc: 0.840000
+[2021-08-27 14:58:37] PRINT Validation AUC increased (0.840000 --> 0.880000)
+[2021-08-27 14:58:37] PRINT [6/200] train_loss: 0.686678469 train_auc: 0.731065760 valid_loss: 0.680455 valid_auc: 0.880000
+[2021-08-27 14:58:39] PRINT Validation AUC increased (0.880000 --> 0.960000)
+[2021-08-27 14:58:39] PRINT [7/200] train_loss: 0.702971250 train_auc: 0.796825397 valid_loss: 0.688494 valid_auc: 0.960000
+[2021-08-27 14:58:40] PRINT Validation AUC increased (0.960000 --> 1.000000)
+[2021-08-27 14:58:40] PRINT [8/200] train_loss: 0.691270679 train_auc: 0.844897959 valid_loss: 0.684423 valid_auc: 1.000000
+[2021-08-27 14:58:42] PRINT Early-Stopping counter: 1 out of 20
+[2021-08-27 14:58:42] PRINT [9/200] train_loss: 0.689889520 train_auc: 0.717006803 valid_loss: 0.679792 valid_auc: 0.800000
+[2021-08-27 14:58:43] PRINT Early-Stopping counter: 2 out of 20
+[2021-08-27 14:58:43] PRINT [10/200] train_loss: 0.681754023 train_auc: 0.732426304 valid_loss: 0.677510 valid_auc: 0.920000
+[2021-08-27 14:58:45] PRINT Early-Stopping counter: 3 out of 20
+[2021-08-27 14:58:45] PRINT [11/200] train_loss: 0.682038724 train_auc: 0.726984127 valid_loss: 0.676278 valid_auc: 0.840000
+[2021-08-27 14:58:47] PRINT Early-Stopping counter: 4 out of 20
+[2021-08-27 14:58:47] PRINT [12/200] train_loss: 0.673894823 train_auc: 0.699773243 valid_loss: 0.685935 valid_auc: 0.800000
+[2021-08-27 14:58:50] PRINT Early-Stopping counter: 5 out of 20
+[2021-08-27 14:58:50] PRINT [13/200] train_loss: 0.694797069 train_auc: 0.737414966 valid_loss: 0.673818 valid_auc: 0.920000
+[2021-08-27 14:58:52] PRINT Early-Stopping counter: 6 out of 20
+[2021-08-27 14:58:52] PRINT [14/200] train_loss: 0.676297843 train_auc: 0.759637188 valid_loss: 0.669794 valid_auc: 0.920000
+[2021-08-27 14:58:53] PRINT Early-Stopping counter: 7 out of 20
+[2021-08-27 14:58:53] PRINT [15/200] train_loss: 0.675167114 train_auc: 0.703401361 valid_loss: 0.695554 valid_auc: 0.800000
+[2021-08-27 14:58:55] PRINT Early-Stopping counter: 8 out of 20
+[2021-08-27 14:58:55] PRINT [16/200] train_loss: 0.678301573 train_auc: 0.706122449 valid_loss: 0.693032 valid_auc: 0.800000
+[2021-08-27 14:58:56] PRINT Early-Stopping counter: 9 out of 20
+[2021-08-27 14:58:56] PRINT [17/200] train_loss: 0.679356277 train_auc: 0.735147392 valid_loss: 0.670948 valid_auc: 0.840000
+[2021-08-27 14:58:57] PRINT Early-Stopping counter: 10 out of 20
+[2021-08-27 14:58:57] PRINT [18/200] train_loss: 0.686447859 train_auc: 0.777777778 valid_loss: 0.663608 valid_auc: 1.000000
+[2021-08-27 14:58:59] PRINT Early-Stopping counter: 11 out of 20
+[2021-08-27 14:58:59] PRINT [19/200] train_loss: 0.668088019 train_auc: 0.798185941 valid_loss: 0.659396 valid_auc: 1.000000
+[2021-08-27 14:59:00] PRINT Early-Stopping counter: 12 out of 20
+[2021-08-27 14:59:00] PRINT [20/200] train_loss: 0.662869513 train_auc: 0.788662132 valid_loss: 0.654342 valid_auc: 1.000000
+[2021-08-27 14:59:02] PRINT Early-Stopping counter: 13 out of 20
+[2021-08-27 14:59:02] PRINT [21/200] train_loss: 0.659266979 train_auc: 0.824489796 valid_loss: 0.652256 valid_auc: 1.000000
+[2021-08-27 14:59:03] PRINT Early-Stopping counter: 14 out of 20
+[2021-08-27 14:59:03] PRINT [22/200] train_loss: 0.659752727 train_auc: 0.759183673 valid_loss: 0.649036 valid_auc: 0.840000
+[2021-08-27 14:59:05] PRINT Early-Stopping counter: 15 out of 20
+[2021-08-27 14:59:05] PRINT [23/200] train_loss: 0.667150140 train_auc: 0.757369615 valid_loss: 0.648585 valid_auc: 0.880000
+[2021-08-27 14:59:06] PRINT Early-Stopping counter: 16 out of 20
+[2021-08-27 14:59:06] PRINT [24/200] train_loss: 0.658424050 train_auc: 0.840362812 valid_loss: 0.644226 valid_auc: 1.000000
+[2021-08-27 14:59:08] PRINT Early-Stopping counter: 17 out of 20
+[2021-08-27 14:59:08] PRINT [25/200] train_loss: 0.685811758 train_auc: 0.703854875 valid_loss: 0.794912 valid_auc: 0.760000
+[2021-08-27 14:59:10] PRINT Early-Stopping counter: 18 out of 20
+[2021-08-27 14:59:10] PRINT [26/200] train_loss: 0.725688666 train_auc: 0.752834467 valid_loss: 0.655677 valid_auc: 0.840000
+[2021-08-27 14:59:11] PRINT Early-Stopping counter: 19 out of 20
+[2021-08-27 14:59:11] PRINT [27/200] train_loss: 0.656570613 train_auc: 0.790476190 valid_loss: 0.640919 valid_auc: 1.000000
+[2021-08-27 14:59:12] PRINT Early-Stopping counter: 20 out of 20
+[2021-08-27 14:59:12] PRINT [28/200] train_loss: 0.668744147 train_auc: 0.810430839 valid_loss: 0.636688 valid_auc: 1.000000
+[2021-08-27 14:59:14] PRINT Early stopping
+[2021-08-27 14:59:14] PRINT Minimum Validation and Train Auc 0.8448979591836734
+[2021-08-27 14:59:14] PRINT Run 7
+[2021-08-27 14:59:16] PRINT Validation AUC increased (0.000000 --> 0.600000)
+[2021-08-27 14:59:16] PRINT [0/200] train_loss: 0.698682189 train_auc: 0.562811791 valid_loss: 0.694034 valid_auc: 0.600000
+[2021-08-27 14:59:17] PRINT Validation AUC increased (0.600000 --> 0.640000)
+[2021-08-27 14:59:17] PRINT [1/200] train_loss: 0.692345440 train_auc: 0.574603175 valid_loss: 0.693365 valid_auc: 0.640000
+[2021-08-27 14:59:19] PRINT Validation AUC increased (0.640000 --> 0.760000)
+[2021-08-27 14:59:19] PRINT [2/200] train_loss: 0.703008235 train_auc: 0.592290249 valid_loss: 0.692272 valid_auc: 0.760000
+[2021-08-27 14:59:20] PRINT Validation AUC increased (0.760000 --> 0.800000)
+[2021-08-27 14:59:20] PRINT [3/200] train_loss: 0.697580755 train_auc: 0.610430839 valid_loss: 0.691893 valid_auc: 0.800000
+[2021-08-27 14:59:22] PRINT Early-Stopping counter: 1 out of 20
+[2021-08-27 14:59:22] PRINT [4/200] train_loss: 0.699470937 train_auc: 0.639909297 valid_loss: 0.691976 valid_auc: 0.800000
+[2021-08-27 14:59:23] PRINT Validation AUC increased (0.800000 --> 0.920000)
+[2021-08-27 14:59:23] PRINT [5/200] train_loss: 0.691435009 train_auc: 0.650793651 valid_loss: 0.692346 valid_auc: 0.920000
+[2021-08-27 14:59:24] PRINT Early-Stopping counter: 1 out of 20
+[2021-08-27 14:59:24] PRINT [6/200] train_loss: 0.693360060 train_auc: 0.669841270 valid_loss: 0.692653 valid_auc: 0.920000
+[2021-08-27 14:59:26] PRINT Early-Stopping counter: 2 out of 20
+[2021-08-27 14:59:26] PRINT [7/200] train_loss: 0.688695878 train_auc: 0.685260771 valid_loss: 0.693186 valid_auc: 0.920000
+[2021-08-27 14:59:27] PRINT Early-Stopping counter: 3 out of 20
+[2021-08-27 14:59:27] PRINT [8/200] train_loss: 0.693140239 train_auc: 0.704308390 valid_loss: 0.691966 valid_auc: 0.920000
+[2021-08-27 14:59:28] PRINT Early-Stopping counter: 4 out of 20
+[2021-08-27 14:59:28] PRINT [9/200] train_loss: 0.693011880 train_auc: 0.717460317 valid_loss: 0.691854 valid_auc: 0.920000
+[2021-08-27 14:59:30] PRINT Early-Stopping counter: 5 out of 20
+[2021-08-27 14:59:30] PRINT [10/200] train_loss: 0.698764741 train_auc: 0.730612245 valid_loss: 0.691251 valid_auc: 0.880000
+[2021-08-27 14:59:31] PRINT Early-Stopping counter: 6 out of 20
+[2021-08-27 14:59:31] PRINT [11/200] train_loss: 0.695114255 train_auc: 0.739682540 valid_loss: 0.691191 valid_auc: 0.920000
+[2021-08-27 14:59:32] PRINT Early-Stopping counter: 7 out of 20
+[2021-08-27 14:59:32] PRINT [12/200] train_loss: 0.689237446 train_auc: 0.749206349 valid_loss: 0.691056 valid_auc: 0.920000
+[2021-08-27 14:59:34] PRINT Validation AUC increased (0.920000 --> 0.960000)
+[2021-08-27 14:59:34] PRINT [13/200] train_loss: 0.692163080 train_auc: 0.750113379 valid_loss: 0.691366 valid_auc: 0.960000
+[2021-08-27 14:59:36] PRINT Early-Stopping counter: 1 out of 20
+[2021-08-27 14:59:36] PRINT [14/200] train_loss: 0.688471884 train_auc: 0.761451247 valid_loss: 0.690968 valid_auc: 0.960000
+[2021-08-27 14:59:37] PRINT Validation AUC increased (0.960000 --> 1.000000)
+[2021-08-27 14:59:37] PRINT [15/200] train_loss: 0.689653099 train_auc: 0.769614512 valid_loss: 0.691873 valid_auc: 1.000000
+[2021-08-27 14:59:39] PRINT Early-Stopping counter: 1 out of 20
+[2021-08-27 14:59:39] PRINT [16/200] train_loss: 0.698938161 train_auc: 0.781405896 valid_loss: 0.690847 valid_auc: 0.960000
+[2021-08-27 14:59:40] PRINT Early-Stopping counter: 2 out of 20
+[2021-08-27 14:59:40] PRINT [17/200] train_loss: 0.686796784 train_auc: 0.788208617 valid_loss: 0.691085 valid_auc: 1.000000
+[2021-08-27 14:59:42] PRINT Early-Stopping counter: 3 out of 20
+[2021-08-27 14:59:42] PRINT [18/200] train_loss: 0.686869144 train_auc: 0.783219955 valid_loss: 0.692825 valid_auc: 1.000000
+[2021-08-27 14:59:43] PRINT Early-Stopping counter: 4 out of 20
+[2021-08-27 14:59:43] PRINT [19/200] train_loss: 0.690710396 train_auc: 0.789115646 valid_loss: 0.691760 valid_auc: 1.000000
+[2021-08-27 14:59:44] PRINT Early-Stopping counter: 5 out of 20
+[2021-08-27 14:59:44] PRINT [20/200] train_loss: 0.700865299 train_auc: 0.808163265 valid_loss: 0.690336 valid_auc: 1.000000
+[2021-08-27 14:59:46] PRINT Early-Stopping counter: 6 out of 20
+[2021-08-27 14:59:46] PRINT [21/200] train_loss: 0.690810144 train_auc: 0.806802721 valid_loss: 0.690586 valid_auc: 1.000000
+[2021-08-27 14:59:47] PRINT Early-Stopping counter: 7 out of 20
+[2021-08-27 14:59:47] PRINT [22/200] train_loss: 0.700165302 train_auc: 0.829478458 valid_loss: 0.690038 valid_auc: 1.000000
+[2021-08-27 14:59:48] PRINT Early-Stopping counter: 8 out of 20
+[2021-08-27 14:59:48] PRINT [23/200] train_loss: 0.694736719 train_auc: 0.820861678 valid_loss: 0.690260 valid_auc: 1.000000
+[2021-08-27 14:59:49] PRINT Early-Stopping counter: 9 out of 20
+[2021-08-27 14:59:49] PRINT [24/200] train_loss: 0.687181026 train_auc: 0.825396825 valid_loss: 0.690265 valid_auc: 1.000000
+[2021-08-27 14:59:51] PRINT Early-Stopping counter: 10 out of 20
+[2021-08-27 14:59:51] PRINT [25/200] train_loss: 0.693324804 train_auc: 0.843083900 valid_loss: 0.689683 valid_auc: 1.000000
+[2021-08-27 14:59:52] PRINT Early-Stopping counter: 11 out of 20
+[2021-08-27 14:59:52] PRINT [26/200] train_loss: 0.690966576 train_auc: 0.852607710 valid_loss: 0.689694 valid_auc: 1.000000
+[2021-08-27 14:59:54] PRINT Early-Stopping counter: 12 out of 20
+[2021-08-27 14:59:54] PRINT [27/200] train_loss: 0.691839784 train_auc: 0.849886621 valid_loss: 0.689509 valid_auc: 1.000000
+[2021-08-27 14:59:56] PRINT Early-Stopping counter: 13 out of 20
+[2021-08-27 14:59:56] PRINT [28/200] train_loss: 0.690177590 train_auc: 0.857596372 valid_loss: 0.689339 valid_auc: 1.000000
+[2021-08-27 14:59:58] PRINT Early-Stopping counter: 14 out of 20
+[2021-08-27 14:59:58] PRINT [29/200] train_loss: 0.692174256 train_auc: 0.863038549 valid_loss: 0.689220 valid_auc: 1.000000
+[2021-08-27 14:59:59] PRINT Early-Stopping counter: 15 out of 20
+[2021-08-27 14:59:59] PRINT [30/200] train_loss: 0.686156392 train_auc: 0.858049887 valid_loss: 0.689200 valid_auc: 1.000000
+[2021-08-27 15:00:00] PRINT Early-Stopping counter: 16 out of 20
+[2021-08-27 15:00:00] PRINT [31/200] train_loss: 0.692612857 train_auc: 0.847165533 valid_loss: 0.689729 valid_auc: 1.000000
+[2021-08-27 15:00:02] PRINT Early-Stopping counter: 17 out of 20
+[2021-08-27 15:00:02] PRINT [32/200] train_loss: 0.689511836 train_auc: 0.846712018 valid_loss: 0.689828 valid_auc: 1.000000
+[2021-08-27 15:00:03] PRINT Early-Stopping counter: 18 out of 20
+[2021-08-27 15:00:03] PRINT [33/200] train_loss: 0.698184371 train_auc: 0.861678005 valid_loss: 0.689054 valid_auc: 1.000000
+[2021-08-27 15:00:06] PRINT Early-Stopping counter: 19 out of 20
+[2021-08-27 15:00:06] PRINT [34/200] train_loss: 0.686634868 train_auc: 0.851247166 valid_loss: 0.689556 valid_auc: 1.000000
+[2021-08-27 15:00:07] PRINT Early-Stopping counter: 20 out of 20
+[2021-08-27 15:00:07] PRINT [35/200] train_loss: 0.690142721 train_auc: 0.865759637 valid_loss: 0.688880 valid_auc: 1.000000
+[2021-08-27 15:00:08] PRINT Early stopping
+[2021-08-27 15:00:09] PRINT Minimum Validation and Train Auc 0.7696145124716554
+[2021-08-27 15:00:09] PRINT Run 8
+[2021-08-27 15:00:11] PRINT Validation AUC increased (0.000000 --> 0.160000)
+[2021-08-27 15:00:11] PRINT [0/200] train_loss: 0.696418107 train_auc: 0.372335601 valid_loss: 0.699909 valid_auc: 0.160000
+[2021-08-27 15:00:13] PRINT Validation AUC increased (0.160000 --> 0.200000)
+[2021-08-27 15:00:13] PRINT [1/200] train_loss: 0.696547568 train_auc: 0.436281179 valid_loss: 0.698841 valid_auc: 0.200000
+[2021-08-27 15:00:15] PRINT Validation AUC increased (0.200000 --> 0.240000)
+[2021-08-27 15:00:15] PRINT [2/200] train_loss: 0.695978105 train_auc: 0.498412698 valid_loss: 0.697944 valid_auc: 0.240000
+[2021-08-27 15:00:16] PRINT Early-Stopping counter: 1 out of 20
+[2021-08-27 15:00:16] PRINT [3/200] train_loss: 0.694298804 train_auc: 0.564172336 valid_loss: 0.697054 valid_auc: 0.240000
+[2021-08-27 15:00:18] PRINT Early-Stopping counter: 2 out of 20
+[2021-08-27 15:00:18] PRINT [4/200] train_loss: 0.691191971 train_auc: 0.623129252 valid_loss: 0.696215 valid_auc: 0.240000
+[2021-08-27 15:00:19] PRINT Validation AUC increased (0.240000 --> 0.320000)
+[2021-08-27 15:00:19] PRINT [5/200] train_loss: 0.693312049 train_auc: 0.681179138 valid_loss: 0.695334 valid_auc: 0.320000
+[2021-08-27 15:00:20] PRINT Validation AUC increased (0.320000 --> 0.400000)
+[2021-08-27 15:00:20] PRINT [6/200] train_loss: 0.693261117 train_auc: 0.737414966 valid_loss: 0.694090 valid_auc: 0.400000
+[2021-08-27 15:00:22] PRINT Early-Stopping counter: 1 out of 20
+[2021-08-27 15:00:22] PRINT [7/200] train_loss: 0.689865947 train_auc: 0.778231293 valid_loss: 0.693228 valid_auc: 0.400000
+[2021-08-27 15:00:24] PRINT Validation AUC increased (0.400000 --> 0.480000)
+[2021-08-27 15:00:24] PRINT [8/200] train_loss: 0.689486504 train_auc: 0.812244898 valid_loss: 0.692050 valid_auc: 0.480000
+[2021-08-27 15:00:25] PRINT Validation AUC increased (0.480000 --> 0.560000)
+[2021-08-27 15:00:25] PRINT [9/200] train_loss: 0.683937341 train_auc: 0.833106576 valid_loss: 0.690826 valid_auc: 0.560000
+[2021-08-27 15:00:27] PRINT Early-Stopping counter: 1 out of 20
+[2021-08-27 15:00:27] PRINT [10/200] train_loss: 0.681953371 train_auc: 0.852607710 valid_loss: 0.690022 valid_auc: 0.560000
+[2021-08-27 15:00:29] PRINT Validation AUC increased (0.560000 --> 0.640000)
+[2021-08-27 15:00:29] PRINT [11/200] train_loss: 0.681544244 train_auc: 0.863492063 valid_loss: 0.689243 valid_auc: 0.640000
+[2021-08-27 15:00:30] PRINT Validation AUC increased (0.640000 --> 0.680000)
+[2021-08-27 15:00:30] PRINT [12/200] train_loss: 0.683012307 train_auc: 0.869841270 valid_loss: 0.688173 valid_auc: 0.680000
+[2021-08-27 15:00:31] PRINT Early-Stopping counter: 1 out of 20
+[2021-08-27 15:00:31] PRINT [13/200] train_loss: 0.682600707 train_auc: 0.879818594 valid_loss: 0.687296 valid_auc: 0.680000
+[2021-08-27 15:00:32] PRINT Early-Stopping counter: 2 out of 20
+[2021-08-27 15:00:32] PRINT [14/200] train_loss: 0.680050164 train_auc: 0.875736961 valid_loss: 0.686302 valid_auc: 0.680000
+[2021-08-27 15:00:34] PRINT Validation AUC increased (0.680000 --> 0.720000)
+[2021-08-27 15:00:34] PRINT [15/200] train_loss: 0.681620866 train_auc: 0.881179138 valid_loss: 0.685483 valid_auc: 0.720000
+[2021-08-27 15:00:35] PRINT Validation AUC increased (0.720000 --> 0.760000)
+[2021-08-27 15:00:35] PRINT [16/200] train_loss: 0.679349244 train_auc: 0.886167800 valid_loss: 0.684635 valid_auc: 0.760000
+[2021-08-27 15:00:36] PRINT Early-Stopping counter: 1 out of 20
+[2021-08-27 15:00:36] PRINT [17/200] train_loss: 0.676864296 train_auc: 0.885260771 valid_loss: 0.683823 valid_auc: 0.760000
+[2021-08-27 15:00:38] PRINT Early-Stopping counter: 2 out of 20
+[2021-08-27 15:00:38] PRINT [18/200] train_loss: 0.675381243 train_auc: 0.888888889 valid_loss: 0.682890 valid_auc: 0.760000
+[2021-08-27 15:00:40] PRINT Early-Stopping counter: 3 out of 20
+[2021-08-27 15:00:40] PRINT [19/200] train_loss: 0.669869542 train_auc: 0.884807256 valid_loss: 0.682223 valid_auc: 0.760000
+[2021-08-27 15:00:42] PRINT Early-Stopping counter: 4 out of 20
+[2021-08-27 15:00:42] PRINT [20/200] train_loss: 0.672522068 train_auc: 0.888435374 valid_loss: 0.681046 valid_auc: 0.760000
+[2021-08-27 15:00:43] PRINT Early-Stopping counter: 5 out of 20
+[2021-08-27 15:00:43] PRINT [21/200] train_loss: 0.668754369 train_auc: 0.887981859 valid_loss: 0.680417 valid_auc: 0.760000
+[2021-08-27 15:00:45] PRINT Early-Stopping counter: 6 out of 20
+[2021-08-27 15:00:45] PRINT [22/200] train_loss: 0.677317262 train_auc: 0.891609977 valid_loss: 0.679157 valid_auc: 0.760000
+[2021-08-27 15:00:47] PRINT Early-Stopping counter: 7 out of 20
+[2021-08-27 15:00:47] PRINT [23/200] train_loss: 0.665139377 train_auc: 0.890249433 valid_loss: 0.678175 valid_auc: 0.760000
+[2021-08-27 15:00:48] PRINT Early-Stopping counter: 8 out of 20
+[2021-08-27 15:00:48] PRINT [24/200] train_loss: 0.670819223 train_auc: 0.890702948 valid_loss: 0.677042 valid_auc: 0.760000
+[2021-08-27 15:00:50] PRINT Early-Stopping counter: 9 out of 20
+[2021-08-27 15:00:50] PRINT [25/200] train_loss: 0.667963684 train_auc: 0.891609977 valid_loss: 0.676176 valid_auc: 0.760000
+[2021-08-27 15:00:51] PRINT Early-Stopping counter: 10 out of 20
+[2021-08-27 15:00:51] PRINT [26/200] train_loss: 0.664881170 train_auc: 0.896145125 valid_loss: 0.674774 valid_auc: 0.760000
+[2021-08-27 15:00:53] PRINT Early-Stopping counter: 11 out of 20
+[2021-08-27 15:00:53] PRINT [27/200] train_loss: 0.672188133 train_auc: 0.897959184 valid_loss: 0.673542 valid_auc: 0.760000
+[2021-08-27 15:00:54] PRINT Early-Stopping counter: 12 out of 20
+[2021-08-27 15:00:54] PRINT [28/200] train_loss: 0.658038616 train_auc: 0.898866213 valid_loss: 0.672246 valid_auc: 0.760000
+[2021-08-27 15:00:56] PRINT Early-Stopping counter: 13 out of 20
+[2021-08-27 15:00:56] PRINT [29/200] train_loss: 0.665737689 train_auc: 0.899773243 valid_loss: 0.671129 valid_auc: 0.760000
+[2021-08-27 15:00:57] PRINT Validation AUC increased (0.760000 --> 0.800000)
+[2021-08-27 15:00:57] PRINT [30/200] train_loss: 0.661783010 train_auc: 0.900680272 valid_loss: 0.669824 valid_auc: 0.800000
+[2021-08-27 15:00:59] PRINT Validation AUC increased (0.800000 --> 0.840000)
+[2021-08-27 15:00:59] PRINT [31/200] train_loss: 0.660658419 train_auc: 0.899773243 valid_loss: 0.668566 valid_auc: 0.840000
+[2021-08-27 15:01:00] PRINT Early-Stopping counter: 1 out of 20
+[2021-08-27 15:01:00] PRINT [32/200] train_loss: 0.656610787 train_auc: 0.898866213 valid_loss: 0.667429 valid_auc: 0.840000
+[2021-08-27 15:01:01] PRINT Early-Stopping counter: 2 out of 20
+[2021-08-27 15:01:01] PRINT [33/200] train_loss: 0.652148128 train_auc: 0.901133787 valid_loss: 0.666275 valid_auc: 0.840000
+[2021-08-27 15:01:03] PRINT Early-Stopping counter: 3 out of 20
+[2021-08-27 15:01:03] PRINT [34/200] train_loss: 0.654470056 train_auc: 0.901133787 valid_loss: 0.664811 valid_auc: 0.840000
+[2021-08-27 15:01:05] PRINT Early-Stopping counter: 4 out of 20
+[2021-08-27 15:01:05] PRINT [35/200] train_loss: 0.642270893 train_auc: 0.899773243 valid_loss: 0.663318 valid_auc: 0.840000
+[2021-08-27 15:01:06] PRINT Early-Stopping counter: 5 out of 20
+[2021-08-27 15:01:06] PRINT [36/200] train_loss: 0.655256599 train_auc: 0.901133787 valid_loss: 0.661709 valid_auc: 0.840000
+[2021-08-27 15:01:08] PRINT Early-Stopping counter: 6 out of 20
+[2021-08-27 15:01:08] PRINT [37/200] train_loss: 0.645766169 train_auc: 0.901587302 valid_loss: 0.660052 valid_auc: 0.840000
+[2021-08-27 15:01:09] PRINT Early-Stopping counter: 7 out of 20
+[2021-08-27 15:01:09] PRINT [38/200] train_loss: 0.644429415 train_auc: 0.899773243 valid_loss: 0.658768 valid_auc: 0.840000
+[2021-08-27 15:01:11] PRINT Early-Stopping counter: 8 out of 20
+[2021-08-27 15:01:11] PRINT [39/200] train_loss: 0.633604020 train_auc: 0.900226757 valid_loss: 0.657142 valid_auc: 0.840000
+[2021-08-27 15:01:12] PRINT Early-Stopping counter: 9 out of 20
+[2021-08-27 15:01:12] PRINT [40/200] train_loss: 0.640387625 train_auc: 0.900680272 valid_loss: 0.655178 valid_auc: 0.840000
+[2021-08-27 15:01:14] PRINT Validation AUC increased (0.840000 --> 0.880000)
+[2021-08-27 15:01:14] PRINT [41/200] train_loss: 0.631682336 train_auc: 0.902494331 valid_loss: 0.652807 valid_auc: 0.880000
+[2021-08-27 15:01:16] PRINT Early-Stopping counter: 1 out of 20
+[2021-08-27 15:01:16] PRINT [42/200] train_loss: 0.633291125 train_auc: 0.904308390 valid_loss: 0.650606 valid_auc: 0.880000
+[2021-08-27 15:01:18] PRINT Early-Stopping counter: 2 out of 20
+[2021-08-27 15:01:18] PRINT [43/200] train_loss: 0.629882962 train_auc: 0.903854875 valid_loss: 0.648515 valid_auc: 0.880000
+[2021-08-27 15:01:19] PRINT Early-Stopping counter: 3 out of 20
+[2021-08-27 15:01:19] PRINT [44/200] train_loss: 0.631169617 train_auc: 0.905215420 valid_loss: 0.645946 valid_auc: 0.880000
+[2021-08-27 15:01:21] PRINT Early-Stopping counter: 4 out of 20
+[2021-08-27 15:01:21] PRINT [45/200] train_loss: 0.634808987 train_auc: 0.905668934 valid_loss: 0.643973 valid_auc: 0.880000
+[2021-08-27 15:01:22] PRINT Early-Stopping counter: 5 out of 20
+[2021-08-27 15:01:22] PRINT [46/200] train_loss: 0.624475330 train_auc: 0.907936508 valid_loss: 0.641854 valid_auc: 0.880000
+[2021-08-27 15:01:23] PRINT Early-Stopping counter: 6 out of 20
+[2021-08-27 15:01:23] PRINT [47/200] train_loss: 0.625573635 train_auc: 0.908390023 valid_loss: 0.639811 valid_auc: 0.880000
+[2021-08-27 15:01:24] PRINT Early-Stopping counter: 7 out of 20
+[2021-08-27 15:01:24] PRINT [48/200] train_loss: 0.607386231 train_auc: 0.907029478 valid_loss: 0.637207 valid_auc: 0.880000
+[2021-08-27 15:01:26] PRINT Early-Stopping counter: 8 out of 20
+[2021-08-27 15:01:26] PRINT [49/200] train_loss: 0.617890894 train_auc: 0.912925170 valid_loss: 0.634657 valid_auc: 0.880000
+[2021-08-27 15:01:28] PRINT Early-Stopping counter: 9 out of 20
+[2021-08-27 15:01:28] PRINT [50/200] train_loss: 0.606449515 train_auc: 0.914739229 valid_loss: 0.632041 valid_auc: 0.880000
+[2021-08-27 15:01:29] PRINT Early-Stopping counter: 10 out of 20
+[2021-08-27 15:01:29] PRINT [51/200] train_loss: 0.602248162 train_auc: 0.913378685 valid_loss: 0.628851 valid_auc: 0.880000
+[2021-08-27 15:01:30] PRINT Early-Stopping counter: 11 out of 20
+[2021-08-27 15:01:30] PRINT [52/200] train_loss: 0.600040764 train_auc: 0.910657596 valid_loss: 0.626003 valid_auc: 0.880000
+[2021-08-27 15:01:31] PRINT Early-Stopping counter: 12 out of 20
+[2021-08-27 15:01:31] PRINT [53/200] train_loss: 0.602261066 train_auc: 0.909750567 valid_loss: 0.623233 valid_auc: 0.880000
+[2021-08-27 15:01:33] PRINT Early-Stopping counter: 13 out of 20
+[2021-08-27 15:01:33] PRINT [54/200] train_loss: 0.607979745 train_auc: 0.909297052 valid_loss: 0.620783 valid_auc: 0.880000
+[2021-08-27 15:01:35] PRINT Early-Stopping counter: 14 out of 20
+[2021-08-27 15:01:35] PRINT [55/200] train_loss: 0.587569535 train_auc: 0.908843537 valid_loss: 0.617478 valid_auc: 0.880000
+[2021-08-27 15:01:37] PRINT Early-Stopping counter: 15 out of 20
+[2021-08-27 15:01:37] PRINT [56/200] train_loss: 0.598832041 train_auc: 0.912471655 valid_loss: 0.614124 valid_auc: 0.880000
+[2021-08-27 15:01:39] PRINT Early-Stopping counter: 16 out of 20
+[2021-08-27 15:01:39] PRINT [57/200] train_loss: 0.584244430 train_auc: 0.912471655 valid_loss: 0.610972 valid_auc: 0.880000
+[2021-08-27 15:01:41] PRINT Early-Stopping counter: 17 out of 20
+[2021-08-27 15:01:41] PRINT [58/200] train_loss: 0.577402353 train_auc: 0.910204082 valid_loss: 0.607226 valid_auc: 0.880000
+[2021-08-27 15:01:42] PRINT Early-Stopping counter: 18 out of 20
+[2021-08-27 15:01:42] PRINT [59/200] train_loss: 0.587723494 train_auc: 0.912471655 valid_loss: 0.604115 valid_auc: 0.880000
+[2021-08-27 15:01:44] PRINT Early-Stopping counter: 19 out of 20
+[2021-08-27 15:01:44] PRINT [60/200] train_loss: 0.560928822 train_auc: 0.911111111 valid_loss: 0.600292 valid_auc: 0.880000
+[2021-08-27 15:01:45] PRINT Early-Stopping counter: 20 out of 20
+[2021-08-27 15:01:45] PRINT [61/200] train_loss: 0.572633207 train_auc: 0.910657596 valid_loss: 0.597080 valid_auc: 0.880000
+[2021-08-27 15:01:47] PRINT Early stopping
+[2021-08-27 15:01:48] PRINT Minimum Validation and Train Auc 0.8800000000000001
+[2021-08-27 15:01:48] PRINT Run 9
+[2021-08-27 15:01:50] PRINT Validation AUC increased (0.000000 --> 0.440000)
+[2021-08-27 15:01:50] PRINT [0/200] train_loss: 0.691259623 train_auc: 0.576417234 valid_loss: 0.694977 valid_auc: 0.440000
+[2021-08-27 15:01:52] PRINT Validation AUC increased (0.440000 --> 0.560000)
+[2021-08-27 15:01:52] PRINT [1/200] train_loss: 0.691879064 train_auc: 0.682993197 valid_loss: 0.692515 valid_auc: 0.560000
+[2021-08-27 15:01:54] PRINT Validation AUC increased (0.560000 --> 0.600000)
+[2021-08-27 15:01:54] PRINT [2/200] train_loss: 0.688081920 train_auc: 0.775510204 valid_loss: 0.690314 valid_auc: 0.600000
+[2021-08-27 15:01:55] PRINT Validation AUC increased (0.600000 --> 0.640000)
+[2021-08-27 15:01:55] PRINT [3/200] train_loss: 0.685883701 train_auc: 0.837641723 valid_loss: 0.689113 valid_auc: 0.640000
+[2021-08-27 15:01:57] PRINT Validation AUC increased (0.640000 --> 0.720000)
+[2021-08-27 15:01:57] PRINT [4/200] train_loss: 0.679470122 train_auc: 0.874376417 valid_loss: 0.686627 valid_auc: 0.720000
+[2021-08-27 15:01:59] PRINT Early-Stopping counter: 1 out of 20
+[2021-08-27 15:01:59] PRINT [5/200] train_loss: 0.684678674 train_auc: 0.887981859 valid_loss: 0.685371 valid_auc: 0.720000
+[2021-08-27 15:02:00] PRINT Validation AUC increased (0.720000 --> 0.760000)
+[2021-08-27 15:02:00] PRINT [6/200] train_loss: 0.675546199 train_auc: 0.900680272 valid_loss: 0.683661 valid_auc: 0.760000
+[2021-08-27 15:02:02] PRINT Validation AUC increased (0.760000 --> 0.840000)
+[2021-08-27 15:02:02] PRINT [7/200] train_loss: 0.669839203 train_auc: 0.907029478 valid_loss: 0.682034 valid_auc: 0.840000
+[2021-08-27 15:02:04] PRINT Early-Stopping counter: 1 out of 20
+[2021-08-27 15:02:04] PRINT [8/200] train_loss: 0.672695369 train_auc: 0.909297052 valid_loss: 0.680324 valid_auc: 0.840000
+[2021-08-27 15:02:05] PRINT Validation AUC increased (0.840000 --> 0.880000)
+[2021-08-27 15:02:05] PRINT [9/200] train_loss: 0.665339947 train_auc: 0.907482993 valid_loss: 0.677760 valid_auc: 0.880000
+[2021-08-27 15:02:07] PRINT Early-Stopping counter: 1 out of 20
+[2021-08-27 15:02:07] PRINT [10/200] train_loss: 0.660000563 train_auc: 0.912925170 valid_loss: 0.675961 valid_auc: 0.840000
+[2021-08-27 15:02:09] PRINT Early-Stopping counter: 2 out of 20
+[2021-08-27 15:02:09] PRINT [11/200] train_loss: 0.652050316 train_auc: 0.912925170 valid_loss: 0.673883 valid_auc: 0.840000
+[2021-08-27 15:02:11] PRINT Early-Stopping counter: 3 out of 20
+[2021-08-27 15:02:11] PRINT [12/200] train_loss: 0.654966176 train_auc: 0.915192744 valid_loss: 0.671675 valid_auc: 0.840000
+[2021-08-27 15:02:12] PRINT Early-Stopping counter: 4 out of 20
+[2021-08-27 15:02:12] PRINT [13/200] train_loss: 0.644847661 train_auc: 0.913832200 valid_loss: 0.670971 valid_auc: 0.840000
+[2021-08-27 15:02:14] PRINT Early-Stopping counter: 5 out of 20
+[2021-08-27 15:02:14] PRINT [14/200] train_loss: 0.634755045 train_auc: 0.914285714 valid_loss: 0.667407 valid_auc: 0.840000
+[2021-08-27 15:02:16] PRINT Early-Stopping counter: 6 out of 20
+[2021-08-27 15:02:16] PRINT [15/200] train_loss: 0.636447608 train_auc: 0.916099773 valid_loss: 0.664872 valid_auc: 0.840000
+[2021-08-27 15:02:17] PRINT Early-Stopping counter: 7 out of 20
+[2021-08-27 15:02:17] PRINT [16/200] train_loss: 0.636690766 train_auc: 0.917006803 valid_loss: 0.662374 valid_auc: 0.840000
+[2021-08-27 15:02:19] PRINT Early-Stopping counter: 8 out of 20
+[2021-08-27 15:02:19] PRINT [17/200] train_loss: 0.634409219 train_auc: 0.917006803 valid_loss: 0.660413 valid_auc: 0.840000
+[2021-08-27 15:02:20] PRINT Early-Stopping counter: 9 out of 20
+[2021-08-27 15:02:20] PRINT [18/200] train_loss: 0.609303564 train_auc: 0.917460317 valid_loss: 0.657182 valid_auc: 0.840000
+[2021-08-27 15:02:21] PRINT Early-Stopping counter: 10 out of 20
+[2021-08-27 15:02:21] PRINT [19/200] train_loss: 0.629719645 train_auc: 0.920181406 valid_loss: 0.654490 valid_auc: 0.840000
+[2021-08-27 15:02:22] PRINT Early-Stopping counter: 11 out of 20
+[2021-08-27 15:02:22] PRINT [20/200] train_loss: 0.603829086 train_auc: 0.920181406 valid_loss: 0.651494 valid_auc: 0.840000
+[2021-08-27 15:02:24] PRINT Early-Stopping counter: 12 out of 20
+[2021-08-27 15:02:24] PRINT [21/200] train_loss: 0.600008637 train_auc: 0.919274376 valid_loss: 0.648195 valid_auc: 0.840000
+[2021-08-27 15:02:26] PRINT Early-Stopping counter: 13 out of 20
+[2021-08-27 15:02:26] PRINT [22/200] train_loss: 0.602150977 train_auc: 0.919727891 valid_loss: 0.646169 valid_auc: 0.840000
+[2021-08-27 15:02:28] PRINT Early-Stopping counter: 14 out of 20
+[2021-08-27 15:02:28] PRINT [23/200] train_loss: 0.595248580 train_auc: 0.919727891 valid_loss: 0.642466 valid_auc: 0.840000
+[2021-08-27 15:02:30] PRINT Early-Stopping counter: 15 out of 20
+[2021-08-27 15:02:30] PRINT [24/200] train_loss: 0.582523912 train_auc: 0.921088435 valid_loss: 0.637754 valid_auc: 0.840000
+[2021-08-27 15:02:32] PRINT Early-Stopping counter: 16 out of 20
+[2021-08-27 15:02:32] PRINT [25/200] train_loss: 0.589176506 train_auc: 0.922448980 valid_loss: 0.635713 valid_auc: 0.840000
+[2021-08-27 15:02:33] PRINT Early-Stopping counter: 17 out of 20
+[2021-08-27 15:02:33] PRINT [26/200] train_loss: 0.581715256 train_auc: 0.922902494 valid_loss: 0.632792 valid_auc: 0.840000
+[2021-08-27 15:02:35] PRINT Early-Stopping counter: 18 out of 20
+[2021-08-27 15:02:35] PRINT [27/200] train_loss: 0.572808176 train_auc: 0.924263039 valid_loss: 0.632410 valid_auc: 0.840000
+[2021-08-27 15:02:36] PRINT Early-Stopping counter: 19 out of 20
+[2021-08-27 15:02:36] PRINT [28/200] train_loss: 0.554232955 train_auc: 0.923356009 valid_loss: 0.624973 valid_auc: 0.840000
+[2021-08-27 15:02:38] PRINT Early-Stopping counter: 20 out of 20
+[2021-08-27 15:02:38] PRINT [29/200] train_loss: 0.559072852 train_auc: 0.924263039 valid_loss: 0.623286 valid_auc: 0.840000
+[2021-08-27 15:02:39] PRINT Early stopping
+[2021-08-27 15:02:39] PRINT Minimum Validation and Train Auc 0.88
+[2021-08-27 15:02:40] PRINT 
+[2021-08-27 15:02:40] PRINT  
+[2021-08-27 15:02:40] PRINT Mean Validation Set AUC:  0.7889441958713796  +-  0.06777803634322076
+[2021-08-27 15:02:40] PRINT Mean Test Set AUC:  0.8226190476190475  +-  0.039912034795810035
