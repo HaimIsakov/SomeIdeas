@@ -54,3 +54,21 @@ class MyDatasets:
         test_data_file_path = os.path.join('IBD_Chrone_split_dataset', 'test_set_IBD_Chrone_microbiome.csv')
         test_tag_file_path = os.path.join('IBD_Chrone_split_dataset', 'test_set_IBD_Chrone_tags.csv')
         return train_data_file_path, train_tag_file_path, test_data_file_path, test_tag_file_path
+
+    @staticmethod
+    def allergy_or_not_files():
+        train_data_file_path = os.path.join('Allergy_or_not_split_dataset', 'train_val_set_Allergy_or_not_microbiome.csv')
+        train_tag_file_path = os.path.join('Allergy_or_not_split_dataset', 'train_val_set_Allergy_or_not_tags.csv')
+
+        test_data_file_path = os.path.join('Allergy_or_not_split_dataset', 'test_set_Allergy_or_not_microbiome.csv')
+        test_tag_file_path = os.path.join('Allergy_or_not_split_dataset', 'test_set_Allergy_or_not_tags.csv')
+        return train_data_file_path, train_tag_file_path, test_data_file_path, test_tag_file_path
+
+    @staticmethod
+    def allergy_milk_or_not_files():
+        train_data_file_path = os.path.join('Allergy_milk_split_dataset', 'train_val_set_Allergy_milk_or_not_microbiome.csv')
+        train_tag_file_path = os.path.join('Allergy_milk_split_dataset', 'train_val_set_Allergy_milk_or_not_tags.csv')
+
+        test_data_file_path = os.path.join('Allergy_milk_split_dataset', 'test_set_Allergy_milk_or_not_microbiome.csv')
+        test_tag_file_path = os.path.join('Allergy_milk_split_dataset', 'test_set_Allergy_milk_or_not_tags.csv')
+        return train_data_file_path, train_tag_file_path, test_data_file_path, test_tag_file_path

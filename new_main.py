@@ -21,7 +21,9 @@ from MyDatasets import *
 LOG = logging.getLogger('nni_logger')
 K = 10  # For k-cross-validation
 datasets_dict = {"gdm": MyDatasets.gdm_files, "cirrhosis": MyDatasets.cirrhosis_files, "IBD": MyDatasets.ibd_files,
-                 "bw": MyDatasets.bw_files, "IBD_Chrone": MyDatasets.ibd_chrone_files}
+                 "bw": MyDatasets.bw_files, "IBD_Chrone": MyDatasets.ibd_chrone_files,
+                 "allergy_or_not": MyDatasets.allergy_or_not_files,
+                 "allergy_milk_or_not": MyDatasets.allergy_milk_or_not_files}
 tasks_dict = {1: MyTasks.just_values, 2: MyTasks.just_graph_structure, 3: MyTasks.values_and_graph_structure,
               4: MyTasks.pytorch_geometric}
 
@@ -120,9 +122,25 @@ def run_again_from_nni_results_csv(file, n_rows=10):
             params_list[i][j] = int(first_n_rows.iloc[i][j]) if type(first_n_rows.iloc[i][j]) is np.int64 else first_n_rows.iloc[i][j]
     return params_list
 
+def run_again_from_nni_results_csv_format2(file, n_rows=10):
+    result_df = pd.read_csv(file, header=0, index_col=0)
+    result_df.sort_values(by=['mean_val_nni'], inplace=True, ascending=False)
+    del result_df["std_val_nni"]
+    del result_df["mean_test_nni"]
+    del result_df["std_test_nni"]
+    del result_df["mean_val_nni"]
+    first_n_rows = result_df[0:n_rows]
+    params_list = [{} for i in range(n_rows)]
+    for i in range(n_rows):
+        for j in first_n_rows.columns:
+            params_list[i][j] = int(first_n_rows.iloc[i][j]) if type(first_n_rows.iloc[i][j]) is np.int64 else first_n_rows.iloc[i][j]
+    return params_list
+
+
 def reproduce_from_nni(nni_result_file, dataset_name, mission_number):
     mission_dict = {1: "just_values", 2: "just_graph", 3: "graph_and_values"}
-    params_list = run_again_from_nni_results_csv(nni_result_file, n_rows=10)
+    # params_list = run_again_from_nni_results_csv(nni_result_file, n_rows=5)
+    params_list = run_again_from_nni_results_csv_format2(nni_result_file, n_rows=5)
     nni_flag = False
     pytorch_geometric_mode = False
     add_attributes = False
@@ -130,7 +148,6 @@ def reproduce_from_nni(nni_result_file, dataset_name, mission_number):
     device = f"cuda:{cuda_number}" if torch.cuda.is_available() else "cpu"
     print("Device", device)
     for RECEIVED_PARAMS in params_list:
-        print("Device", device)
         main_runner = Main(dataset_name, mission_number, RECEIVED_PARAMS, device, nni_mode=nni_flag,
                            geometric_mode=pytorch_geometric_mode, add_attributes=add_attributes, plot_figures=False)
         train_metric, val_metric, test_metric, min_train_val_metric = main_runner.turn_on_train()
@@ -156,7 +173,6 @@ def run_regular():
         RECEIVED_PARAMS = json.load(open(params_file_path, 'r'))
 
     device = f"cuda:{cuda_number}" if torch.cuda.is_available() else "cpu"
-    print("Device", device)
     main_runner = Main(dataset_name, mission_number, RECEIVED_PARAMS, device, nni_mode=nni_flag,
                        geometric_mode=pytorch_geometric_mode, add_attributes=add_attributes, plot_figures=False)
     train_metric, val_metric, test_metric, min_train_val_metric = main_runner.turn_on_train()
@@ -166,11 +182,25 @@ def run_regular():
 
 if __name__ == '__main__':
     try:
-        # run_regular()
-        reproduce_from_nni(os.path.join("nni_results", "bw", "bw_nni_graph_and_values.csv"), "bw", 3)
-        reproduce_from_nni(os.path.join("nni_results", "bw", "bw_nni_just_graph.csv"), "bw", 2)
-        reproduce_from_nni(os.path.join("nni_results", "bw", "bw_nni_just_values.csv"), "bw", 1)
-
+        run_regular()
+        # try:
+        #     print("cirrhosis_nni_graph_and_values")
+        #     reproduce_from_nni(os.path.join("nni_results", "cirrhosis", "cirrhosis_nni_values_and_graph_new.csv"), "cirrhosis", 3)
+        # except Exception as e:
+        #     print(e)
+        #     pass
+        # try:
+        #     print("cirrhosis_nni_just_graph")
+        #     reproduce_from_nni(os.path.join("nni_results", "cirrhosis", "cirrhosis_nni_just_graph_new.csv"), "cirrhosis", 2)
+        # except Exception as e:
+        #     print(e)
+        #     pass
+        # try:
+        #     print("cirrhosis_nni_just_values")
+        #     reproduce_from_nni(os.path.join("nni_results", "cirrhosis", "cirrhosis_nni_just_values_new.csv"), "cirrhosis", 1)
+        # except Exception as e:
+        #     print(e)
+        #     pass
     except Exception as e:
         LOG.exception(e)
         raise

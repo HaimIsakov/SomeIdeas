@@ -64,7 +64,7 @@ class TrainTestValOneTime:
 
     def train(self):
         optimizer = self.get_optimizer()
-        epochs = self.RECEIVED_PARAMS['epochs']
+        epochs = int(self.RECEIVED_PARAMS['epochs'])
         # min_val_loss = float('inf')
         # best_model = copy.deepcopy(self.model)
         best_model = self.model.state_dict()

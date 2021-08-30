@@ -22,11 +22,11 @@ def get_hyper_parameters_as_dict(params_file):
     parames_dict = {}
     for line in f:
         x = line.split(",")
-        x = x[2:-2]
+        x = x[2:-1]
         x = [i.replace("\'", "").replace("\"", "").replace(" ", "").replace("{", "") for i in x]
         x[0] = x[0].replace("parameters:", "")
         for i in x:
-            y = i.split(":")
+            y = [r.replace("\'", "").replace("}", "") for r in i.split(":")]
             try:
                 y[1] = float(y[1])
             except:
