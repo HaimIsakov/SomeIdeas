@@ -23,9 +23,12 @@ K = 10  # For k-cross-validation
 datasets_dict = {"gdm": MyDatasets.gdm_files, "cirrhosis": MyDatasets.cirrhosis_files, "IBD": MyDatasets.ibd_files,
                  "bw": MyDatasets.bw_files, "IBD_Chrone": MyDatasets.ibd_chrone_files,
                  "allergy_or_not": MyDatasets.allergy_or_not_files,
-                 "allergy_milk_or_not": MyDatasets.allergy_milk_or_not_files}
+                 "allergy_milk_or_not": MyDatasets.allergy_milk_or_not_files,
+                 "male_vs_female": MyDatasets.male_vs_female}
+
 tasks_dict = {1: MyTasks.just_values, 2: MyTasks.just_graph_structure, 3: MyTasks.values_and_graph_structure,
               4: MyTasks.pytorch_geometric}
+
 
 class Main:
     def __init__(self, dataset_name, task_number, RECEIVED_PARAMS, device, nni_mode=False, geometric_mode=False,
@@ -64,6 +67,7 @@ class Main:
                                                 geometric_or_not=self.geometric_mode)
         train_metric, val_metric, test_metric, min_train_val_metric = trainer_and_tester.train_group_k_cross_validation(k=K)
         return train_metric, val_metric, test_metric, min_train_val_metric
+
 
 def set_arguments():
     parser = argparse.ArgumentParser(description='Main script of all models')
@@ -121,6 +125,7 @@ def run_again_from_nni_results_csv(file, n_rows=10):
         for j in first_n_rows.columns:
             params_list[i][j] = int(first_n_rows.iloc[i][j]) if type(first_n_rows.iloc[i][j]) is np.int64 else first_n_rows.iloc[i][j]
     return params_list
+
 
 def run_again_from_nni_results_csv_format2(file, n_rows=10):
     result_df = pd.read_csv(file, header=0, index_col=0)

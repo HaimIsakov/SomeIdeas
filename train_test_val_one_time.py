@@ -93,8 +93,8 @@ class TrainTestValOneTime:
 
             average_train_loss, train_auc, val_loss, val_auc = self.record_evaluations(batched_train_loss)
             # early_training_results['train_auc'] = train_auc
-            if val_auc == 0.5 and train_auc == 0.5:
-                a=5
+            # if val_auc == 0.5 and train_auc == 0.5:
+            #     print("The model stuck")
             if val_auc > max_val_auc:
                 print(f"Validation AUC increased ({max_val_auc:.6f} --> {val_auc:.6f})")
                 max_val_auc = val_auc

@@ -64,12 +64,16 @@ if __name__ == "__main__":
     # microbiome_df_path = os.path.join("Allergy_or_not_split_dataset", "OTU_Allergy_after_mipmlp_Genus_same_ids_new.csv")
     # tags_df_path = os.path.join("Allergy_or_not_split_dataset", "tag_allergy_or_not_file.csv")
 
-    dataset_name = "Allergy_milk_or_not"
-    microbiome_df_path = os.path.join("Allergy_milk_split_dataset", "OTU_Allergy_after_mipmlp_Genus_same_ids_new.csv")
-    tags_df_path = os.path.join("Allergy_milk_split_dataset", "tag_allergy_milk_or_not_file.csv")
+    # dataset_name = "Allergy_milk_or_not"
+    # microbiome_df_path = os.path.join("Allergy_milk_split_dataset", "OTU_Allergy_after_mipmlp_Genus_same_ids_new.csv")
+    # tags_df_path = os.path.join("Allergy_milk_split_dataset", "tag_allergy_milk_or_not_file.csv")
+
+    dataset_name = "Male_vs_Female"
+    microbiome_df_path = os.path.join("Male_vs_Female_split_dataset", "OTU_Male_vs_Female_after_mipmlp_same_ids.csv")
+    tags_df_path = os.path.join("Male_vs_Female_split_dataset", "tag_male_vs_female_file.csv")
 
     microbiome_df = pd.read_csv(microbiome_df_path, index_col='ID')
-    tags_df = pd.read_csv(tags_df_path, index_col='ID')  # ha
+    tags_df = pd.read_csv(tags_df_path, index_col='ID')
     group = "Group"
     stratify_by = "Tag"
     test_size = 0.2

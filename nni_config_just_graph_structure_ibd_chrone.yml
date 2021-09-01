@@ -16,7 +16,7 @@ tuner:
     #choice: maximize, minimize
     optimize_mode: maximize
 trial:
-  command: python main_for_three_models.py --nni 1 --task_number 2 --dataset IBD_Chrone --device_num 1
+  command: python new_main.py --nni 1 --task_number 2 --dataset IBD_Chrone --device_num 1
   codeDir: .
   gpuNum: 2
 localConfig:

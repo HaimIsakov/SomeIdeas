@@ -2,7 +2,7 @@ import networkx as nx
 import torch
 from torch.utils.data import Dataset
 from torch import Tensor, FloatTensor
-from torch_geometric.utils import from_networkx
+#from torch_geometric.utils import from_networkx
 
 from MicrobiomeDataset import MicrobiomeDataset
 from create_microbiome_graphs import CreateMicrobiomeGraphs

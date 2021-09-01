@@ -2,7 +2,7 @@ import json
 import os
 from datetime import datetime
 
-import torch_geometric.data
+#import torch_geometric.data
 from sklearn.model_selection import GroupShuffleSplit, GroupKFold
 from torch.utils.data import DataLoader
 import matplotlib.pyplot as plt
@@ -13,12 +13,13 @@ from train_test_val_one_time import TrainTestValOneTime
 from JustGraphStructure.Models.just_graph_structure import JustGraphStructure
 from JustValues.Models.just_values_fc_binary_classification import JustValuesOnNodes
 from ValuesAndGraphStructure.Models.values_and_graph_structure import ValuesAndGraphStructure
-from pytorch_geometric import GCN
+#from pytorch_geometric import GCN
 LOSS_PLOT = 'loss'
 ACCURACY_PLOT = 'acc'
 AUC_PLOT = 'auc'
 TRAIN_JOB = 'train'
 TEST_JOB = 'test'
+
 
 class TrainTestValKTimes:
     def __init__(self, RECEIVED_PARAMS, device, train_val_dataset, test_dataset,

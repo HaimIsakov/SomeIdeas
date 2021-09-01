@@ -9,8 +9,8 @@ class ValuesAndGraphStructure(nn.Module):
         self.feature_size = feature_size
         self.nodes_number = nodes_number
         self.RECEIVED_PARAMS = RECEIVED_PARAMS
-        self.pre_weighting = nn.Linear(self.feature_size, 1)
-        self.fc1 = nn.Linear(self.nodes_number, int(self.RECEIVED_PARAMS["layer_1"]))  # input layer
+        self.pre_weighting = nn.Linear(self.feature_size, int(self.RECEIVED_PARAMS["preweight"]))
+        self.fc1 = nn.Linear(int(self.RECEIVED_PARAMS["preweight"]) * self.nodes_number, int(self.RECEIVED_PARAMS["layer_1"]))  # input layer
         self.fc2 = nn.Linear(int(self.RECEIVED_PARAMS["layer_1"]), int(self.RECEIVED_PARAMS["layer_2"]))
         self.fc3 = nn.Linear(int(self.RECEIVED_PARAMS["layer_2"]), 1)
         self.device = device
@@ -19,45 +19,42 @@ class ValuesAndGraphStructure(nn.Module):
         self.dropout = nn.Dropout(p=self.RECEIVED_PARAMS["dropout"])
 
     def forward(self, x, adjacency_matrix):
-        # alpha_A = adjacency_matrix * self.alpha.expand_as(adjacency_matrix)
-        alpha_A = torch.mul(adjacency_matrix, self.alpha)
-        # alpha_A = torch.matmul(adjacency_matrix, self.alpha.expand_as(adjacency_matrix))
+        # multiply the matrix adjacency_matrix by (learnt scalar) self.alpha
+        alpha_A = torch.mul(adjacency_matrix, self.alpha)  # 𝛼A
         a, b, c = alpha_A.shape
         d, e, f = x.shape
         I = torch.eye(b).to(self.device)
-        # print("I device", I.device)
-        alpha_A_plus_I = alpha_A + I
+        alpha_A_plus_I = alpha_A + I  # 𝛼A + I
         normalized_adjacency_matrix = self.calculate_adjacency_matrix(alpha_A_plus_I)
-        # x = torch.reshape(x, (d, e, 1))
-        x = torch.matmul(normalized_adjacency_matrix, x)
-        # x = torch.reshape(x, (d, e))
+        x = torch.matmul(normalized_adjacency_matrix, x)  # (𝛼A + I)·x
         if self.activation_func == 'relu':
-            x = F.relu(self.pre_weighting(x))
-            x = x.squeeze()
+            x = F.relu(self.pre_weighting(x))  # (𝛼A + I)·x·W
+            # a/d variables are the batch size
+            # x = x.view(d, 1, -1)
+            x = torch.flatten(x, start_dim=1)  # flatten the tensor
             x = F.relu(self.fc1(x))
             x = self.dropout(x)
             x = F.relu(self.fc2(x))
         elif self.activation_func == 'elu':
-            x = F.elu(self.pre_weighting(x))
-            x = x.squeeze()
+            x = F.elu(self.pre_weighting(x))   # (𝛼A + I)·x·W
+            # x = x.view(d, 1, -1)
+            x = torch.flatten(x, start_dim=1)  # flatten the tensor
             x = F.elu(self.fc1(x))
             x = self.dropout(x)
             x = F.elu(self.fc2(x))
         elif self.activation_func == 'tanh':
-            x = torch.tanh(self.pre_weighting(x))
-            x = x.squeeze()
+            x = torch.tanh(self.pre_weighting(x))   # (𝛼A + I)·x·W
+            # x = x.view(d, 1, -1)
+            x = torch.flatten(x, start_dim=1)  # flatten the tensor
             x = torch.tanh(self.fc1(x))
             x = self.dropout(x)
             x = torch.tanh(self.fc2(x))
-        # x = torch.sigmoid(x) # BCE loss automatically applies sigmoid
         x = self.fc3(x)
         return x
 
     def calculate_adjacency_matrix(self, batched_adjacency_matrix):
-        # size = adjacency_matrix.shape[0]
         # D^(-0.5)
         def calc_d_minus_root_sqr(batched_adjacency_matrix):
-            # return np.diag([1 / np.sqrt(np.sum(adjacency_matrix[i, :])) for i in range(size)])
             return torch.stack([torch.diag(torch.pow(adjacency_matrix.sum(1), -0.5)) for adjacency_matrix in batched_adjacency_matrix])
         D__minus_sqrt = calc_d_minus_root_sqr(batched_adjacency_matrix)
         normalized_adjacency = torch.matmul(torch.matmul(D__minus_sqrt, batched_adjacency_matrix), D__minus_sqrt)
