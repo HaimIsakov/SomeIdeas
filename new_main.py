@@ -144,8 +144,8 @@ def run_again_from_nni_results_csv_format2(file, n_rows=10):
 
 def reproduce_from_nni(nni_result_file, dataset_name, mission_number):
     mission_dict = {1: "just_values", 2: "just_graph", 3: "graph_and_values"}
-    # params_list = run_again_from_nni_results_csv(nni_result_file, n_rows=5)
-    params_list = run_again_from_nni_results_csv_format2(nni_result_file, n_rows=5)
+    params_list = run_again_from_nni_results_csv(nni_result_file, n_rows=5)
+    # params_list = run_again_from_nni_results_csv_format2(nni_result_file, n_rows=5)
     nni_flag = False
     pytorch_geometric_mode = False
     add_attributes = False
@@ -190,19 +190,31 @@ if __name__ == '__main__':
         run_regular()
         # try:
         #     print("cirrhosis_nni_graph_and_values")
-        #     reproduce_from_nni(os.path.join("nni_results", "cirrhosis", "cirrhosis_nni_values_and_graph_new.csv"), "cirrhosis", 3)
+        #     reproduce_from_nni(os.path.join("nni_results_fixed", "cirrhosis_nni_fixed_graph_and_values.csv"), "cirrhosis", 3)
         # except Exception as e:
         #     print(e)
         #     pass
         # try:
-        #     print("cirrhosis_nni_just_graph")
-        #     reproduce_from_nni(os.path.join("nni_results", "cirrhosis", "cirrhosis_nni_just_graph_new.csv"), "cirrhosis", 2)
+        #     print("bw_nni_graph_and_values")
+        #     reproduce_from_nni(os.path.join("nni_results_fixed", "bw_nni_fixed_graph_and_values.csv"), "bw", 3)
         # except Exception as e:
         #     print(e)
         #     pass
         # try:
-        #     print("cirrhosis_nni_just_values")
-        #     reproduce_from_nni(os.path.join("nni_results", "cirrhosis", "cirrhosis_nni_just_values_new.csv"), "cirrhosis", 1)
+        #     print("gdm_nni_graph_and_values")
+        #     reproduce_from_nni(os.path.join("nni_results_fixed", "gdm_nni_fixed_graph_and_values.csv"), "gdm", 3)
+        # except Exception as e:
+        #     print(e)
+        #     pass
+        # try:
+        #     print("ibd_nni_graph_and_values")
+        #     reproduce_from_nni(os.path.join("nni_results_fixed", "ibd_nni_fixed_graph_and_values.csv"), "IBD", 3)
+        # except Exception as e:
+        #     print(e)
+        #     pass
+        # try:
+        #     print("ibd_chrone_graph_and_values")
+        #     reproduce_from_nni(os.path.join("nni_results_fixed", "ibd_chrone_nni_fixed_graph_and_values.csv"), "IBD_Chrone", 3)
         # except Exception as e:
         #     print(e)
         #     pass

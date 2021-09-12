@@ -43,9 +43,9 @@ class TrainTestValKTimes:
         # gss_train_val = GroupKFold(n_splits=k)
         run = 0
         for train_idx, val_idx in gss_train_val.split(self.train_val_dataset, groups=self.train_val_dataset.get_all_groups()):
-            print(f"Run {run}")
-            print("len of train set:", len(train_idx))
-            print("len of val set:", len(val_idx))
+            # print(f"Run {run}")
+            # print("len of train set:", len(train_idx))
+            # print("len of val set:", len(val_idx))
             if run == 0 and not self.nni_flag:
                 date, directory_root = self.create_directory_to_save_results()
 

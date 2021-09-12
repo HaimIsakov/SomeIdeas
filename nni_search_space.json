@@ -10,5 +10,5 @@
     "train_frac":{"_type":"choice","_value":[0.7]},
     "test_frac":{"_type":"choice","_value":[0.15]},
     "epochs":{"_type":"choice","_value":[200]},
-    "preweight":{"_type":"quniform","_value":[10, 70, 1]}
+    "preweight":{"_type":"quniform","_value":[2, 10, 1]}
 }
