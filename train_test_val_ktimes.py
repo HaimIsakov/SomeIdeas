@@ -43,7 +43,7 @@ class TrainTestValKTimes:
         # gss_train_val = GroupKFold(n_splits=k)
         run = 0
         for train_idx, val_idx in gss_train_val.split(self.train_val_dataset, groups=self.train_val_dataset.get_all_groups()):
-            # print(f"Run {run}")
+            print(f"Run {run}")
             # print("len of train set:", len(train_idx))
             # print("len of val set:", len(val_idx))
             if run == 0 and not self.nni_flag:
@@ -91,11 +91,11 @@ class TrainTestValKTimes:
             val_data = torch.utils.data.Subset(self.train_val_dataset, val_idx)
             # Dataloader
             train_loader = torch.utils.data.DataLoader(train_data, shuffle=True, batch_size=batch_size)
-            val_loader = torch.utils.data.DataLoader(val_data, batch_size=len(val_data), shuffle=False)
+            val_loader = torch.utils.data.DataLoader(val_data, batch_size=batch_size, shuffle=False)
             # Notice that the test data is loaded as one unit.
-            test_loader = torch.utils.data.DataLoader(self.test_dataset, batch_size=len(self.test_dataset), shuffle=False)
-            print("train loader size:", len(train_loader))
-            print("val loader size:", len(val_loader))
+            test_loader = torch.utils.data.DataLoader(self.test_dataset, batch_size=batch_size, shuffle=False)
+            # print("train loader size:", len(train_loader))
+            # print("val loader size:", len(val_loader))
         else:
             # Datasets
             train_data = torch.utils.data.Subset(self.train_val_dataset, train_idx)

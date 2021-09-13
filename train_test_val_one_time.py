@@ -56,10 +56,10 @@ class TrainTestValOneTime:
                 output = torch.sigmoid(output)
                 true_labels += target.tolist()
                 pred += output.squeeze(dim=1).tolist()
-        # if job != TRAIN_JOB:
-        #     auc_result = roc_auc_score(true_labels, [1 - i for i in pred])  # TODO: Change
-        # else:
+        try:
             auc_result = roc_auc_score(true_labels, pred)
+        except:
+            print("An Error")
         return auc_result
 
     def train(self):

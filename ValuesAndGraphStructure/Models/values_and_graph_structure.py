@@ -49,8 +49,18 @@ class ValuesAndGraphStructure(nn.Module):
             x = torch.tanh(self.fc1(x))
             x = self.dropout(x)
             x = torch.tanh(self.fc2(x))
+        elif self.activation_func == 'srss':
+            x = self.srss(self.pre_weighting(x))   # (𝛼A + I)·x·W
+            # x = x.view(d, 1, -1)
+            x = torch.flatten(x, start_dim=1)  # flatten the tensor
+            x = self.srss(self.fc1(x))
+            x = self.dropout(x)
+            x = self.srss(self.fc2(x))
         x = self.fc3(x)
         return x
+
+    def srss(self, x):
+        return 1 - 2 / (x**2 + 1)
 
     def calculate_adjacency_matrix(self, batched_adjacency_matrix):
         # D^(-0.5)

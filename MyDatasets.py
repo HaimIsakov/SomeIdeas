@@ -81,3 +81,12 @@ class MyDatasets:
         test_data_file_path = os.path.join('Male_vs_Female_split_dataset', 'test_set_Male_vs_Female_microbiome.csv')
         test_tag_file_path = os.path.join('Male_vs_Female_split_dataset', 'test_set_Male_vs_Female_tags.csv')
         return train_data_file_path, train_tag_file_path, test_data_file_path, test_tag_file_path
+
+    @staticmethod
+    def male_vs_female_species():
+        train_data_file_path = os.path.join('Male_vs_Female_Species_split_dataset', 'train_val_set_Male_vs_Female_Species_microbiome.csv')
+        train_tag_file_path = os.path.join('Male_vs_Female_Species_split_dataset', 'train_val_set_Male_vs_Female_Species_tags.csv')
+
+        test_data_file_path = os.path.join('Male_vs_Female_Species_split_dataset', 'test_set_Male_vs_Female_Species_microbiome.csv')
+        test_tag_file_path = os.path.join('Male_vs_Female_Species_split_dataset', 'test_set_Male_vs_Female_Species_tags.csv')
+        return train_data_file_path, train_tag_file_path, test_data_file_path, test_tag_file_path

@@ -24,7 +24,8 @@ datasets_dict = {"gdm": MyDatasets.gdm_files, "cirrhosis": MyDatasets.cirrhosis_
                  "bw": MyDatasets.bw_files, "IBD_Chrone": MyDatasets.ibd_chrone_files,
                  "allergy_or_not": MyDatasets.allergy_or_not_files,
                  "allergy_milk_or_not": MyDatasets.allergy_milk_or_not_files,
-                 "male_vs_female": MyDatasets.male_vs_female}
+                 "male_vs_female": MyDatasets.male_vs_female,
+                 "male_vs_female_species": MyDatasets.male_vs_female_species}
 
 tasks_dict = {1: MyTasks.just_values, 2: MyTasks.just_graph_structure, 3: MyTasks.values_and_graph_structure,
               4: MyTasks.pytorch_geometric}
@@ -158,6 +159,8 @@ def reproduce_from_nni(nni_result_file, dataset_name, mission_number):
         train_metric, val_metric, test_metric, min_train_val_metric = main_runner.turn_on_train()
         result_file_name = f"{dataset_name}_{mission_dict[mission_number]}"
         results_dealing(train_metric, val_metric, test_metric, min_train_val_metric, nni_flag, RECEIVED_PARAMS, result_file_name)
+        for k, v in RECEIVED_PARAMS.items():
+            print(type(v))
 
 
 def run_regular():
@@ -176,6 +179,11 @@ def run_regular():
         RECEIVED_PARAMS = nni.get_next_parameter()
     else:
         RECEIVED_PARAMS = json.load(open(params_file_path, 'r'))
+    RECEIVED_PARAMS["learning_rate"] = np.float64(RECEIVED_PARAMS["learning_rate"])
+    RECEIVED_PARAMS["dropout"] = np.float64(RECEIVED_PARAMS["dropout"])
+    RECEIVED_PARAMS["regularization"] = np.float64(RECEIVED_PARAMS["regularization"])
+    RECEIVED_PARAMS["train_frac"] = np.float64(RECEIVED_PARAMS["train_frac"])
+    RECEIVED_PARAMS["test_frac"] = np.float64(RECEIVED_PARAMS["test_frac"])
 
     device = f"cuda:{cuda_number}" if torch.cuda.is_available() else "cpu"
     main_runner = Main(dataset_name, mission_number, RECEIVED_PARAMS, device, nni_mode=nni_flag,
