@@ -26,6 +26,7 @@ class TrainTestValOneTime:
         self.train_loss_vec, self.val_loss_vec = [], []
         self.train_auc_vec, self.val_auc_vec = [], []
         self.train_acc, self.val_acc = [], []
+        self.alpha_list = []
         self.val_auc = 0.0
         self.early_stopping = early_stopping
 
@@ -77,6 +78,7 @@ class TrainTestValOneTime:
         # run the main training loop
         for epoch in range(epochs):
             self.model.train()  # prep model for training
+            self.alpha_list.append(self.model.alpha.item())
             batched_train_loss = []
             for data, adjacency_matrix, target in self.train_loader:
                 data, adjacency_matrix, target = data.to(self.device), adjacency_matrix.to(self.device), target.to(self.device)

@@ -57,6 +57,7 @@ class TrainTestValKTimes:
                 early_stopping_results = trainer_and_tester.train()
             else:
                 early_stopping_results = trainer_and_tester.train_geometric()
+            print(trainer_and_tester.alpha_list)
             min_val_train_auc = min(early_stopping_results['val_auc'], early_stopping_results['train_auc'])
             print("Minimum Validation and Train Auc", min_val_train_auc)
             min_train_val_metric.append(min_val_train_auc)  # the minimum between the aucs between train set and validation set
