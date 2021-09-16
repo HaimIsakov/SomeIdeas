@@ -6,9 +6,9 @@ import torch.nn.functional as F
 class JustGraphStructure(nn.Module):
     def __init__(self, nodes_number, feature_size, RECEIVED_PARAMS, device):
         super(JustGraphStructure, self).__init__()
-        self.feature_size = feature_size
-        self.nodes_number = nodes_number
-        self.RECEIVED_PARAMS = RECEIVED_PARAMS
+        self.feature_size = feature_size  # the dimension of the features for each node
+        self.nodes_number = nodes_number  # the number of nodes for each graph
+        self.RECEIVED_PARAMS = RECEIVED_PARAMS  # dictionary of hyper-parameters
         self.pre_weighting = nn.Linear(self.feature_size, int(self.RECEIVED_PARAMS["preweight"]))
         self.fc1 = nn.Linear(int(self.RECEIVED_PARAMS["preweight"]) * self.nodes_number,
                              int(self.RECEIVED_PARAMS["layer_1"]))  # input layer

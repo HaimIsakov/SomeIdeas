@@ -2,13 +2,16 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+from GcnLayer import GCNLayer
+
 
 class ValuesAndGraphStructure(nn.Module):
     def __init__(self, nodes_number, feature_size, RECEIVED_PARAMS, device):
         super(ValuesAndGraphStructure, self).__init__()
-        self.feature_size = feature_size
-        self.nodes_number = nodes_number
-        self.RECEIVED_PARAMS = RECEIVED_PARAMS
+        self.feature_size = feature_size  # the dimension of the features for each node
+        self.nodes_number = nodes_number  # the number of nodes for each graph
+        print("nodes number", self.nodes_number)
+        self.RECEIVED_PARAMS = RECEIVED_PARAMS  # dictionary of hyper-parameters
         self.pre_weighting = nn.Linear(self.feature_size, int(self.RECEIVED_PARAMS["preweight"]))
         self.fc1 = nn.Linear(int(self.RECEIVED_PARAMS["preweight"]) * self.nodes_number, int(self.RECEIVED_PARAMS["layer_1"]))  # input layer
         self.fc2 = nn.Linear(int(self.RECEIVED_PARAMS["layer_1"]), int(self.RECEIVED_PARAMS["layer_2"]))
@@ -17,6 +20,9 @@ class ValuesAndGraphStructure(nn.Module):
         self.alpha = nn.Parameter(torch.rand(1, requires_grad=True)).to(self.device)
         self.activation_func = self.RECEIVED_PARAMS['activation']
         self.dropout = nn.Dropout(p=self.RECEIVED_PARAMS["dropout"])
+        self.gcn_layer1 = GCNLayer(self.nodes_number, self.feature_size, self.RECEIVED_PARAMS, self.device)
+        self.gcn_layer2 = GCNLayer(self.nodes_number, int(self.RECEIVED_PARAMS["preweight"]), self.RECEIVED_PARAMS,
+                                   self.device)
 
     def forward(self, x, adjacency_matrix):
         # multiply the matrix adjacency_matrix by (learnt scalar) self.alpha
@@ -26,6 +32,12 @@ class ValuesAndGraphStructure(nn.Module):
         I = torch.eye(b).to(self.device)
         alpha_A_plus_I = alpha_A + I  # 𝛼A + I
         normalized_adjacency_matrix = self.calculate_adjacency_matrix(alpha_A_plus_I)
+
+        # x = self.gcn_layer1(x, adjacency_matrix)
+        # print(x.shape)
+        # x = torch.flatten(x, start_dim=1)  # flatten the tensor
+        # print(x.shape)
+        # x = self.gcn_layer2(x, adjacency_matrix)
         x = torch.matmul(normalized_adjacency_matrix, x)  # (𝛼A + I)·x
         if self.activation_func == 'relu':
             x = F.relu(self.pre_weighting(x))  # (𝛼A + I)·x·W

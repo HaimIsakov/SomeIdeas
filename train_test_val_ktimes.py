@@ -110,14 +110,14 @@ class TrainTestValKTimes:
 
     def get_model(self):
         if not self.geometric_or_not:
-            if self.train_val_dataset.mission == "JustValues":
+            if self.train_val_dataset.mission == "just_values":
                 data_size = self.train_val_dataset.get_leaves_number()
                 model = JustValuesOnNodes(data_size, self.RECEIVED_PARAMS)
-            elif self.train_val_dataset.mission == "JustGraphStructure":
+            elif self.train_val_dataset.mission == "just_graph":
                 data_size = self.train_val_dataset.get_vector_size()
                 nodes_number = self.train_val_dataset.nodes_number()
                 model = JustGraphStructure(nodes_number, data_size, self.RECEIVED_PARAMS, self.device)
-            elif self.train_val_dataset.mission == "GraphStructure&Values":
+            elif self.train_val_dataset.mission == "graph_and_values":
                 data_size = self.train_val_dataset.get_vector_size()
                 nodes_number = self.train_val_dataset.nodes_number()
                 model = ValuesAndGraphStructure(nodes_number, data_size, self.RECEIVED_PARAMS, self.device)
@@ -169,9 +169,9 @@ class TrainTestValKTimes:
     def plot_acc_loss_auc(self, root, date, trainer_and_tester):
         # root = os.path.join(root, f'Values_and_graph_structure_on_nodes_model_{date}')
         # os.mkdir(root)
-        with open(os.path.join(root, "params_file.json"), 'w') as pf:
+        with open(os.path.join(root, "params_file_1_gcn.json"), 'w') as pf:
             json.dump(self.RECEIVED_PARAMS, pf)
-        # copyfile(params_file, os.path.join(root, "params_file.json"))
+        # copyfile(params_file_1_gcn, os.path.join(root, "params_file_1_gcn.json"))
         self.plot_measurement(root, date, trainer_and_tester, LOSS_PLOT)
         # self.plot_measurement(root, date, ACCURACY_PLOT)
         self.plot_measurement(root, date, trainer_and_tester, AUC_PLOT)

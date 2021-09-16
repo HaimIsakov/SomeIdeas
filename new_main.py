@@ -48,7 +48,7 @@ class Main:
         return cur_dataset
 
     def turn_on_train(self):
-        my_tasks = MyTasks(tasks_dict)
+        my_tasks = MyTasks(tasks_dict, self.dataset_name)
         my_datasets = MyDatasets(datasets_dict)
 
         directory_name, mission, params_file_path = my_tasks.get_task_files(self.task_number)
@@ -173,7 +173,7 @@ def run_regular():
     pytorch_geometric_mode = False
     add_attributes = False
 
-    my_tasks = MyTasks(tasks_dict)
+    my_tasks = MyTasks(tasks_dict, dataset_name)
     directory_name, mission, params_file_path = my_tasks.get_task_files(mission_number)
     if nni_flag:
         RECEIVED_PARAMS = nni.get_next_parameter()
