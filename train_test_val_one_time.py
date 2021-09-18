@@ -61,6 +61,7 @@ class TrainTestValOneTime:
             auc_result = roc_auc_score(true_labels, pred)
         except:
             print("An Error")
+            raise
         return auc_result
 
     def train(self):
@@ -78,7 +79,7 @@ class TrainTestValOneTime:
         # run the main training loop
         for epoch in range(epochs):
             self.model.train()  # prep model for training
-            self.alpha_list.append(self.model.alpha.item())
+
             batched_train_loss = []
             for data, adjacency_matrix, target in self.train_loader:
                 data, adjacency_matrix, target = data.to(self.device), adjacency_matrix.to(self.device), target.to(self.device)
@@ -93,6 +94,8 @@ class TrainTestValOneTime:
                 optimizer.step()  # perform a single optimization step (parameter update)
                 batched_train_loss.append(loss.item())
 
+            self.alpha_list.append(self.model.alpha.item())
+            print("Alpha value:", self.model.alpha.item())
             average_train_loss, train_auc, val_loss, val_auc = self.record_evaluations(batched_train_loss)
             # early_training_results['train_auc'] = train_auc
             # if val_auc == 0.5 and train_auc == 0.5:

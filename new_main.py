@@ -20,12 +20,13 @@ from MyDatasets import *
 
 LOG = logging.getLogger('nni_logger')
 K = 10  # For k-cross-validation
-datasets_dict = {"gdm": MyDatasets.gdm_files, "cirrhosis": MyDatasets.cirrhosis_files, "IBD": MyDatasets.ibd_files,
+# "gdm": MyDatasets.gdm_files,"male_vs_female_species": MyDatasets.male_vs_female_species
+datasets_dict = {"cirrhosis": MyDatasets.cirrhosis_files, "IBD": MyDatasets.ibd_files,
                  "bw": MyDatasets.bw_files, "IBD_Chrone": MyDatasets.ibd_chrone_files,
                  "allergy_or_not": MyDatasets.allergy_or_not_files,
                  "allergy_milk_or_not": MyDatasets.allergy_milk_or_not_files,
                  "male_vs_female": MyDatasets.male_vs_female,
-                 "male_vs_female_species": MyDatasets.male_vs_female_species}
+                 }
 
 tasks_dict = {1: MyTasks.just_values, 2: MyTasks.just_graph_structure, 3: MyTasks.values_and_graph_structure,
               4: MyTasks.pytorch_geometric}
@@ -72,9 +73,9 @@ class Main:
 
 def set_arguments():
     parser = argparse.ArgumentParser(description='Main script of all models')
-    parser.add_argument("--dataset", help="Dataset name", default="gdm", type=str)
+    parser.add_argument("--dataset", help="Dataset name", default="IBD", type=str)
     parser.add_argument("--task_number", help="Task number", default=1, type=int)
-    parser.add_argument("--device_num", help="Cuda Device Number", default=0, type=int)
+    parser.add_argument("--device_num", help="Cuda Device Number", default=1, type=int)
     parser.add_argument("--nni", help="is nni mode", default=0, type=int)
     return parser
 
@@ -150,7 +151,7 @@ def reproduce_from_nni(nni_result_file, dataset_name, mission_number):
     nni_flag = False
     pytorch_geometric_mode = False
     add_attributes = False
-    cuda_number = 0
+    cuda_number = 1
     device = f"cuda:{cuda_number}" if torch.cuda.is_available() else "cpu"
     print("Device", device)
     for RECEIVED_PARAMS in params_list:
@@ -163,16 +164,18 @@ def reproduce_from_nni(nni_result_file, dataset_name, mission_number):
             print(type(v))
 
 
-def run_regular():
-    parser = set_arguments()
-    args = parser.parse_args()
-    dataset_name = args.dataset
-    mission_number = args.task_number
-    cuda_number = args.device_num
-    nni_flag = False if args.nni == 0 else True
-    pytorch_geometric_mode = False
-    add_attributes = False
+def run_all_dataset(mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes):
+    for dataset_name in datasets_dict.keys():
+        try:
+            run_regular(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
+        except Exception as e:
+            print(e)
 
+def run_all_datasets_missions(cuda_number, nni_flag, pytorch_geometric_mode, add_attributes):
+    for mission_number in tasks_dict.keys():
+        run_all_dataset(mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
+
+def run_regular(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes):
     my_tasks = MyTasks(tasks_dict, dataset_name)
     directory_name, mission, params_file_path = my_tasks.get_task_files(mission_number)
     if nni_flag:
@@ -185,7 +188,10 @@ def run_regular():
     RECEIVED_PARAMS["train_frac"] = np.float64(RECEIVED_PARAMS["train_frac"])
     RECEIVED_PARAMS["test_frac"] = np.float64(RECEIVED_PARAMS["test_frac"])
 
+    print("Dataset", dataset_name)
     device = f"cuda:{cuda_number}" if torch.cuda.is_available() else "cpu"
+    print("Device", device)
+    print("Task", mission)
     main_runner = Main(dataset_name, mission_number, RECEIVED_PARAMS, device, nni_mode=nni_flag,
                        geometric_mode=pytorch_geometric_mode, add_attributes=add_attributes, plot_figures=False)
     train_metric, val_metric, test_metric, min_train_val_metric = main_runner.turn_on_train()
@@ -195,7 +201,19 @@ def run_regular():
 
 if __name__ == '__main__':
     try:
-        run_regular()
+        parser = set_arguments()
+        args = parser.parse_args()
+        dataset_name = args.dataset
+
+        mission_number = args.task_number
+        cuda_number = args.device_num
+        nni_flag = False if args.nni == 0 else True
+        pytorch_geometric_mode = False
+        add_attributes = False
+
+        run_regular(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
+        # run_all_dataset(3, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
+
         # try:
         #     print("cirrhosis_nni_graph_and_values")
         #     reproduce_from_nni(os.path.join("nni_results_fixed", "cirrhosis_nni_fixed_graph_and_values.csv"), "cirrhosis", 3)

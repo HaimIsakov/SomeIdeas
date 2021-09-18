@@ -15,13 +15,15 @@ class JustGraphStructure(nn.Module):
         self.fc2 = nn.Linear(int(self.RECEIVED_PARAMS["layer_1"]), int(self.RECEIVED_PARAMS["layer_2"]))
         self.fc3 = nn.Linear(int(self.RECEIVED_PARAMS["layer_2"]), 1)
         self.device = device
-        self.alpha = nn.Parameter(torch.rand(1, requires_grad=True)).to(self.device)
+        self.alpha = nn.Parameter(torch.rand(1, requires_grad=True, device=self.device))
+        # self.alpha = nn.Parameter(torch.tensor([-0.1], requires_grad=True, device=self.device))
         self.activation_func = self.RECEIVED_PARAMS['activation']
         self.dropout = nn.Dropout(p=self.RECEIVED_PARAMS["dropout"])
 
     def forward(self, x, adjacency_matrix):
         # multiply the matrix adjacency_matrix by (learnt scalar) self.alpha
-        alpha_A = torch.mul(adjacency_matrix, self.alpha)  # 𝛼A
+        # alpha_A = torch.mul(adjacency_matrix, self.alpha)  # 𝛼A  - this function does not forward gradients
+        alpha_A = adjacency_matrix * self.alpha.expand_as(adjacency_matrix)  # 𝛼A
         a, b, c = alpha_A.shape
         d, e, f = x.shape
         I = torch.eye(b).to(self.device)
@@ -57,7 +59,13 @@ class JustGraphStructure(nn.Module):
     def calculate_adjacency_matrix(self, batched_adjacency_matrix):
         # D^(-0.5)
         def calc_d_minus_root_sqr(batched_adjacency_matrix):
-            return torch.stack([torch.diag(torch.pow(adjacency_matrix.sum(1), -0.5)) for adjacency_matrix in batched_adjacency_matrix])
+            # print("Alpha when stuck", self.alpha.item())
+            s = torch.stack([torch.diag(torch.pow(adjacency_matrix.sum(1), -0.5)) for adjacency_matrix in batched_adjacency_matrix])
+            if torch.isnan(s).any():
+                print("Alpha when stuck", self.alpha.item())
+                print("batched_adjacency_matrix", torch.isnan(batched_adjacency_matrix).any())
+                print("The model is stuck", torch.isnan(s).any())
+            return s
         D__minus_sqrt = calc_d_minus_root_sqr(batched_adjacency_matrix)
         normalized_adjacency = torch.matmul(torch.matmul(D__minus_sqrt, batched_adjacency_matrix), D__minus_sqrt)
         return normalized_adjacency

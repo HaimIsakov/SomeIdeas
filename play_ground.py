@@ -1,5 +1,6 @@
 import numpy as np
 import torch
+import torch.nn as nn
 # from graph_measures.features_algorithms.vertices.average_neighbor_degree import AverageNeighborDegreeCalculator
 # from graph_measures.features_algorithms.vertices.closeness_centrality import ClosenessCentralityCalculator
 # from graph_measures.features_algorithms.vertices.communicability_betweenness_centrality import \
@@ -20,7 +21,17 @@ import torch
 # from graph_measures.features_algorithms.vertices.betweenness_centrality import BetweennessCentralityCalculator
 
 if __name__ == "__main__":
+    b = torch.tensor([-0.03, 1])
+    print(b)
+    r = nn.Parameter(torch.tensor([-1]))
+    print(torch.abs(r))
+    print(torch.pow(b, -0.5))
+    print(torch.isnan(torch.pow(b, -0.5)).any())
+
+    print(torch.__version__)
     x = torch.tensor([[[1, 2], [3, 4]], [[5, 6], [7, 8]]])
+    alpha = torch.tensor([0.5])
+    print(x * alpha.expand_as(x))
     print(torch.mul(x, 0.5))
     print(x)
     print(x.shape)
