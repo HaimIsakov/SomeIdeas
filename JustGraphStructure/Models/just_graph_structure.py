@@ -23,14 +23,14 @@ class JustGraphStructure(nn.Module):
     def forward(self, x, adjacency_matrix):
         # multiply the matrix adjacency_matrix by (learnt scalar) self.alpha
         # alpha_A = torch.mul(adjacency_matrix, self.alpha)  # 𝛼A  - this function does not forward gradients
-        alpha_A = adjacency_matrix * self.alpha.expand_as(adjacency_matrix)  # 𝛼A
-        a, b, c = alpha_A.shape
+        a, b, c = adjacency_matrix.shape
         d, e, f = x.shape
         I = torch.eye(b).to(self.device)
-        alpha_A_plus_I = alpha_A + I  # 𝛼A + I
-        normalized_adjacency_matrix = self.calculate_adjacency_matrix(alpha_A_plus_I)
+        alpha_I = I * self.alpha.expand_as(I)  # 𝛼I
+        normalized_adjacency_matrix = self.calculate_adjacency_matrix(adjacency_matrix)  # Ã
+        alpha_I_plus_A = alpha_I + normalized_adjacency_matrix  # 𝛼I + Ã
         x = torch.sign(x)
-        x = torch.matmul(normalized_adjacency_matrix, x)  # (𝛼A + I)·x
+        x = torch.matmul(alpha_I_plus_A, x)  # (𝛼I + Ã)·x
         if self.activation_func == 'relu':
             x = F.relu(self.pre_weighting(x))  # (𝛼A + I)·x·W
             # a/d variables are the batch size
@@ -56,11 +56,51 @@ class JustGraphStructure(nn.Module):
         x = self.fc3(x)
         return x
 
+    # def forward(self, x, adjacency_matrix):
+    #     # multiply the matrix adjacency_matrix by (learnt scalar) self.alpha
+    #     # alpha_A = torch.mul(adjacency_matrix, self.alpha)  # 𝛼A  - this function does not forward gradients
+    #     alpha_A = adjacency_matrix * self.alpha.expand_as(adjacency_matrix)  # 𝛼A
+    #     a, b, c = alpha_A.shape
+    #     d, e, f = x.shape
+    #     I = torch.eye(b).to(self.device)
+    #     alpha_A_plus_I = alpha_A + I  # 𝛼A + I
+    #     normalized_adjacency_matrix = self.calculate_adjacency_matrix(alpha_A_plus_I)
+    #     x = torch.sign(x)
+    #     x = torch.matmul(normalized_adjacency_matrix, x)  # (𝛼A + I)·x
+    #     if self.activation_func == 'relu':
+    #         x = F.relu(self.pre_weighting(x))  # (𝛼A + I)·x·W
+    #         # a/d variables are the batch size
+    #         # x = x.view(d, 1, -1)
+    #         x = torch.flatten(x, start_dim=1)  # flatten the tensor
+    #         x = F.relu(self.fc1(x))
+    #         x = self.dropout(x)
+    #         x = F.relu(self.fc2(x))
+    #     elif self.activation_func == 'elu':
+    #         x = F.elu(self.pre_weighting(x))   # (𝛼A + I)·x·W
+    #         # x = x.view(d, 1, -1)
+    #         x = torch.flatten(x, start_dim=1)  # flatten the tensor
+    #         x = F.elu(self.fc1(x))
+    #         x = self.dropout(x)
+    #         x = F.elu(self.fc2(x))
+    #     elif self.activation_func == 'tanh':
+    #         x = torch.tanh(self.pre_weighting(x))   # (𝛼A + I)·x·W
+    #         # x = x.view(d, 1, -1)
+    #         x = torch.flatten(x, start_dim=1)  # flatten the tensor
+    #         x = torch.tanh(self.fc1(x))
+    #         x = self.dropout(x)
+    #         x = torch.tanh(self.fc2(x))
+    #     x = self.fc3(x)
+    #     return x
+
     def calculate_adjacency_matrix(self, batched_adjacency_matrix):
         # D^(-0.5)
         def calc_d_minus_root_sqr(batched_adjacency_matrix):
-            # print("Alpha when stuck", self.alpha.item())
-            s = torch.stack([torch.diag(torch.pow(adjacency_matrix.sum(1), -0.5)) for adjacency_matrix in batched_adjacency_matrix])
+            r = []
+            for adjacency_matrix in batched_adjacency_matrix:
+                sum_of_each_row = adjacency_matrix.sum(1)
+                sum_of_each_row_plus_one = torch.where(sum_of_each_row != 0, sum_of_each_row, torch.tensor(1.0))
+                r.append(torch.diag(torch.pow(sum_of_each_row_plus_one, -0.5)))
+            s = torch.stack(r)
             if torch.isnan(s).any():
                 print("Alpha when stuck", self.alpha.item())
                 print("batched_adjacency_matrix", torch.isnan(batched_adjacency_matrix).any())
