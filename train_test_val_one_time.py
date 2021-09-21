@@ -94,8 +94,11 @@ class TrainTestValOneTime:
                 optimizer.step()  # perform a single optimization step (parameter update)
                 batched_train_loss.append(loss.item())
 
-            self.alpha_list.append(self.model.alpha.item())
-            print("Alpha value:", self.model.alpha.item())
+            try:
+                self.alpha_list.append(self.model.alpha.item())
+                print("Alpha value:", self.model.alpha.item())
+            except:
+                pass
             average_train_loss, train_auc, val_loss, val_auc = self.record_evaluations(batched_train_loss)
             # early_training_results['train_auc'] = train_auc
             # if val_auc == 0.5 and train_auc == 0.5:

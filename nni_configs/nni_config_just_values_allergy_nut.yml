@@ -1,5 +1,5 @@
 authorName: Haim
-experimentName: NNI_Just_Values_and_Graph_Structure_Cirrhosis
+experimentName: NNI_Just_Values_Allergy_Nut
 trialConcurrency: 1   # max GPUs to use simultaneously.
 maxExecDuration: 24h
 maxTrialNum: 99999
@@ -16,7 +16,7 @@ tuner:
     #choice: maximize, minimize
     optimize_mode: maximize
 trial:
-  command: python new_main.py --nni 1 --task_number 3 --dataset cirrhosis --device_num 1
+  command: python new_main.py --nni 1 --task_number 1 --dataset nut --device_num 1
   codeDir: ..
   gpuNum: 2
 localConfig:

@@ -87,6 +87,24 @@ class MyDatasets:
         train_data_file_path = os.path.join(origin_dir,'Male_vs_Female_Species_split_dataset', 'train_val_set_Male_vs_Female_Species_microbiome.csv')
         train_tag_file_path = os.path.join(origin_dir,'Male_vs_Female_Species_split_dataset', 'train_val_set_Male_vs_Female_Species_tags.csv')
 
-        test_data_file_path = os.path.join('Male_vs_Female_Species_split_dataset', 'test_set_Male_vs_Female_Species_microbiome.csv')
-        test_tag_file_path = os.path.join('Male_vs_Female_Species_split_dataset', 'test_set_Male_vs_Female_Species_tags.csv')
+        test_data_file_path = os.path.join(origin_dir,'Male_vs_Female_Species_split_dataset', 'test_set_Male_vs_Female_Species_microbiome.csv')
+        test_tag_file_path = os.path.join(origin_dir,'Male_vs_Female_Species_split_dataset', 'test_set_Male_vs_Female_Species_tags.csv')
+        return train_data_file_path, train_tag_file_path, test_data_file_path, test_tag_file_path
+
+    @staticmethod
+    def peanut():
+        train_data_file_path = os.path.join(origin_dir, 'Allergy_peanut_split_dataset', 'train_val_set_peanut_microbiome.csv')
+        train_tag_file_path = os.path.join(origin_dir, 'Allergy_peanut_split_dataset', 'train_val_set_peanut_tags.csv')
+
+        test_data_file_path = os.path.join(origin_dir,'Allergy_peanut_split_dataset', 'test_set_peanut_microbiome.csv')
+        test_tag_file_path = os.path.join(origin_dir,'Allergy_peanut_split_dataset', 'test_set_peanut_tags.csv')
+        return train_data_file_path, train_tag_file_path, test_data_file_path, test_tag_file_path
+
+    @staticmethod
+    def nut():
+        train_data_file_path = os.path.join(origin_dir, 'Allergy_nut_split_dataset', 'train_val_set_nut_microbiome.csv')
+        train_tag_file_path = os.path.join(origin_dir, 'Allergy_nut_split_dataset', 'train_val_set_nut_tags.csv')
+
+        test_data_file_path = os.path.join(origin_dir,'Allergy_nut_split_dataset', 'test_set_nut_microbiome.csv')
+        test_tag_file_path = os.path.join(origin_dir,'Allergy_nut_split_dataset', 'test_set_nut_tags.csv')
         return train_data_file_path, train_tag_file_path, test_data_file_path, test_tag_file_path

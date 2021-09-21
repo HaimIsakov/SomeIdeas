@@ -73,7 +73,7 @@ class GraphDataset(Dataset):
             # v = torch.FloatTensor(values)
             # shape = sparse_adjacency_matrix.shape
             # x = torch.sparse.FloatTensor(i, v, torch.Size(shape))
-            if self.mission == "JustValues":
+            if self.mission == "just_values":
                 values = index_value['values_on_leaves']
             else:
                 values = index_value['values_on_nodes']

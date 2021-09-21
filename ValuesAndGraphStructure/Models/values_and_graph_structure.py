@@ -113,7 +113,7 @@ class ValuesAndGraphStructure(nn.Module):
             r = []
             for adjacency_matrix in batched_adjacency_matrix:
                 sum_of_each_row = adjacency_matrix.sum(1)
-                sum_of_each_row_plus_one = torch.where(sum_of_each_row != 0, sum_of_each_row, torch.tensor(1.0))
+                sum_of_each_row_plus_one = torch.where(sum_of_each_row != 0, sum_of_each_row, torch.tensor(1.0, device=self.device))
                 r.append(torch.diag(torch.pow(sum_of_each_row_plus_one, -0.5)))
             s = torch.stack(r)
             if torch.isnan(s).any():

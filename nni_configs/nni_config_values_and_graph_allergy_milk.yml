@@ -17,7 +17,7 @@ tuner:
     optimize_mode: maximize
 trial:
   command: python new_main.py --nni 1 --task_number 3 --dataset allergy_milk_or_not --device_num 1
-  codeDir: .
+  codeDir: ..
   gpuNum: 2
 localConfig:
   useActiveGpu: true

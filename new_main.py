@@ -20,12 +20,12 @@ from MyDatasets import *
 
 LOG = logging.getLogger('nni_logger')
 K = 10  # For k-cross-validation
-# "gdm": MyDatasets.gdm_files,"male_vs_female_species": MyDatasets.male_vs_female_species
+# "gdm": MyDatasets.gdm_files,"male_vs_female_species": MyDatasets.male_vs_female_species,"allergy_or_not": MyDatasets.allergy_or_not_files,
 datasets_dict = {"cirrhosis": MyDatasets.cirrhosis_files, "IBD": MyDatasets.ibd_files,
                  "bw": MyDatasets.bw_files, "IBD_Chrone": MyDatasets.ibd_chrone_files,
-                 "allergy_or_not": MyDatasets.allergy_or_not_files,
                  "allergy_milk_or_not": MyDatasets.allergy_milk_or_not_files,
                  "male_vs_female": MyDatasets.male_vs_female,
+                 "nut": MyDatasets.nut, "peanut": MyDatasets.peanut
                  }
 
 tasks_dict = {1: MyTasks.just_values, 2: MyTasks.just_graph_structure, 3: MyTasks.values_and_graph_structure,
