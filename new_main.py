@@ -25,7 +25,7 @@ datasets_dict = {"cirrhosis": MyDatasets.cirrhosis_files, "IBD": MyDatasets.ibd_
                  "bw": MyDatasets.bw_files, "IBD_Chrone": MyDatasets.ibd_chrone_files,
                  "allergy_milk_or_not": MyDatasets.allergy_milk_or_not_files,
                  "male_vs_female": MyDatasets.male_vs_female,
-                 "nut": MyDatasets.nut, "peanut": MyDatasets.peanut
+                 "nut": MyDatasets.nut, "peanut": MyDatasets.peanut, "nugent": MyDatasets.nugent
                  }
 
 tasks_dict = {1: MyTasks.just_values, 2: MyTasks.just_graph_structure, 3: MyTasks.values_and_graph_structure,
@@ -214,36 +214,32 @@ if __name__ == '__main__':
         run_regular(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
         # run_all_dataset(3, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
 
+        #
         # try:
-        #     print("cirrhosis_nni_graph_and_values")
-        #     reproduce_from_nni(os.path.join("nni_results_fixed", "cirrhosis_nni_fixed_graph_and_values.csv"), "cirrhosis", 3)
+        #     print("allergy_nut_graph_and_values_normalized_A_plus_alpha_I")
+        #     reproduce_from_nni(os.path.join("nni_results_normalized_A_plus_alpha_I", "allergy_nut_graph_and_values_normalized_A_plus_alpha_I.csv"), "nut", 3)
         # except Exception as e:
         #     print(e)
         #     pass
         # try:
-        #     print("bw_nni_graph_and_values")
-        #     reproduce_from_nni(os.path.join("nni_results_fixed", "bw_nni_fixed_graph_and_values.csv"), "bw", 3)
+        #     print("allergy_peanut_graph_and_values_normalized_A_plus_alpha_I")
+        #     reproduce_from_nni(os.path.join("nni_results_normalized_A_plus_alpha_I", "allergy_peanut_graph_and_values_normalized_A_plus_alpha_I.csv"), "peanut", 3)
         # except Exception as e:
         #     print(e)
         #     pass
         # try:
-        #     print("gdm_nni_graph_and_values")
-        #     reproduce_from_nni(os.path.join("nni_results_fixed", "gdm_nni_fixed_graph_and_values.csv"), "gdm", 3)
+        #     print("allergy_nut_just_graph_normalized_A_plus_alpha_I")
+        #     reproduce_from_nni(os.path.join("nni_results_normalized_A_plus_alpha_I", "allergy_nut_just_graph_normalized_A_plus_alpha_I.csv"), "nut", 2)
         # except Exception as e:
         #     print(e)
         #     pass
         # try:
-        #     print("ibd_nni_graph_and_values")
-        #     reproduce_from_nni(os.path.join("nni_results_fixed", "ibd_nni_fixed_graph_and_values.csv"), "IBD", 3)
-        # except Exception as e:
-        #     print(e)
-        #     pass
-        # try:
-        #     print("ibd_chrone_graph_and_values")
-        #     reproduce_from_nni(os.path.join("nni_results_fixed", "ibd_chrone_nni_fixed_graph_and_values.csv"), "IBD_Chrone", 3)
+        #     print("allergy_peanut_just_graph_normalized_A_plus_alpha_I")
+        #     reproduce_from_nni(os.path.join("nni_results_normalized_A_plus_alpha_I", "allergy_peanut_just_graph_normalized_A_plus_alpha_I.csv"), "peanut", 2)
         # except Exception as e:
         #     print(e)
         #     pass
     except Exception as e:
         LOG.exception(e)
         raise
+

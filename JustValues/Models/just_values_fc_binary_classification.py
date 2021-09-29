@@ -16,24 +16,33 @@ class JustValuesOnNodes(nn.Module):
         #     torch.nn.init.xavier_normal_(self.fc1.weight)
         #     torch.nn.init.xavier_normal_(self.fc2.weight)
         #     torch.nn.init.xavier_normal_(self.fc3.weight)
-
+        self.activation_func_dict = {'relu': nn.ReLU(), 'elu': nn.ELU(), 'tanh': nn.Tanh()}
         self.dropout = nn.Dropout(p=self.RECEIVED_PARAMS["dropout"])
         self.activation_func = self.RECEIVED_PARAMS['activation']
+        self.classifier = nn.Sequential(
+            self.fc1,
+            self.activation_func_dict[self.activation_func],
+            self.dropout,
+            self.fc2,
+            self.activation_func_dict[self.activation_func],
+            )
 
     def forward(self, x, adjacency_matrix):
         # x = x.view(-1, self.data_size)
-        if self.activation_func == 'relu':
-            x = F.relu(self.fc1(x))
-            x = self.dropout(x)
-            x = F.relu(self.fc2(x))
-        elif self.activation_func == 'elu':
-            x = F.elu(self.fc1(x))
-            x = self.dropout(x)
-            x = F.elu(self.fc2(x))
-        elif self.activation_func == 'tanh':
-            x = torch.tanh(self.fc1(x))
-            x = self.dropout(x)
-            x = torch.tanh(self.fc2(x))
-        # x = torch.sigmoid(x) # BCE loss automatically applies sigmoid
+
+        # if self.activation_func == 'relu':
+        #     x = F.relu(self.fc1(x))
+        #     x = self.dropout(x)
+        #     x = F.relu(self.fc2(x))
+        # elif self.activation_func == 'elu':
+        #     x = F.elu(self.fc1(x))
+        #     x = self.dropout(x)
+        #     x = F.elu(self.fc2(x))
+        # elif self.activation_func == 'tanh':
+        #     x = torch.tanh(self.fc1(x))
+        #     x = self.dropout(x)
+        #     x = torch.tanh(self.fc2(x))
+
+        x = self.classifier(x)
         x = self.fc3(x)
         return x

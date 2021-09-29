@@ -1,5 +1,6 @@
 import os
 import networkx as nx
+import numpy as np
 import pandas as pd
 from tqdm import tqdm
 from taxonomy_tree_for_pytorch_geometric import create_tax_tree
@@ -11,9 +12,22 @@ def create_multi_graph(graphs_list):
     for graph in graphs_list:
         multi_graph.add_edges_from(graph.edges())
 
-    adj_mat = nx.adjacency_matrix(multi_graph).todense()
-    adj_mat_df = pd.DataFrame(adj_mat)
-    adj_mat_df.to_csv("multi_graph_adj_mat.csv")
+    multi_graph_adj_mat = nx.adjacency_matrix(multi_graph).todense()
+    G = nx.from_numpy_matrix(np.matrix(multi_graph_adj_mat))
+    weighted_graph_adj_mat = nx.adjacency_matrix(G).todense()
+    multi_graph_adj_mat_df = pd.DataFrame(multi_graph_adj_mat)
+    weighted_graph_adj_mat_df = pd.DataFrame(weighted_graph_adj_mat)
+    # adj_mat_df.to_csv("multi_graph_adj_mat.csv")
+    print(multi_graph_adj_mat_df.equals(weighted_graph_adj_mat_df))
+
+def count_edges_from_all_graphs(graphs_list):
+    edges_dict = {}
+    for graph in graphs_list:
+        cur_edges = dict(graph.edges())
+        for k, v in cur_edges.items():
+            if k not in edges_dict:
+                edges_dict[k] = 0
+            edges_dict[k] += 1
     print()
 
 
@@ -27,3 +41,4 @@ if __name__ == "__main__":
         graphs.append(cur_graph)
 
     create_multi_graph(graphs)
+    # count_edges_from_all_graphs(graphs)

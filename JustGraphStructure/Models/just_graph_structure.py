@@ -19,6 +19,19 @@ class JustGraphStructure(nn.Module):
         # self.alpha = nn.Parameter(torch.tensor([-0.1], requires_grad=True, device=self.device))
         self.activation_func = self.RECEIVED_PARAMS['activation']
         self.dropout = nn.Dropout(p=self.RECEIVED_PARAMS["dropout"])
+        self.activation_func_dict = {'relu': nn.ReLU(), 'elu': nn.ELU(), 'tanh': nn.Tanh()}
+
+        self.gcn_layer = nn.Sequential(
+            self.pre_weighting,
+            self.activation_func_dict[self.activation_func]
+        )
+        self.classifier = nn.Sequential(
+            self.fc1,
+            self.activation_func_dict[self.activation_func],
+            self.dropout,
+            self.fc2,
+            self.activation_func_dict[self.activation_func],
+        )
 
     def forward(self, x, adjacency_matrix):
         # multiply the matrix adjacency_matrix by (learnt scalar) self.alpha
@@ -31,28 +44,10 @@ class JustGraphStructure(nn.Module):
         alpha_I_plus_A = alpha_I + normalized_adjacency_matrix  # 𝛼I + Ã
         x = torch.sign(x)
         x = torch.matmul(alpha_I_plus_A, x)  # (𝛼I + Ã)·x
-        if self.activation_func == 'relu':
-            x = F.relu(self.pre_weighting(x))  # (𝛼A + I)·x·W
-            # a/d variables are the batch size
-            # x = x.view(d, 1, -1)
-            x = torch.flatten(x, start_dim=1)  # flatten the tensor
-            x = F.relu(self.fc1(x))
-            x = self.dropout(x)
-            x = F.relu(self.fc2(x))
-        elif self.activation_func == 'elu':
-            x = F.elu(self.pre_weighting(x))   # (𝛼A + I)·x·W
-            # x = x.view(d, 1, -1)
-            x = torch.flatten(x, start_dim=1)  # flatten the tensor
-            x = F.elu(self.fc1(x))
-            x = self.dropout(x)
-            x = F.elu(self.fc2(x))
-        elif self.activation_func == 'tanh':
-            x = torch.tanh(self.pre_weighting(x))   # (𝛼A + I)·x·W
-            # x = x.view(d, 1, -1)
-            x = torch.flatten(x, start_dim=1)  # flatten the tensor
-            x = torch.tanh(self.fc1(x))
-            x = self.dropout(x)
-            x = torch.tanh(self.fc2(x))
+
+        x = self.gcn_layer(x)
+        x = torch.flatten(x, start_dim=1)  # flatten the tensor
+        x = self.classifier(x)
         x = self.fc3(x)
         return x
 

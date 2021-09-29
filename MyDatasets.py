@@ -108,3 +108,12 @@ class MyDatasets:
         test_data_file_path = os.path.join(origin_dir,'Allergy_nut_split_dataset', 'test_set_nut_microbiome.csv')
         test_tag_file_path = os.path.join(origin_dir,'Allergy_nut_split_dataset', 'test_set_nut_tags.csv')
         return train_data_file_path, train_tag_file_path, test_data_file_path, test_tag_file_path
+
+    @staticmethod
+    def nugent():
+        train_data_file_path = os.path.join(origin_dir, 'Nugent_split_dataset', 'train_val_set_nugent_microbiome.csv')
+        train_tag_file_path = os.path.join(origin_dir, 'Nugent_split_dataset', 'train_val_set_nugent_tags.csv')
+
+        test_data_file_path = os.path.join(origin_dir, 'Nugent_split_dataset', 'test_set_nugent_microbiome.csv')
+        test_tag_file_path = os.path.join(origin_dir, 'Nugent_split_dataset', 'test_set_nugent_tags.csv')
+        return train_data_file_path, train_tag_file_path, test_data_file_path, test_tag_file_path
