@@ -117,3 +117,13 @@ class MyDatasets:
         test_data_file_path = os.path.join(origin_dir, 'Nugent_split_dataset', 'test_set_nugent_microbiome.csv')
         test_tag_file_path = os.path.join(origin_dir, 'Nugent_split_dataset', 'test_set_nugent_tags.csv')
         return train_data_file_path, train_tag_file_path, test_data_file_path, test_tag_file_path
+
+
+    @staticmethod
+    def allergy_milk_no_controls():
+        train_data_file_path = os.path.join(origin_dir, 'Allergy_milk_no_controls_split_dataset', 'train_val_set_milk_no_controls_microbiome.csv')
+        train_tag_file_path = os.path.join(origin_dir, 'Allergy_milk_no_controls_split_dataset', 'train_val_set_milk_no_controls_tags.csv')
+
+        test_data_file_path = os.path.join(origin_dir, 'Allergy_milk_no_controls_split_dataset', 'test_set_milk_no_controls_microbiome.csv')
+        test_tag_file_path = os.path.join(origin_dir, 'Allergy_milk_no_controls_split_dataset', 'test_set_milk_no_controls_tags.csv')
+        return train_data_file_path, train_tag_file_path, test_data_file_path, test_tag_file_path

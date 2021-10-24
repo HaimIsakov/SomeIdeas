@@ -25,11 +25,12 @@ datasets_dict = {"cirrhosis": MyDatasets.cirrhosis_files, "IBD": MyDatasets.ibd_
                  "bw": MyDatasets.bw_files, "IBD_Chrone": MyDatasets.ibd_chrone_files,
                  "allergy_milk_or_not": MyDatasets.allergy_milk_or_not_files,
                  "male_vs_female": MyDatasets.male_vs_female,
-                 "nut": MyDatasets.nut, "peanut": MyDatasets.peanut, "nugent": MyDatasets.nugent
-                 }
+                 "nut": MyDatasets.nut, "peanut": MyDatasets.peanut, "nugent": MyDatasets.nugent,
+                 "allergy_milk_no_controls": MyDatasets.allergy_milk_no_controls}
 
 tasks_dict = {1: MyTasks.just_values, 2: MyTasks.just_graph_structure, 3: MyTasks.values_and_graph_structure,
               4: MyTasks.pytorch_geometric}
+
 
 
 class Main:
@@ -211,7 +212,11 @@ if __name__ == '__main__':
         pytorch_geometric_mode = False
         add_attributes = False
 
-        run_regular(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
+        run_regular("allergy_milk_no_controls", 1, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
+        run_regular("allergy_milk_no_controls", 2, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
+        run_regular("allergy_milk_no_controls", 3, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
+
+        # run_regular(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
         # run_all_dataset(3, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
 
         #
