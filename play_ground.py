@@ -9,59 +9,58 @@ import torch.nn as nn
 # from graph_measures.features_algorithms.vertices.load_centrality import LoadCentralityCalculator
 # from graph_measures.features_infra.feature_calculators import FeatureMeta
 # from graph_measures.loggers import PrintLogger
-# from taxonomy_tree_for_pytorch_geometric import create_tax_tree
-# import os
-# import pandas as pd
+
+from taxonomy_tree_for_pytorch_geometric import create_tax_tree
+import os
+import pandas as pd
 # from torch_geometric.data import DataLoader
 # from torch_geometric.utils.convert import from_networkx
-# from tqdm import tqdm
+from tqdm import tqdm
 # from graph_measures.features_infra.graph_features import GraphFeatures
 #
 # from graph_measures.features_algorithms.vertices.louvain import LouvainCalculator
 # from graph_measures.features_algorithms.vertices.betweenness_centrality import BetweennessCentralityCalculator
 
-if __name__ == "__main__":
-    b = torch.tensor([-0.03, 1])
-    print(b)
-    r = nn.Parameter(torch.tensor([-1]))
-    print(torch.abs(r))
-    print(torch.pow(b, -0.5))
-    print(torch.isnan(torch.pow(b, -0.5)).any())
-
-    print(torch.__version__)
-    x = torch.tensor([[[1, 2], [3, 4]], [[5, 6], [7, 8]]])
-    alpha = torch.tensor([0.5])
-    print(x * alpha.expand_as(x))
-    print(torch.mul(x, 0.5))
-    print(x)
-    print(x.shape)
-    y = x.view(2, 1, -1)
-    z = torch.flatten(x, start_dim=1)
-    print(y)
-    print(y.shape)
-    print(z)
-    print(z.shape)
-
-
-
+# if __name__ == "__main__":
+#     b = torch.tensor([-0.03, 1])
+#     print(b)
+#     r = nn.Parameter(torch.tensor([-1]))
+#     print(torch.abs(r))
+#     print(torch.pow(b, -0.5))
+#     print(torch.isnan(torch.pow(b, -0.5)).any())
 #
-# if __name__ == '__main__':
-#     # data_file_path = os.path.join('Cirrhosis_split_dataset', 'train_val_set_Cirrhosis_microbiome.csv')
-#     # data_file_path = os.path.join('GDM_split_dataset', 'train_val_set_gdm_microbiome.csv')
-#     # data_file_path = os.path.join('Allergy', 'OTU_Allergy_after_mipmlp_Genus_same_ids.csv')
-#     data_file_path = os.path.join('Black_vs_White_split_dataset', 'OTU_Black_vs_White_after_mipmlp_Genus_same_ids.csv')
-#     # data_file_path = os.path.join('IBD_split_dataset', 'OTU_IBD_after_mipmlp_Genus.csv')
-#     microbiome_df = pd.read_csv(data_file_path, index_col='ID')
-#     nodes_number = []
-#     graphs = []
-#     for i, mom in tqdm(enumerate(microbiome_df.iterrows()), desc='Create graphs', total=len(microbiome_df)):
-#         # cur_graph = create_tax_tree(microbiome_df.iloc[i], ignore_values=0, ignore_flag=True)
-#         cur_graph = create_tax_tree(microbiome_df.iloc[i])
-#         graphs.append(cur_graph)
-#         nodes_number.append(cur_graph.number_of_nodes())
-#         # print("Nodes Number", cur_graph.number_of_nodes())
+#     print(torch.__version__)
+#     x = torch.tensor([[[1, 2], [3, 4]], [[5, 6], [7, 8]]])
+#     alpha = torch.tensor([0.5])
+#     print(x * alpha.expand_as(x))
+#     print(torch.mul(x, 0.5))
+#     print(x)
+#     print(x.shape)
+#     y = x.view(2, 1, -1)
+#     z = torch.flatten(x, start_dim=1)
+#     print(y)
+#     print(y.shape)
+#     print(z)
+#     print(z.shape)
+
+
+if __name__ == '__main__':
+    # data_file_path = os.path.join('Cirrhosis_split_dataset', 'train_val_set_Cirrhosis_microbiome.csv')
+    # data_file_path = os.path.join('GDM_split_dataset', 'train_val_set_gdm_microbiome.csv')
+    # data_file_path = os.path.join('Allergy', 'OTU_Allergy_after_mipmlp_Genus_same_ids.csv')
+    data_file_path = os.path.join('Black_vs_White_split_dataset', 'OTU_Black_vs_White_after_mipmlp_Genus_same_ids.csv')
+    # data_file_path = os.path.join('IBD_split_dataset', 'OTU_IBD_after_mipmlp_Genus.csv')
+    microbiome_df = pd.read_csv(data_file_path, index_col='ID')
+    nodes_number = []
+    graphs = []
+    for i, mom in tqdm(enumerate(microbiome_df.iterrows()), desc='Create graphs', total=len(microbiome_df)):
+        # cur_graph = create_tax_tree(microbiome_df.iloc[i], ignore_values=0, ignore_flag=True)
+        cur_graph = create_tax_tree(microbiome_df.iloc[i])
+        graphs.append(cur_graph)
+        nodes_number.append(cur_graph.number_of_nodes())
+        # print("Nodes Number", cur_graph.number_of_nodes())
 #     logger = PrintLogger("MyLogger")
-#
+
 #     for ind, graph in enumerate(graphs):
 #         print(ind)
 #         features_meta = {

@@ -1,7 +1,6 @@
-from tqdm import tqdm
-# from taxonomy_tree import *
 from graph_measures.loggers import PrintLogger
-from taxonomy_tree_for_pytorch_geometric import *
+# from taxonomy_tree_for_pytorch_geometric import *
+# from taxonomy_tree_for_pytorch_geometric import create_tax_tree
 import numpy as np
 
 from graph_measures.features_algorithms.vertices.average_neighbor_degree import AverageNeighborDegreeCalculator
@@ -14,7 +13,8 @@ from graph_measures.features_algorithms.vertices.louvain import LouvainCalculato
 from graph_measures.features_algorithms.vertices.betweenness_centrality import BetweennessCentralityCalculator
 
 from tqdm import tqdm
-from taxonomy_tree_for_pytorch_geometric import create_tax_tree
+
+from taxonomy_tree_average_sons import *
 
 class CreateMicrobiomeGraphs:
     def __init__(self, df, add_attributes):

@@ -212,11 +212,11 @@ if __name__ == '__main__':
         pytorch_geometric_mode = False
         add_attributes = False
 
-        run_regular("allergy_milk_no_controls", 1, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
-        run_regular("allergy_milk_no_controls", 2, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
-        run_regular("allergy_milk_no_controls", 3, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
+        # run_regular("allergy_milk_no_controls", 1, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
+        # run_regular("allergy_milk_no_controls", 2, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
+        # run_regular("allergy_milk_no_controls", 3, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
 
-        # run_regular(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
+        run_regular(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
         # run_all_dataset(3, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
 
         #
