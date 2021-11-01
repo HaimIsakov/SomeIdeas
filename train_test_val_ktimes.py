@@ -8,6 +8,7 @@ from torch.utils.data import DataLoader
 import matplotlib.pyplot as plt
 import torch
 
+from OneHeadAttention.Models.ofek_model import AttentionGCN
 from ValuesAndGraphStructure.Models.graph_attention_layer import GraphAttentionLayer, GAT
 from ValuesAndGraphStructure.Models.two_gcn_layers_graph_and_values import TwoLayersGCNValuesGraph
 from train_test_val_one_time import TrainTestValOneTime
@@ -123,6 +124,10 @@ class TrainTestValKTimes:
                 nodes_number = self.train_val_dataset.nodes_number()
                 model = ValuesAndGraphStructure(nodes_number, data_size, self.RECEIVED_PARAMS, self.device)
                 # model = TwoLayersGCNValuesGraph(nodes_number, data_size, self.RECEIVED_PARAMS, self.device)
+            elif self.train_val_dataset.mission == "one_head_attention":
+                data_size = self.train_val_dataset.get_vector_size()
+                nodes_number = self.train_val_dataset.nodes_number()
+                model = AttentionGCN(nodes_number, data_size, self.RECEIVED_PARAMS, self.device)
         else:
             data_size = self.train_val_dataset.get_vector_size()
             model = GCN(1, self.RECEIVED_PARAMS, self.device)
