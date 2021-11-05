@@ -1,0 +1,2 @@
+﻿initial size,embed algo,regression,test,micro-f1,macro-f1,auc
+100,node2vec,OGRE,0.1,0.811+-0.116,0.811+-0.163,0.812+-0.117
