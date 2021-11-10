@@ -1,10 +1,32 @@
-import numpy as np
-from node2vec import Node2Vec
+import os
 
+import networkx as nx
+import numpy as np
+import pandas as pd
+from node2vec import Node2Vec
+from tqdm import tqdm
+
+from taxonomy_tree_average_sons import create_tax_tree
+
+
+def create_multi_graph(graphs_list):
+    multi_graph = nx.MultiGraph()
+    # Assumption: all graphs have the same nodes
+    multi_graph.add_nodes_from(graphs_list[0].nodes(data=False))
+    for graph in graphs_list:
+        multi_graph.add_edges_from(graph.edges())
+
+    multi_graph_adj_mat = nx.adjacency_matrix(multi_graph).todense()
+    G = nx.from_numpy_matrix(np.matrix(multi_graph_adj_mat))
+    # weighted_graph_adj_mat = nx.adjacency_matrix(G).todense()
+    # multi_graph_adj_mat_df = pd.DataFrame(multi_graph_adj_mat)
+    # weighted_graph_adj_mat_df = pd.DataFrame(weighted_graph_adj_mat)
+    # adj_mat_df.to_csv("multi_graph_adj_mat.csv")
+    # print(multi_graph_adj_mat_df.equals(weighted_graph_adj_mat_df))
+    return G
 
 def node2vec_embed(graph):
-
-    node2vec = Node2Vec(graph, dimensions=128, walk_length=80, num_walks=16, workers=2)
+    node2vec = Node2Vec(graph, dimensions=128, walk_length=80, num_walks=16, weight_key='weight')
     model = node2vec.fit()
     nodes = list(graph.nodes())
     my_dict = {}
@@ -20,6 +42,22 @@ def node2vec_embed(graph):
         except KeyError:
             X[i, :] = np.asarray(model.wv.get_vector(str(nodes[i])))
     # X is the embedding matrix and projections are the embedding dictionary
-    return my_dict, graph
+    return my_dict, X, graph
+
+def find_embed(graphs_list):
+    G = create_multi_graph(graphs_list)
+    my_dict, X, graph = node2vec_embed(G)
+    return my_dict, X, graph
 
 if __name__ == '__main__':
+    data_file_path = os.path.join("split_datasets", 'IBD_split_dataset', 'OTU_IBD_after_mipmlp_Genus.csv')
+    microbiome_df = pd.read_csv(data_file_path, index_col='ID')
+    graphs = []
+    for i, mom in tqdm(enumerate(microbiome_df.iterrows()), desc='Create graphs', total=len(microbiome_df)):
+        cur_graph = create_tax_tree(microbiome_df.iloc[i])
+        graphs.append(cur_graph)
+
+    G = create_multi_graph(graphs)
+    my_dict, X, graph = node2vec_embed(G)
+    print()
+    # count_edges_from_all_graphs(graphs)

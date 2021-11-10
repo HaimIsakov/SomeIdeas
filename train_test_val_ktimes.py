@@ -125,7 +125,8 @@ class TrainTestValKTimes:
                 model = ValuesAndGraphStructure(nodes_number, data_size, self.RECEIVED_PARAMS, self.device)
                 # model = TwoLayersGCNValuesGraph(nodes_number, data_size, self.RECEIVED_PARAMS, self.device)
             elif self.train_val_dataset.mission == "one_head_attention":
-                data_size = self.train_val_dataset.get_vector_size()
+                # data_size = self.train_val_dataset.get_vector_size()
+                data_size = 128
                 nodes_number = self.train_val_dataset.nodes_number()
                 model = AttentionGCN(nodes_number, data_size, self.RECEIVED_PARAMS, self.device)
         else:

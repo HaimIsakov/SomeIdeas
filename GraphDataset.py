@@ -1,4 +1,5 @@
 import networkx as nx
+import numpy as np
 import torch
 from torch.utils.data import Dataset
 from torch import Tensor, FloatTensor
@@ -6,6 +7,7 @@ from torch import Tensor, FloatTensor
 
 from MicrobiomeDataset import MicrobiomeDataset
 from create_microbiome_graphs import CreateMicrobiomeGraphs
+from node2vec_embed import find_embed
 
 
 class GraphDataset(Dataset):
@@ -27,12 +29,17 @@ class GraphDataset(Dataset):
         for i in range(self.samples_len):
             graph = self.create_microbiome_graphs.get_graph(i)
             if not self.geometric_or_not:
+                if i == 0:
+                    print("Calculate Node2vec embedding")
+                    graphs_list = self.create_microbiome_graphs.graphs_list
+                    my_dict, X, agraph = find_embed(graphs_list)
+
                 dataset_dict[i] = {'graph': graph,
                                    'label': self.microbiome_dataset.get_label(i),
                                    'values_on_leaves': self.microbiome_dataset.get_leaves_values(i),
                                    'values_on_nodes': self.create_microbiome_graphs.get_values_on_nodes_ordered_by_nodes(graph),
-                                   'adjacency_matrix': nx.adjacency_matrix(graph).todense()
-                                   }
+                                   'adjacency_matrix': nx.adjacency_matrix(graph).todense(),
+                                   'graph_embed': X}
             else:
                 data = from_networkx(graph, group_node_attrs=['val'])  # Notice: convert file has been changed explicitly
                 data.y = torch.tensor(self.microbiome_dataset.get_label(i))
@@ -66,17 +73,18 @@ class GraphDataset(Dataset):
         if not self.geometric_or_not:
             label = index_value['label']
             adjacency_matrix = index_value['adjacency_matrix']
-            # sparse_adjacency_matrix = nx.adjacency_matrix(gnx).tocoo()
-            # values = sparse_adjacency_matrix.data
-            # indices = np.vstack((sparse_adjacency_matrix.row, sparse_adjacency_matrix.col))
-            # i = torch.LongTensor(indices)
-            # v = torch.FloatTensor(values)
-            # shape = sparse_adjacency_matrix.shape
-            # x = torch.sparse.FloatTensor(i, v, torch.Size(shape))
             if self.mission == "just_values":
                 values = index_value['values_on_leaves']
-            else:
+            elif self.mission == "just_graph" or self.mission == "graph_and_values":
                 values = index_value['values_on_nodes']
+            elif self.mission == "one_head_attention":
+                values = np.array(index_value['values_on_nodes'])
+                # print("values before repeat", values.shape)
+                # values = np.expand_dims(values, axis=1)
+                # values = values.repeat(1, self.nodes_number())
+                values = np.tile(np.array([values]).transpose(), (1, 128))
+                # print("values after repeat", values.shape)
+                adjacency_matrix = index_value['graph_embed']  # TODO: it is not the actual adj mat - so Fix it
             return Tensor(values), Tensor(adjacency_matrix), label
         else:
             return index_value['data']

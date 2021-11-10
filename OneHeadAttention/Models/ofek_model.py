@@ -22,11 +22,11 @@ class AttentionGCN(nn.Module):
         self.activation_func = self.RECEIVED_PARAMS['activation']
         self.pre_weighting = nn.Linear(self.input_dim, int(self.RECEIVED_PARAMS["preweight"]))
         self.alpha = nn.Parameter(torch.rand(1, requires_grad=True, device=self.device))
-        self.fc1 = nn.Linear(int(self.RECEIVED_PARAMS["preweight"]), int(self.RECEIVED_PARAMS["layer_1"]))
+        self.fc1 = nn.Linear(128, int(self.RECEIVED_PARAMS["layer_1"]))
         # self.embedding_state_dict = embedding_state_dict
         self.fc2 = nn.Linear(int(self.RECEIVED_PARAMS["layer_1"]), int(self.RECEIVED_PARAMS["layer_2"]))
         self.keys = nn.Linear(int(self.RECEIVED_PARAMS["layer_1"]), 1)
-        self.output = nn.Linear(10, 1)
+        self.output = nn.Linear(128, 1)
 
         self.activation_func_dict = {'relu': nn.ReLU(), 'elu': nn.ELU(), 'tanh': nn.Tanh()}
         # GCN layer
@@ -38,28 +38,30 @@ class AttentionGCN(nn.Module):
     '''
     padded input dim : N x input_dim
     '''
-    def forward(self, x, adjacency_matrix):
-        a, b, c = adjacency_matrix.shape
-        d, e, f = x.shape
-        I = torch.eye(b).to(self.device)
-        alpha_I = I * self.alpha.expand_as(I)  # 𝛼I
-        normalized_adjacency_matrix = self.calculate_adjacency_matrix(adjacency_matrix)  # Ã
-        alpha_I_plus_A = alpha_I + normalized_adjacency_matrix  # 𝛼I + Ã
-        # x = torch.squeeze(x, 0)
-        x = torch.matmul(alpha_I_plus_A, x)  # (𝛼I + Ã)·x
-        # print(x.shape)
-        # N x [feature size]
-        x = self.nodes_embedding_model(x)
-        # print(x.shape)
-        # x = torch.flatten(x, start_dim=1)  # flatten the tensor
-        # values : N x input_dim
+    def forward(self, frequencies, node_embedding_vector):
+        # x, adjacency_matrix
+        # a, b, c = adjacency_matrix.shape
+        # d, e, f = x.shape
+        # I = torch.eye(b).to(self.device)
+        # alpha_I = I * self.alpha.expand_as(I)  # 𝛼I
+        # normalized_adjacency_matrix = self.calculate_adjacency_matrix(adjacency_matrix)  # Ã
+        # alpha_I_plus_A = alpha_I + normalized_adjacency_matrix  # 𝛼I + Ã
+        # # x = torch.squeeze(x, 0)
+        # x = torch.matmul(alpha_I_plus_A, x)  # (𝛼I + Ã)·x
+        # # print(x.shape)
+        # # N x [feature size]
+        # x = self.nodes_embedding_model(x)
+        # # print(x.shape)
+        # # x = torch.flatten(x, start_dim=1)  # flatten the tensor
+
         # values = x.view(-1, self.input_dim)
-        values = x
+        # values = x
         # x : N x hl
         # x = F.relu(self.fc1(self.dropout(values)))
-
+        # values : N x input_dim
+        values = node_embedding_vector
         # queries : N x hl
-        queries = F.relu(self.fc1(self.dropout(x)))
+        queries = F.relu(self.fc1(self.dropout(values)))
         # print(x.shape)
         # mat1 : N x 1
         mat1 = self.keys(queries)
@@ -70,13 +72,18 @@ class AttentionGCN(nn.Module):
         # scores : 1 x N
         scores = F.softmax(mat2, dim=1)
 
-
         # vect: 1 x input_dim
-        # values = torch.squeeze(values, 0)
-        # vect = torch.matmul(scores, values)
+        values = torch.squeeze(values, 0)
+        frequencies = frequencies.squeeze()
+        freq_values = frequencies * values
+        values_scores = torch.matmul(scores, freq_values)
+        # values_scores = torch.matmul(scores, values)
+        # freq_values_scores = frequencies * values_scores
         # vect = vect.view(1, self.input_dim)
         # y : 1 x 1
-        # y = self.output(vect)
+        y = self.output(values_scores)
+        if y.shape[0] == 0 or y.shape[1] == 0:
+            print()
         return y
 
     def calculate_adjacency_matrix(self, batched_adjacency_matrix):

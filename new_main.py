@@ -166,6 +166,7 @@ def reproduce_from_nni(nni_result_file, dataset_name, mission_number):
 
 def run_all_dataset(mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes):
     for dataset_name in datasets_dict.keys():
+    #for dataset_name in ["male_vs_female", "bw"]:
         try:
             run_regular(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
         except Exception as e:
@@ -215,8 +216,8 @@ if __name__ == '__main__':
         # run_regular("allergy_milk_no_controls", 2, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
         # run_regular("allergy_milk_no_controls", 3, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
 
-        run_regular(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
-        # run_all_dataset(3, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
+        # run_regular(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
+        run_all_dataset(5, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
 
         #
         # try:
