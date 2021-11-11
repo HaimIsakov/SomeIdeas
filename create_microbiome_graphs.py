@@ -16,6 +16,7 @@ from tqdm import tqdm
 
 from taxonomy_tree_average_sons import *
 
+
 class CreateMicrobiomeGraphs:
     def __init__(self, df, add_attributes):
         self.microbiome_df = df

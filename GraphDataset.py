@@ -24,15 +24,16 @@ class GraphDataset(Dataset):
         self.geometric_or_not = geometric_or_not
         self.add_attributes = add_attributes
 
-    def set_dataset_dict(self):
+    def set_dataset_dict(self, **kwargs):
         dataset_dict = {}
         for i in range(self.samples_len):
             graph = self.create_microbiome_graphs.get_graph(i)
+            X = kwargs['X']
             if not self.geometric_or_not:
-                if i == 0:
-                    print("Calculate Node2vec embedding")
-                    graphs_list = self.create_microbiome_graphs.graphs_list
-                    my_dict, X, agraph = find_embed(graphs_list)
+                # if i == 0:
+                #     print("Calculate Node2vec embedding")
+                #     graphs_list = self.create_microbiome_graphs.graphs_list
+                #     my_dict, X, agraph = find_embed(graphs_list)
 
                 dataset_dict[i] = {'graph': graph,
                                    'label': self.microbiome_dataset.get_label(i),
@@ -49,9 +50,9 @@ class GraphDataset(Dataset):
     def get_joint_nodes(self):
         return self.create_microbiome_graphs.find_common_nodes().keys()
 
-    def update_graphs(self):
+    def update_graphs(self, **kwargs):
         # self.create_microbiome_graphs.create_graphs_with_common_nodes(union_train_and_test)
-        self.dataset_dict = self.set_dataset_dict()  # create dataset dict only after we added the missing nodes to the graph
+        self.dataset_dict = self.set_dataset_dict(**kwargs)  # create dataset dict only after we added the missing nodes to the graph
 
     def get_all_groups(self):
         return self.microbiome_dataset.groups

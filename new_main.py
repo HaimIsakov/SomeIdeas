@@ -1,4 +1,7 @@
 import os
+
+from node2vec_embed import find_embed
+
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
 os.environ["CUDA_VISIBLE_DEVICES"] = "0,1,2,3"
 import pandas as pd
@@ -61,8 +64,14 @@ class Main:
         train_val_dataset = self.create_dataset(train_data_file_path, train_tag_file_path, mission)
         print("Test set Graphs")
         test_dataset = self.create_dataset(test_data_file_path, test_tag_file_path, mission)
-        train_val_dataset.update_graphs()
-        test_dataset.update_graphs()
+
+        print("Calculate Node2vec embedding")
+        graphs_list = train_val_dataset.create_microbiome_graphs.graphs_list
+        my_dict, X, agraph = find_embed(graphs_list)
+        kwargs = {'X': X}
+
+        train_val_dataset.update_graphs(**kwargs)
+        test_dataset.update_graphs(**kwargs)
 
         trainer_and_tester = TrainTestValKTimes(self.RECEIVED_PARAMS, self.device, train_val_dataset, test_dataset,
                                                 result_directory_name, nni_flag=self.nni_mode,
@@ -216,8 +225,8 @@ if __name__ == '__main__':
         # run_regular("allergy_milk_no_controls", 2, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
         # run_regular("allergy_milk_no_controls", 3, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
 
-        # run_regular(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
-        run_all_dataset(5, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
+        run_regular(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
+        # run_all_dataset(5, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
 
         #
         # try:
