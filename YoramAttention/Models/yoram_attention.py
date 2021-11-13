@@ -11,12 +11,23 @@ class YoramAttention(nn.Module):
         self.device = device
         self.RECEIVED_PARAMS = RECEIVED_PARAMS
 
-        self.keys = nn.Linear(self.feature_size, int(self.RECEIVED_PARAMS["layer1"]))
+        self.keys = nn.Linear(self.feature_size, int(self.RECEIVED_PARAMS["layer_1"]))
         self.activation_func = self.RECEIVED_PARAMS['activation']
         self.dropout = nn.Dropout(p=self.RECEIVED_PARAMS["dropout"])
         self.activation_func_dict = {'relu': nn.ReLU(), 'elu': nn.ELU(), 'tanh': nn.Tanh()}
 
+        self.fc2 = nn.Linear(int(self.RECEIVED_PARAMS["layer_1"]), int(self.RECEIVED_PARAMS["layer_2"]))
+        self.fc3 = nn.Linear(int(self.RECEIVED_PARAMS["layer_2"]), 1)
+        self.classifier = nn.Sequential(
+            self.fc2,
+            self.activation_func_dict[self.activation_func],
+            self.dropout,
+        )
+
     def forward(self, frequencies, node_embedding_vector):
         attention_vector = F.softmax(self.keys(node_embedding_vector), dim=1)
-        output = frequencies @ attention_vector
-        return output
+        output = torch.transpose(frequencies, 1, 2) @ attention_vector
+        x = self.classifier(output)
+        x = self.fc3(x)
+        x = x.squeeze(1)
+        return x

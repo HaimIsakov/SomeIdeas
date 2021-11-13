@@ -44,3 +44,9 @@ class MyTasks:
         mission = 'one_head_attention'
         params_file_path = os.path.join(directory_name, 'Models', "one_head_attention_params_file.json")
         return directory_name, mission, params_file_path
+
+    def yoram_attention(self):
+        directory_name = "YoramAttention"
+        mission = 'yoram_attention'
+        params_file_path = os.path.join(directory_name, 'Models', "yoram_attention_params_file.json")
+        return directory_name, mission, params_file_path

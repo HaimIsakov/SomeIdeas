@@ -32,7 +32,7 @@ datasets_dict = {"cirrhosis": MyDatasets.cirrhosis_files, "IBD": MyDatasets.ibd_
                  "allergy_milk_no_controls": MyDatasets.allergy_milk_no_controls}
 
 tasks_dict = {1: MyTasks.just_values, 2: MyTasks.just_graph_structure, 3: MyTasks.values_and_graph_structure,
-              4: MyTasks.pytorch_geometric, 5: MyTasks.one_head_attention}
+              4: MyTasks.pytorch_geometric, 5: MyTasks.one_head_attention, 6: MyTasks.yoram_attention}
 
 
 class Main:

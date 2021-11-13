@@ -28,7 +28,8 @@ class GraphDataset(Dataset):
         dataset_dict = {}
         for i in range(self.samples_len):
             graph = self.create_microbiome_graphs.get_graph(i)
-            X = kwargs['X']
+            if 'X' in kwargs:
+                X = kwargs['X']
             if not self.geometric_or_not:
                 # if i == 0:
                 #     print("Calculate Node2vec embedding")
@@ -76,8 +77,9 @@ class GraphDataset(Dataset):
             adjacency_matrix = index_value['adjacency_matrix']
             if self.mission == "just_values":
                 values = index_value['values_on_leaves']
-            elif self.mission == "just_graph" or self.mission == "graph_and_values":
+            elif self.mission == "just_graph" or self.mission == "graph_and_values" or self.mission == "yoram_attention":
                 values = index_value['values_on_nodes']
+                adjacency_matrix = index_value['graph_embed']  # TODO: it is not the actual adj mat - so Fix it
             elif self.mission == "one_head_attention":
                 values = np.array(index_value['values_on_nodes'])
                 # print("values before repeat", values.shape)

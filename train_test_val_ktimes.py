@@ -11,6 +11,7 @@ import torch
 from OneHeadAttention.Models.ofek_model import AttentionGCN
 from ValuesAndGraphStructure.Models.graph_attention_layer import GraphAttentionLayer, GAT
 from ValuesAndGraphStructure.Models.two_gcn_layers_graph_and_values import TwoLayersGCNValuesGraph
+from YoramAttention.Models.yoram_attention import YoramAttention
 from train_test_val_one_time import TrainTestValOneTime
 from JustGraphStructure.Models.just_graph_structure import JustGraphStructure
 from JustValues.Models.just_values_fc_binary_classification import JustValuesOnNodes
@@ -129,6 +130,10 @@ class TrainTestValKTimes:
                 data_size = 128
                 nodes_number = self.train_val_dataset.nodes_number()
                 model = AttentionGCN(nodes_number, data_size, self.RECEIVED_PARAMS, self.device)
+            elif self.train_val_dataset.mission == "yoram_attention":
+                data_size = 128
+                nodes_number = self.train_val_dataset.nodes_number()
+                model = YoramAttention(nodes_number, data_size, self.RECEIVED_PARAMS, self.device)
         else:
             data_size = self.train_val_dataset.get_vector_size()
             model = GCN(1, self.RECEIVED_PARAMS, self.device)
