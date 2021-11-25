@@ -93,7 +93,6 @@ class TrainTestValOneTime:
                 loss.backward()  # backward pass: compute gradient of the loss with respect to model parameters
                 optimizer.step()  # perform a single optimization step (parameter update)
                 batched_train_loss.append(loss.item())
-
             try:
                 self.alpha_list.append(self.model.alpha.item())
                 print("Alpha value:", self.model.alpha.item())
@@ -112,10 +111,12 @@ class TrainTestValOneTime:
                 early_training_results['train_auc'] = train_auc
                 # best_model = copy.deepcopy(self.model)
                 best_model = self.model.state_dict()
+
             elif self.early_stopping and counter == EARLY_STOPPING_PATIENCE:
                 print("Early stopping")
                 #self.model = best_model
                 self.model.load_state_dict(best_model)
+                # self.model.get_attention_hist(self.model.attention,  f"epoch{epoch}_dataset_cirrhosis", calc=True)
                 early_training_results['test_auc'] = self.calc_auc(self.test_loader, job=TEST_JOB)
                 break
             else:

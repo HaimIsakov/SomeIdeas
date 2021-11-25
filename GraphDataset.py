@@ -74,10 +74,13 @@ class GraphDataset(Dataset):
         index_value = self.dataset_dict[index]
         if not self.geometric_or_not:
             label = index_value['label']
-            adjacency_matrix = index_value['adjacency_matrix']
+
             if self.mission == "just_values":
                 values = index_value['values_on_leaves']
-            elif self.mission == "just_graph" or self.mission == "graph_and_values" or self.mission == "yoram_attention":
+            elif self.mission == "just_graph" or self.mission == "graph_and_values":
+                values = index_value['values_on_nodes']
+                adjacency_matrix = index_value['adjacency_matrix']
+            elif self.mission == "yoram_attention":
                 values = index_value['values_on_nodes']
                 adjacency_matrix = index_value['graph_embed']  # TODO: it is not the actual adj mat - so Fix it
             elif self.mission == "one_head_attention":

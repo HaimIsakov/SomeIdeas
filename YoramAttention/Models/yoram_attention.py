@@ -1,3 +1,7 @@
+import os
+
+import matplotlib.pyplot as plt
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -23,11 +27,26 @@ class YoramAttention(nn.Module):
             self.activation_func_dict[self.activation_func],
             self.dropout,
         )
+        self.attention = None
 
     def forward(self, frequencies, node_embedding_vector):
         attention_vector = F.softmax(self.keys(node_embedding_vector), dim=1)
+        self.attention = attention_vector
+        # self.get_attention_hist(attention_vector)
+
         output = torch.transpose(frequencies, 1, 2) @ attention_vector
         x = self.classifier(output)
         x = self.fc3(x)
         x = x.squeeze(1)
         return x
+
+    def get_attention_hist(self, tensor, name, calc):
+        if calc:
+            for i, mat in enumerate(tensor):
+                for dim in range(0, int(self.RECEIVED_PARAMS["layer_1"])):
+                    indices = torch.tensor([dim])
+                    vector_in_dim = torch.index_select(mat, 1, indices).cpu().detach().numpy()
+                    plt.hist(vector_in_dim, bins=50)
+                    plt.savefig(os.path.join("HIST", name + f"mat_{i}" + f"dim_{dim}" + ".png"))
+                    plt.clf()
+                    # plt.show()

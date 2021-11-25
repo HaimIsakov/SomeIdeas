@@ -181,9 +181,11 @@ def run_all_dataset(mission_number, cuda_number, nni_flag, pytorch_geometric_mod
         except Exception as e:
             print(e)
 
+
 def run_all_datasets_missions(cuda_number, nni_flag, pytorch_geometric_mode, add_attributes):
     for mission_number in tasks_dict.keys():
         run_all_dataset(mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
+
 
 def run_regular(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes):
     my_tasks = MyTasks(tasks_dict, dataset_name)
@@ -225,16 +227,16 @@ if __name__ == '__main__':
         # run_regular("allergy_milk_no_controls", 2, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
         # run_regular("allergy_milk_no_controls", 3, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
 
-        run_regular(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
-        # run_all_dataset(5, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
+        # run_regular(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
+        # run_all_dataset(6, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
 
         #
-        # try:
-        #     print("allergy_nut_graph_and_values_normalized_A_plus_alpha_I")
-        #     reproduce_from_nni(os.path.join("nni_results_normalized_A_plus_alpha_I", "allergy_nut_graph_and_values_normalized_A_plus_alpha_I.csv"), "nut", 3)
-        # except Exception as e:
-        #     print(e)
-        #     pass
+        try:
+            print("nni_allergy_peanut_yoram_attention")
+            reproduce_from_nni(os.path.join("nni_allergy_peanut_yoram_attention.csv"), "peanut", 6)
+        except Exception as e:
+            print(e)
+            pass
         # try:
         #     print("allergy_peanut_graph_and_values_normalized_A_plus_alpha_I")
         #     reproduce_from_nni(os.path.join("nni_results_normalized_A_plus_alpha_I", "allergy_peanut_graph_and_values_normalized_A_plus_alpha_I.csv"), "peanut", 3)
@@ -256,4 +258,3 @@ if __name__ == '__main__':
     except Exception as e:
         LOG.exception(e)
         raise
-

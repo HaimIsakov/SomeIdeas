@@ -1,11 +1,15 @@
 import os
+
+import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
 import pandas as pd
+import seaborn as sns
 from node2vec import Node2Vec
+from sklearn.manifold import TSNE
 from tqdm import tqdm
 from taxonomy_tree_average_sons import create_tax_tree
-
+from sklearn.manifold import spectral_embedding
 
 def create_multi_graph(graphs_list):
     multi_graph = nx.MultiGraph()
@@ -55,22 +59,35 @@ def node2vec_embed(graph):
     # X is the embedding matrix and projections are the embedding dictionary
     return my_dict, X, graph
 
+
 def find_embed(graphs_list):
     G = create_multi_graph(graphs_list)
     my_dict, X, graph = node2vec_embed(G)
     return my_dict, X, graph
 
 
+def find_embed2(graphs_list):
+    G = create_multi_graph(graphs_list)
+    X = spectral_embedding(nx.adjacency_matrix(G), n_components=200)
+    return X
+
+
 if __name__ == '__main__':
-    data_file_path = os.path.join("split_datasets", 'IBD_split_dataset', 'OTU_IBD_after_mipmlp_Genus.csv')
+    data_file_path = os.path.join("split_datasets", 'Cirrhosis_split_dataset', 'train_val_set_Cirrhosis_microbiome.csv')
     microbiome_df = pd.read_csv(data_file_path, index_col='ID')
     graphs = []
     for i, mom in tqdm(enumerate(microbiome_df.iterrows()), desc='Create graphs', total=len(microbiome_df)):
         cur_graph = create_tax_tree(microbiome_df.iloc[i])
         graphs.append(cur_graph)
 
-    edge_dict = check_multi_graph(graphs)
-    G = create_multi_graph(graphs)
-    my_dict, X, graph = node2vec_embed(G)
+    # my_dict, X, graph = find_embed(graphs)
+    X = find_embed2(graphs)
+    X_embedded = TSNE(n_components=2).fit_transform(np.asarray(X, dtype='float64'))
+    sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], legend='full')
+    plt.savefig("graph_embedding_tsne_spectral.png")
+    plt.show()
+    # edge_dict = check_multi_graph(graphs)
+    # G = create_multi_graph(graphs)
+    # my_dict, X, graph = node2vec_embed(G)
     print()
     # count_edges_from_all_graphs(graphs)
