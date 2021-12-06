@@ -1,5 +1,8 @@
 import os
 
+from sklearn.model_selection import train_test_split
+
+from BrainNetwork import AbideDataset
 from node2vec_embed import find_embed
 
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
@@ -74,6 +77,28 @@ class Main:
         test_dataset.update_graphs(**kwargs)
 
         trainer_and_tester = TrainTestValKTimes(self.RECEIVED_PARAMS, self.device, train_val_dataset, test_dataset,
+                                                result_directory_name, nni_flag=self.nni_mode,
+                                                geometric_or_not=self.geometric_mode)
+        train_metric, val_metric, test_metric, min_train_val_metric = trainer_and_tester.train_group_k_cross_validation(k=K)
+        return train_metric, val_metric, test_metric, min_train_val_metric
+
+    def turn_on_train_abide_dataset(self):
+        data_path = "rois_ho"
+        label_path = "Phenotypic_V1_0b_preprocessed1.csv"
+        phenotype_dataset = pd.read_csv("Phenotypic_V1_0b_preprocessed1.csv")
+        subject_list = [value for value in phenotype_dataset["FILE_ID"].tolist() if value != "no_filename"]
+        subject_list_train_index, subject_list_test_index = train_test_split(subject_list, test_size=0.3, random_state=0)
+
+        print("ABIDE Dataset Training-Validation Sets Graphs")
+        train_val_abide_dataset = AbideDataset(data_path, label_path, subject_list_train_index)
+        print("ABIDE Dataset Test set Graphs")
+        test_abide_dataset = AbideDataset(data_path, label_path, subject_list_test_index)
+
+        train_val_abide_dataset.update_graphs(data_path, label_path)
+        test_abide_dataset.update_graphs(data_path, label_path)
+        directory_name = ""
+        result_directory_name = os.path.join(directory_name, "Result_After_Proposal")
+        trainer_and_tester = TrainTestValKTimes(self.RECEIVED_PARAMS, self.device, train_val_abide_dataset, test_abide_dataset,
                                                 result_directory_name, nni_flag=self.nni_mode,
                                                 geometric_or_not=self.geometric_mode)
         train_metric, val_metric, test_metric, min_train_val_metric = trainer_and_tester.train_group_k_cross_validation(k=K)
@@ -175,7 +200,6 @@ def reproduce_from_nni(nni_result_file, dataset_name, mission_number):
 
 def run_all_dataset(mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes):
     for dataset_name in datasets_dict.keys():
-    #for dataset_name in ["male_vs_female", "bw"]:
         try:
             run_regular(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
         except Exception as e:
@@ -210,6 +234,26 @@ def run_regular(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geo
     result_file_name = f"{dataset_name}_{mission}"
     results_dealing(train_metric, val_metric, test_metric, min_train_val_metric, nni_flag, RECEIVED_PARAMS, result_file_name)
 
+def run_regular_abide_dataset(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes):
+    params_file_path = "abide_dataset_params.json"
+    if nni_flag:
+        RECEIVED_PARAMS = nni.get_next_parameter()
+    else:
+        RECEIVED_PARAMS = json.load(open(params_file_path, 'r'))
+    RECEIVED_PARAMS["learning_rate"] = np.float64(RECEIVED_PARAMS["learning_rate"])
+    RECEIVED_PARAMS["dropout"] = np.float64(RECEIVED_PARAMS["dropout"])
+    RECEIVED_PARAMS["regularization"] = np.float64(RECEIVED_PARAMS["regularization"])
+    RECEIVED_PARAMS["train_frac"] = np.float64(RECEIVED_PARAMS["train_frac"])
+    RECEIVED_PARAMS["test_frac"] = np.float64(RECEIVED_PARAMS["test_frac"])
+
+    print("Dataset", dataset_name)
+    device = f"cuda:{cuda_number}" if torch.cuda.is_available() else "cpu"
+    print("Device", device)
+    main_runner = Main(dataset_name, mission_number, RECEIVED_PARAMS, device, nni_mode=nni_flag,
+                       geometric_mode=pytorch_geometric_mode, add_attributes=add_attributes, plot_figures=False)
+    train_metric, val_metric, test_metric, min_train_val_metric = main_runner.turn_on_train_abide_dataset()
+    result_file_name = f"{dataset_name}"
+    results_dealing(train_metric, val_metric, test_metric, min_train_val_metric, nni_flag, RECEIVED_PARAMS, result_file_name)
 
 if __name__ == '__main__':
     try:
@@ -227,31 +271,48 @@ if __name__ == '__main__':
         # run_regular("allergy_milk_no_controls", 2, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
         # run_regular("allergy_milk_no_controls", 3, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
 
-        # run_regular(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
+        run_regular_abide_dataset(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
         # run_all_dataset(6, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
 
-        #
-        try:
-            print("nni_allergy_peanut_yoram_attention")
-            reproduce_from_nni(os.path.join("nni_allergy_peanut_yoram_attention.csv"), "peanut", 6)
-        except Exception as e:
-            print(e)
-            pass
         # try:
-        #     print("allergy_peanut_graph_and_values_normalized_A_plus_alpha_I")
-        #     reproduce_from_nni(os.path.join("nni_results_normalized_A_plus_alpha_I", "allergy_peanut_graph_and_values_normalized_A_plus_alpha_I.csv"), "peanut", 3)
+        #     print("nni_allergy_peanut_yoram_attention")
+        #     reproduce_from_nni(os.path.join("nni_allergy_peanut_yoram_attention.csv"), "peanut", 6)
         # except Exception as e:
         #     print(e)
         #     pass
         # try:
-        #     print("allergy_nut_just_graph_normalized_A_plus_alpha_I")
-        #     reproduce_from_nni(os.path.join("nni_results_normalized_A_plus_alpha_I", "allergy_nut_just_graph_normalized_A_plus_alpha_I.csv"), "nut", 2)
+        #     print("nni_allergy_nut_yoram_attention")
+        #     reproduce_from_nni(os.path.join("nni_allergy_nut_yoram_attention.csv"), "nut", 6)
         # except Exception as e:
         #     print(e)
         #     pass
         # try:
-        #     print("allergy_peanut_just_graph_normalized_A_plus_alpha_I")
-        #     reproduce_from_nni(os.path.join("nni_results_normalized_A_plus_alpha_I", "allergy_peanut_just_graph_normalized_A_plus_alpha_I.csv"), "peanut", 2)
+        #     print("nni_male_female_yoram_attention")
+        #     reproduce_from_nni(os.path.join("nni_male_female_yoram_attention.csv"), "male_female", 6)
+        # except Exception as e:
+        #     print(e)
+        #     pass
+        # try:
+        #     print("nni_nugent_yoram_attention")
+        #     reproduce_from_nni(os.path.join("nni_nugent_yoram_attention.csv"), "nugent", 6)
+        # except Exception as e:
+        #     print(e)
+        #     pass
+        # try:
+        #     print("nni_ibd_yoram_attention")
+        #     reproduce_from_nni(os.path.join("nni_ibd_yoram_attention.csv"), "ibd", 6)
+        # except Exception as e:
+        #     print(e)
+        #     pass
+        # try:
+        #     print("nni_ibd_chrone_yoram_attention")
+        #     reproduce_from_nni(os.path.join("nni_ibd_chrone_yoram_attention.csv"), "ibd_chrone", 6)
+        # except Exception as e:
+        #     print(e)
+        #     pass
+        # try:
+        #     print("nni_bw_yoram_attention")
+        #     reproduce_from_nni(os.path.join("nni_bw_yoram_attention.csv"), "bw", 6)
         # except Exception as e:
         #     print(e)
         #     pass

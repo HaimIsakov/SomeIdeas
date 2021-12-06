@@ -30,12 +30,6 @@ class GraphDataset(Dataset):
             graph = self.create_microbiome_graphs.get_graph(i)
             if 'X' in kwargs:
                 X = kwargs['X']
-            if not self.geometric_or_not:
-                # if i == 0:
-                #     print("Calculate Node2vec embedding")
-                #     graphs_list = self.create_microbiome_graphs.graphs_list
-                #     my_dict, X, agraph = find_embed(graphs_list)
-
                 dataset_dict[i] = {'graph': graph,
                                    'label': self.microbiome_dataset.get_label(i),
                                    'values_on_leaves': self.microbiome_dataset.get_leaves_values(i),
@@ -77,6 +71,7 @@ class GraphDataset(Dataset):
 
             if self.mission == "just_values":
                 values = index_value['values_on_leaves']
+                adjacency_matrix = index_value['adjacency_matrix']
             elif self.mission == "just_graph" or self.mission == "graph_and_values":
                 values = index_value['values_on_nodes']
                 adjacency_matrix = index_value['adjacency_matrix']

@@ -62,6 +62,7 @@ def node2vec_embed(graph):
 
 def find_embed(graphs_list):
     G = create_multi_graph(graphs_list)
+    print(nx.number_connected_components(G))
     my_dict, X, graph = node2vec_embed(G)
     return my_dict, X, graph
 
@@ -73,19 +74,28 @@ def find_embed2(graphs_list):
 
 
 if __name__ == '__main__':
-    data_file_path = os.path.join("split_datasets", 'Cirrhosis_split_dataset', 'train_val_set_Cirrhosis_microbiome.csv')
-    microbiome_df = pd.read_csv(data_file_path, index_col='ID')
-    graphs = []
-    for i, mom in tqdm(enumerate(microbiome_df.iterrows()), desc='Create graphs', total=len(microbiome_df)):
-        cur_graph = create_tax_tree(microbiome_df.iloc[i])
-        graphs.append(cur_graph)
+    datasets_lst = ["Male_vs_Female", "Cirrhosis", "IBD", "Black_vs_White", "IBD_Chrone", "nugent"]
+    data_file_paths = [os.path.join("split_datasets", f'{dataset_name}_split_dataset', f'train_val_set_{dataset_name}_no_zero_cols_microbiome.csv')
+                       for dataset_name in datasets_lst] + [os.path.join("split_datasets", "Allergy_nut_split_dataset",
+                                                                         "train_val_set_nut_microbiome.csv"),
+                                                            os.path.join("split_datasets", "Allergy_peanut_split_dataset",
+                                                                        "train_val_set_peanut_microbiome.csv")]
+    dataset_names = datasets_lst + ["nut", "peanut"]
+    for data_file_path, dataset_name in zip(data_file_paths, dataset_names):
+        print(dataset_name)
+        microbiome_df = pd.read_csv(data_file_path, index_col='ID')
+        graphs = []
+        for i, mom in tqdm(enumerate(microbiome_df.iterrows()), desc='Create graphs', total=len(microbiome_df)):
+            cur_graph = create_tax_tree(microbiome_df.iloc[i])
+            graphs.append(cur_graph)
 
-    # my_dict, X, graph = find_embed(graphs)
-    X = find_embed2(graphs)
-    X_embedded = TSNE(n_components=2).fit_transform(np.asarray(X, dtype='float64'))
-    sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], legend='full')
-    plt.savefig("graph_embedding_tsne_spectral.png")
-    plt.show()
+        my_dict, X, graph = find_embed(graphs)
+        # X = find_embed2(graphs)
+        X_embedded = TSNE(n_components=2).fit_transform(np.asarray(X, dtype='float64'))
+        sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], legend='full')
+        plt.title(f"{dataset_name}_graph_Node2vec_embedding_tsne")
+        plt.savefig(f"no_Zero_cols{dataset_name}_graph_Node2vec_embedding_tsne.png")
+        plt.show()
     # edge_dict = check_multi_graph(graphs)
     # G = create_multi_graph(graphs)
     # my_dict, X, graph = node2vec_embed(G)

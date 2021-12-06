@@ -67,29 +67,20 @@ class TrainTestValOneTime:
     def train(self):
         optimizer = self.get_optimizer()
         epochs = int(self.RECEIVED_PARAMS['epochs'])
-        # min_val_loss = float('inf')
-        # best_model = copy.deepcopy(self.model)
         best_model = self.model.state_dict()
-        # max_val_auc = 0.5
         max_val_auc = 0
         counter = 0
+        min_val_loss = float("inf")
         early_training_results = {'val_auc': 0, 'train_auc': 0, 'test_auc': 0}
-        # early_training_results['val_auc'] = 0.5
-        # early_stopping = EarlyStopping(patience=EARLY_STOPPING_PATIENCE, verbose=True)
         # run the main training loop
         for epoch in range(epochs):
             self.model.train()  # prep model for training
-
             batched_train_loss = []
             for data, adjacency_matrix, target in self.train_loader:
                 data, adjacency_matrix, target = data.to(self.device), adjacency_matrix.to(self.device), target.to(self.device)
                 optimizer.zero_grad()  # clear the gradients of all optimized variables
                 net_out = self.model(data, adjacency_matrix)  # forward pass: compute predicted outputs by passing inputs to the model
                 loss = F.binary_cross_entropy_with_logits(net_out, target.unsqueeze(dim=1).float())
-                # loss = F.binary_cross_entropy_with_logits(net_out, target.unsqueeze(dim=1).float(),
-                #                                           weight=torch.Tensor(
-                #                                               [self.loss_weights[i] for i in target]).unsqueeze(
-                #                                               dim=1).to(self.device))  # calculate the weighted loss
                 loss.backward()  # backward pass: compute gradient of the loss with respect to model parameters
                 optimizer.step()  # perform a single optimization step (parameter update)
                 batched_train_loss.append(loss.item())
@@ -99,9 +90,7 @@ class TrainTestValOneTime:
             except:
                 pass
             average_train_loss, train_auc, val_loss, val_auc = self.record_evaluations(batched_train_loss)
-            # early_training_results['train_auc'] = train_auc
-            # if val_auc == 0.5 and train_auc == 0.5:
-            #     print("The model stuck")
+
             if val_auc > max_val_auc:
                 print(f"Validation AUC increased ({max_val_auc:.6f} --> {val_auc:.6f})")
                 max_val_auc = val_auc
@@ -109,12 +98,10 @@ class TrainTestValOneTime:
                 early_training_results['val_auc'] = val_auc
                 early_training_results['val_loss'] = val_loss
                 early_training_results['train_auc'] = train_auc
-                # best_model = copy.deepcopy(self.model)
                 best_model = self.model.state_dict()
 
             elif self.early_stopping and counter == EARLY_STOPPING_PATIENCE:
                 print("Early stopping")
-                #self.model = best_model
                 self.model.load_state_dict(best_model)
                 # self.model.get_attention_hist(self.model.attention,  f"epoch{epoch}_dataset_cirrhosis", calc=True)
                 early_training_results['test_auc'] = self.calc_auc(self.test_loader, job=TEST_JOB)
@@ -122,33 +109,30 @@ class TrainTestValOneTime:
             else:
                 counter += 1
                 print(f'Early-Stopping counter: {counter} out of {EARLY_STOPPING_PATIENCE}')
-
-            # early stopping according to val_loss
-            # if val_loss =< min_val_loss:
+            ########################
+            # if val_loss <= min_val_loss:
             #     print(f"Validation loss decreased ({min_val_loss:.6f} --> {val_loss:.6f})")
             #     min_val_loss = val_loss
             #     counter = 0
             #     early_training_results['val_auc'] = val_auc
             #     early_training_results['val_loss'] = val_loss
-            #     best_model = copy.deepcopy(self.model)
+            #     early_training_results['train_auc'] = train_auc
+            #     # best_model = copy.deepcopy(self.model)
+            #     best_model = self.model.state_dict()
+            #
             # elif self.early_stopping and counter == EARLY_STOPPING_PATIENCE:
             #     print("Early stopping")
-            #     self.model = best_model
+            #     self.model.load_state_dict(best_model)
             #     early_training_results['test_auc'] = self.calc_auc(self.test_loader, job=TEST_JOB)
             #     break
             # else:
             #     counter += 1
             #     print(f'Early-Stopping counter: {counter} out of {EARLY_STOPPING_PATIENCE}')
-            # early_stopping(val_loss, self.model)
+
             print_msg = (f'[{epoch}/{epochs}] ' +
                          f'train_loss: {average_train_loss:.9f} train_auc: {train_auc:.9f} ' +
                          f'valid_loss: {val_loss:.6f} valid_auc: {val_auc:.6f}')
             print(print_msg)
-            # if early_stopping.early_stop:
-            #     print("Early stopping")
-            #     self.val_auc = self.calc_auc(self.val_loader, job=VAL_JOB)
-            #     break
-        #self.model = best_model
         self.model.load_state_dict(best_model)
         early_training_results['test_auc'] = self.calc_auc(self.test_loader, job=TEST_JOB)
         return early_training_results

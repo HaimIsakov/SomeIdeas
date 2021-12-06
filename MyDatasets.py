@@ -73,12 +73,13 @@ class MyDatasets:
         test_tag_file_path = os.path.join(origin_dir,'Allergy_milk_split_dataset', 'test_set_Allergy_milk_or_not_tags.csv')
         return train_data_file_path, train_tag_file_path, test_data_file_path, test_tag_file_path
 
+    # TODO: CHANGE BACK TO WITH ZERO COLUMNS
     @staticmethod
     def male_vs_female():
-        train_data_file_path = os.path.join(origin_dir,'Male_vs_Female_split_dataset', 'train_val_set_Male_vs_Female_microbiome.csv')
+        train_data_file_path = os.path.join(origin_dir,'Male_vs_Female_split_dataset', 'train_val_set_Male_vs_Female_no_zero_cols_microbiome.csv')
         train_tag_file_path = os.path.join(origin_dir,'Male_vs_Female_split_dataset', 'train_val_set_Male_vs_Female_tags.csv')
 
-        test_data_file_path = os.path.join(origin_dir,'Male_vs_Female_split_dataset', 'test_set_Male_vs_Female_microbiome.csv')
+        test_data_file_path = os.path.join(origin_dir,'Male_vs_Female_split_dataset', 'test_set_Male_vs_Female_no_zero_cols_microbiome.csv')
         test_tag_file_path = os.path.join(origin_dir,'Male_vs_Female_split_dataset', 'test_set_Male_vs_Female_tags.csv')
         return train_data_file_path, train_tag_file_path, test_data_file_path, test_tag_file_path
 

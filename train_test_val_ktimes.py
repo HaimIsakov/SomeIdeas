@@ -49,8 +49,8 @@ class TrainTestValKTimes:
             print(f"Run {run}")
             # print("len of train set:", len(train_idx))
             # print("len of val set:", len(val_idx))
-            if run == 0 and not self.nni_flag:
-                date, directory_root = self.create_directory_to_save_results()
+            # if run == 0 and not self.nni_flag:
+            #     date, directory_root = self.create_directory_to_save_results()
 
             train_loader, val_loader, test_loader = self.create_data_loaders(train_idx, val_idx)
             model = self.get_model().to(self.device)
@@ -67,12 +67,12 @@ class TrainTestValKTimes:
             train_metric.append(early_stopping_results['train_auc'])
             val_metric.append(early_stopping_results['val_auc'])
             test_metric.append(early_stopping_results['test_auc'])
-            if not self.nni_flag:
-                os.mkdir(os.path.join(directory_root, f"Run{run}"))
-                root = os.path.join(directory_root, f"Run{run}")
-                f = open(os.path.join(directory_root, f"Validation_Auc_{trainer_and_tester.val_auc:.9f}.txt"), 'w')
-                f.close()
-                self.plot_acc_loss_auc(root, date, trainer_and_tester)
+            # if not self.nni_flag:
+            #     os.mkdir(os.path.join(directory_root, f"Run{run}"))
+            #     root = os.path.join(directory_root, f"Run{run}")
+            #     f = open(os.path.join(directory_root, f"Validation_Auc_{trainer_and_tester.val_auc:.9f}.txt"), 'w')
+            #     f.close()
+            #     self.plot_acc_loss_auc(root, date, trainer_and_tester)
             run += 1
         return train_metric, val_metric, test_metric, min_train_val_metric
 
