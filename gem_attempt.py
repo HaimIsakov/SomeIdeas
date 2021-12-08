@@ -30,10 +30,10 @@ if __name__ == '__main__':
 
     G = create_multi_graph(graphs)
     # G = G.to_directed()
-    # embedding = HOPE(d=128, beta=0.01)
+    embedding = HOPE(d=128, beta=0.01)
     # embedding = GraphFactorization(d=128, max_iter=1000, eta=1 * 10 ** -4, regu=1.0, data_set=None)
     # embedding = LaplacianEigenmaps(d=128)
-    embedding = LocallyLinearEmbedding(d=128)
+    # embedding = LocallyLinearEmbedding(d=128)
     embedding.learn_embedding(graph=G, edge_f=None, is_weighted=True, no_python=True)
     X = embedding.get_embedding()
     X_embedded = TSNE(n_components=2).fit_transform(np.asarray(X, dtype='float64'))

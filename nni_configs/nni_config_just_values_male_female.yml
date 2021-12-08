@@ -16,7 +16,7 @@ tuner:
     #choice: maximize, minimize
     optimize_mode: maximize
 trial:
-  command: python new_main.py --nni 1 --task_number 1 --dataset male_vs_female --device_num 1
+  command: python new_main.py --nni 1 --task_number 1 --dataset Male_vs_Female --device_num 1
   codeDir: ..
   gpuNum: 2
 localConfig:

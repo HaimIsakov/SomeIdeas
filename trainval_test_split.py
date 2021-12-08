@@ -52,9 +52,9 @@ if __name__ == "__main__":
     # microbiome_df_path = os.path.join('IBD_split_dataset', 'OTU_IBD_after_mipmlp_Genus.csv')
     # tags_df_path = os.path.join('IBD_split_dataset', 'tag_ibd_file.csv')
     #
-    # dataset_name = "Black_vs_White_split_dataset"
-    # microbiome_df_path = os.path.join('Black_vs_White_split_dataset', 'OTU_Black_vs_White_after_mipmlp_Genus_same_ids.csv')
-    # tags_df_path = os.path.join('Black_vs_White_split_dataset', 'tag_bw_file.csv')
+    # dataset_name = "bw_split_dataset"
+    # microbiome_df_path = os.path.join('bw_split_dataset', 'OTU_Black_vs_White_after_mipmlp_Genus_same_ids.csv')
+    # tags_df_path = os.path.join('bw_split_dataset', 'tag_bw_file.csv')
 
     # dataset_name = "IBD_Chrone"
     # microbiome_df_path = os.path.join("IBD_Chrone_split_dataset", "OTU_IBD_after_mipmlp_Genus.csv")
@@ -81,8 +81,8 @@ if __name__ == "__main__":
     # tags_df_path = os.path.join("Black_vs_White_Species_split_dataset", "tag_bw_file.csv")
 
     dataset_name = "nugent"
-    microbiome_df_path = os.path.join("split_datasets", "Nugent_split_dataset", "OTU_Nugent_after_mipmlp_Genus_same_ids.csv")
-    tags_df_path = os.path.join("split_datasets", "Nugent_split_dataset", "tag_nugent_file.csv")
+    microbiome_df_path = os.path.join("split_datasets", "nugent_split_dataset", "OTU_Nugent_after_mipmlp_Genus_same_ids.csv")
+    tags_df_path = os.path.join("split_datasets", "nugent_split_dataset", "tag_nugent_file.csv")
 
     microbiome_df = pd.read_csv(microbiome_df_path, index_col='ID')
     tags_df = pd.read_csv(tags_df_path, index_col='ID')

@@ -26,7 +26,7 @@ TEST_JOB = 'test'
 
 class TrainTestValKTimes:
     def __init__(self, RECEIVED_PARAMS, device, train_val_dataset, test_dataset,
-                 result_directory_name, nni_flag=False, geometric_or_not=False):
+                 result_directory_name, nni_flag=False, geometric_or_not=False, plot_figures=False):
         # self.mission = mission
         self.RECEIVED_PARAMS = RECEIVED_PARAMS
         self.device = device
@@ -35,6 +35,7 @@ class TrainTestValKTimes:
         self.result_directory_name = result_directory_name
         self.nni_flag = nni_flag
         self.geometric_or_not = geometric_or_not
+        self.plot_figures = plot_figures
         # self.node_order = self.dataset.node_order
 
     def train_group_k_cross_validation(self, k=5):
@@ -49,8 +50,8 @@ class TrainTestValKTimes:
             print(f"Run {run}")
             # print("len of train set:", len(train_idx))
             # print("len of val set:", len(val_idx))
-            # if run == 0 and not self.nni_flag:
-            #     date, directory_root = self.create_directory_to_save_results()
+            if run == 0 and not self.nni_flag and self.plot_figures:
+                date, directory_root = self.create_directory_to_save_results()
 
             train_loader, val_loader, test_loader = self.create_data_loaders(train_idx, val_idx)
             model = self.get_model().to(self.device)
@@ -60,19 +61,20 @@ class TrainTestValKTimes:
                 early_stopping_results = trainer_and_tester.train()
             else:
                 early_stopping_results = trainer_and_tester.train_geometric()
-            print(trainer_and_tester.alpha_list)
+            if len(trainer_and_tester.alpha_list) > 0:
+                print(trainer_and_tester.alpha_list)
             min_val_train_auc = min(early_stopping_results['val_auc'], early_stopping_results['train_auc'])
             print("Minimum Validation and Train Auc", min_val_train_auc)
             min_train_val_metric.append(min_val_train_auc)  # the minimum between the aucs between train set and validation set
             train_metric.append(early_stopping_results['train_auc'])
             val_metric.append(early_stopping_results['val_auc'])
             test_metric.append(early_stopping_results['test_auc'])
-            # if not self.nni_flag:
-            #     os.mkdir(os.path.join(directory_root, f"Run{run}"))
-            #     root = os.path.join(directory_root, f"Run{run}")
-            #     f = open(os.path.join(directory_root, f"Validation_Auc_{trainer_and_tester.val_auc:.9f}.txt"), 'w')
-            #     f.close()
-            #     self.plot_acc_loss_auc(root, date, trainer_and_tester)
+            if not self.nni_flag and self.plot_figures:
+                os.mkdir(os.path.join(directory_root, f"Run{run}"))
+                root = os.path.join(directory_root, f"Run{run}")
+                f = open(os.path.join(directory_root, f"Validation_Auc_{trainer_and_tester.val_auc:.9f}.txt"), 'w')
+                f.close()
+                self.plot_acc_loss_auc(root, date, trainer_and_tester)
             run += 1
         return train_metric, val_metric, test_metric, min_train_val_metric
 
@@ -96,7 +98,6 @@ class TrainTestValKTimes:
             # Dataloader
             train_loader = torch.utils.data.DataLoader(train_data, shuffle=True, batch_size=batch_size)
             val_loader = torch.utils.data.DataLoader(val_data, batch_size=batch_size, shuffle=False)
-            # Notice that the test data is loaded as one unit.
             test_loader = torch.utils.data.DataLoader(self.test_dataset, batch_size=batch_size, shuffle=False)
             # print("train loader size:", len(train_loader))
             # print("val loader size:", len(val_loader))
@@ -175,9 +176,9 @@ class TrainTestValKTimes:
     def plot_acc_loss_auc(self, root, date, trainer_and_tester):
         # root = os.path.join(root, f'Values_and_graph_structure_on_nodes_model_{date}')
         # os.mkdir(root)
-        with open(os.path.join(root, "params_file_1_gcn.json"), 'w') as pf:
+        with open(os.path.join(root, "params_file_1_gcn_just_values.json"), 'w') as pf:
             json.dump(self.RECEIVED_PARAMS, pf)
-        # copyfile(params_file_1_gcn, os.path.join(root, "params_file_1_gcn.json"))
+        # copyfile(params_file_1_gcn_just_values, os.path.join(root, "params_file_1_gcn_just_values.json"))
         self.plot_measurement(root, date, trainer_and_tester, LOSS_PLOT)
         # self.plot_measurement(root, date, ACCURACY_PLOT)
         self.plot_measurement(root, date, trainer_and_tester, AUC_PLOT)

@@ -91,7 +91,7 @@ def create_final_graph(tempGraph, valdict, zeroflag):
 
 # if __name__ == '__main__':
 #     # df = pd.read_csv("test_set_Cirrhosis_microbiome.csv", index_col="ID")
-#     data_file_path = os.path.join("split_datasets", 'Black_vs_White_split_dataset', 'OTU_Black_vs_White_after_mipmlp_Genus_same_ids.csv')
+#     data_file_path = os.path.join("split_datasets", 'bw_split_dataset', 'OTU_Black_vs_White_after_mipmlp_Genus_same_ids.csv')
 #     df = pd.read_csv(data_file_path, index_col='ID')
 #     series = df.iloc[0]
 #     graph = create_tax_tree(series=series, zeroflag=True)

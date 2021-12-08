@@ -5,6 +5,7 @@ import networkx as nx
 import numpy as np
 import pandas as pd
 import seaborn as sns
+from gem.embedding.hope import HOPE
 from node2vec import Node2Vec
 from sklearn.manifold import TSNE
 from tqdm import tqdm
@@ -60,11 +61,18 @@ def node2vec_embed(graph):
     return my_dict, X, graph
 
 
-def find_embed(graphs_list):
+def find_embed(graphs_list, algorithm="node2vec"):
     G = create_multi_graph(graphs_list)
-    print(nx.number_connected_components(G))
-    my_dict, X, graph = node2vec_embed(G)
-    return my_dict, X, graph
+    print("The number of Rehivi Kshiroot", nx.number_connected_components(G))
+
+    if algorithm == "HOPE":
+        embedding = HOPE(d=128, beta=0.01)
+        embedding.learn_embedding(graph=G, edge_f=None, is_weighted=True, no_python=True)
+        X = embedding.get_embedding()
+    else:
+        # The default algorithm is node2vec
+        _, X, _ = node2vec_embed(G)
+    return X
 
 
 def find_embed2(graphs_list):
@@ -76,9 +84,9 @@ def find_embed2(graphs_list):
 if __name__ == '__main__':
     datasets_lst = ["Male_vs_Female", "Cirrhosis", "IBD", "Black_vs_White", "IBD_Chrone", "nugent"]
     data_file_paths = [os.path.join("split_datasets", f'{dataset_name}_split_dataset', f'train_val_set_{dataset_name}_no_zero_cols_microbiome.csv')
-                       for dataset_name in datasets_lst] + [os.path.join("split_datasets", "Allergy_nut_split_dataset",
+                       for dataset_name in datasets_lst] + [os.path.join("split_datasets", "nut_split_dataset",
                                                                          "train_val_set_nut_microbiome.csv"),
-                                                            os.path.join("split_datasets", "Allergy_peanut_split_dataset",
+                                                            os.path.join("split_datasets", "peanut_split_dataset",
                                                                         "train_val_set_peanut_microbiome.csv")]
     dataset_names = datasets_lst + ["nut", "peanut"]
     for data_file_path, dataset_name in zip(data_file_paths, dataset_names):

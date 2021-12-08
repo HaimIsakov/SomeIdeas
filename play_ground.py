@@ -48,7 +48,7 @@ if __name__ == '__main__':
     # data_file_path = os.path.join('Cirrhosis_split_dataset', 'train_val_set_Cirrhosis_microbiome.csv')
     # data_file_path = os.path.join('GDM_split_dataset', 'train_val_set_gdm_microbiome.csv')
     # data_file_path = os.path.join('Allergy', 'OTU_Allergy_after_mipmlp_Genus_same_ids.csv')
-    data_file_path = os.path.join('Black_vs_White_split_dataset', 'OTU_Black_vs_White_after_mipmlp_Genus_same_ids.csv')
+    data_file_path = os.path.join('bw_split_dataset', 'OTU_Black_vs_White_after_mipmlp_Genus_same_ids.csv')
     # data_file_path = os.path.join('IBD_split_dataset', 'OTU_IBD_after_mipmlp_Genus.csv')
     microbiome_df = pd.read_csv(data_file_path, index_col='ID')
     nodes_number = []

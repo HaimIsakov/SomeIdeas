@@ -1,8 +1,7 @@
 import os
-
 from sklearn.model_selection import train_test_split
-
 from BrainNetwork import AbideDataset
+from nni_functions_utils import run_again_from_nni_results_csv
 from node2vec_embed import find_embed
 
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
@@ -26,13 +25,12 @@ from MyDatasets import *
 
 LOG = logging.getLogger('nni_logger')
 K = 10  # For k-cross-validation
-# "gdm": MyDatasets.gdm_files,"male_vs_female_species": MyDatasets.male_vs_female_species,"allergy_or_not": MyDatasets.allergy_or_not_files,
+# "gdm": MyDatasets.gdm_files,"male_vs_female_species": MyDatasets.male_vs_female_species,"allergy_or_not": MyDatasets.allergy_or_not_files,"allergy_milk_or_not": MyDatasets.allergy_milk_or_not_files
 datasets_dict = {"cirrhosis": MyDatasets.cirrhosis_files, "IBD": MyDatasets.ibd_files,
                  "bw": MyDatasets.bw_files, "IBD_Chrone": MyDatasets.ibd_chrone_files,
-                 "allergy_milk_or_not": MyDatasets.allergy_milk_or_not_files,
-                 "male_vs_female": MyDatasets.male_vs_female,
+                 "Male_vs_Female": MyDatasets.male_vs_female,
                  "nut": MyDatasets.nut, "peanut": MyDatasets.peanut, "nugent": MyDatasets.nugent,
-                 "allergy_milk_no_controls": MyDatasets.allergy_milk_no_controls}
+                 "milk_no_controls": MyDatasets.allergy_milk_no_controls}
 
 tasks_dict = {1: MyTasks.just_values, 2: MyTasks.just_graph_structure, 3: MyTasks.values_and_graph_structure,
               4: MyTasks.pytorch_geometric, 5: MyTasks.one_head_attention, 6: MyTasks.yoram_attention}
@@ -55,30 +53,35 @@ class Main:
         return cur_dataset
 
     def turn_on_train(self):
+        kwargs = {}
         my_tasks = MyTasks(tasks_dict, self.dataset_name)
         my_datasets = MyDatasets(datasets_dict)
 
         directory_name, mission, params_file_path = my_tasks.get_task_files(self.task_number)
         result_directory_name = os.path.join(directory_name, "Result_After_Proposal")
+        # train_data_file_path, train_tag_file_path, test_data_file_path, test_tag_file_path = \
+        #     my_datasets.get_dataset_files(self.dataset_name)
         train_data_file_path, train_tag_file_path, test_data_file_path, test_tag_file_path = \
-            my_datasets.get_dataset_files(self.dataset_name)
+            my_datasets.microbiome_files(self.dataset_name)
 
         print("Training-Validation Sets Graphs")
         train_val_dataset = self.create_dataset(train_data_file_path, train_tag_file_path, mission)
         print("Test set Graphs")
         test_dataset = self.create_dataset(test_data_file_path, test_tag_file_path, mission)
 
-        print("Calculate Node2vec embedding")
-        graphs_list = train_val_dataset.create_microbiome_graphs.graphs_list
-        my_dict, X, agraph = find_embed(graphs_list)
-        kwargs = {'X': X}
+        if mission == "yoram_attention":
+            algorithm = "HOPE"
+            print("Calculate embedding")
+            graphs_list = train_val_dataset.create_microbiome_graphs.graphs_list
+            X = find_embed(graphs_list, algorithm=algorithm)
+            kwargs = {'X': X}
 
         train_val_dataset.update_graphs(**kwargs)
         test_dataset.update_graphs(**kwargs)
 
         trainer_and_tester = TrainTestValKTimes(self.RECEIVED_PARAMS, self.device, train_val_dataset, test_dataset,
                                                 result_directory_name, nni_flag=self.nni_mode,
-                                                geometric_or_not=self.geometric_mode)
+                                                geometric_or_not=self.geometric_mode, plot_figures=self.plot_figures)
         train_metric, val_metric, test_metric, min_train_val_metric = trainer_and_tester.train_group_k_cross_validation(k=K)
         return train_metric, val_metric, test_metric, min_train_val_metric
 
@@ -87,7 +90,7 @@ class Main:
         label_path = "Phenotypic_V1_0b_preprocessed1.csv"
         phenotype_dataset = pd.read_csv("Phenotypic_V1_0b_preprocessed1.csv")
         subject_list = [value for value in phenotype_dataset["FILE_ID"].tolist() if value != "no_filename"]
-        subject_list_train_index, subject_list_test_index = train_test_split(subject_list, test_size=0.3, random_state=0)
+        subject_list_train_index, subject_list_test_index = train_test_split(subject_list, test_size=0.3)
 
         print("ABIDE Dataset Training-Validation Sets Graphs")
         train_val_abide_dataset = AbideDataset(data_path, label_path, subject_list_train_index)
@@ -149,35 +152,6 @@ def results_dealing(train_metric, val_metric, test_metric, min_train_val_metric,
     print("Mean Train Set AUC: ", mean_train_metric, " +- ", std_train_metric)
 
 
-def run_again_from_nni_results_csv(file, n_rows=10):
-    result_df = pd.read_csv(file, header=0)
-    result_df.sort_values(by=['reward'], inplace=True, ascending=False)
-    del result_df["trialJobId"]
-    del result_df["intermediate"]
-    del result_df["reward"]
-    first_n_rows = result_df[0:n_rows]
-    params_list = [{} for i in range(n_rows)]
-    for i in range(n_rows):
-        for j in first_n_rows.columns:
-            params_list[i][j] = int(first_n_rows.iloc[i][j]) if type(first_n_rows.iloc[i][j]) is np.int64 else first_n_rows.iloc[i][j]
-    return params_list
-
-
-def run_again_from_nni_results_csv_format2(file, n_rows=10):
-    result_df = pd.read_csv(file, header=0, index_col=0)
-    result_df.sort_values(by=['mean_val_nni'], inplace=True, ascending=False)
-    del result_df["std_val_nni"]
-    del result_df["mean_test_nni"]
-    del result_df["std_test_nni"]
-    del result_df["mean_val_nni"]
-    first_n_rows = result_df[0:n_rows]
-    params_list = [{} for i in range(n_rows)]
-    for i in range(n_rows):
-        for j in first_n_rows.columns:
-            params_list[i][j] = int(first_n_rows.iloc[i][j]) if type(first_n_rows.iloc[i][j]) is np.int64 else first_n_rows.iloc[i][j]
-    return params_list
-
-
 def reproduce_from_nni(nni_result_file, dataset_name, mission_number):
     mission_dict = {1: "just_values", 2: "just_graph", 3: "graph_and_values"}
     params_list = run_again_from_nni_results_csv(nni_result_file, n_rows=5)
@@ -234,6 +208,7 @@ def run_regular(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geo
     result_file_name = f"{dataset_name}_{mission}"
     results_dealing(train_metric, val_metric, test_metric, min_train_val_metric, nni_flag, RECEIVED_PARAMS, result_file_name)
 
+
 def run_regular_abide_dataset(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes):
     params_file_path = "abide_dataset_params.json"
     if nni_flag:
@@ -255,6 +230,7 @@ def run_regular_abide_dataset(dataset_name, mission_number, cuda_number, nni_fla
     result_file_name = f"{dataset_name}"
     results_dealing(train_metric, val_metric, test_metric, min_train_val_metric, nni_flag, RECEIVED_PARAMS, result_file_name)
 
+
 if __name__ == '__main__':
     try:
         parser = set_arguments()
@@ -267,52 +243,14 @@ if __name__ == '__main__':
         pytorch_geometric_mode = False
         add_attributes = False
 
-        # run_regular("allergy_milk_no_controls", 1, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
-        # run_regular("allergy_milk_no_controls", 2, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
-        # run_regular("allergy_milk_no_controls", 3, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
-
-        run_regular_abide_dataset(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
-        # run_all_dataset(6, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
+        # run_regular_abide_dataset(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode,
+        #                           add_attributes)
+        run_regular(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
+        # run_all_dataset(3, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
 
         # try:
         #     print("nni_allergy_peanut_yoram_attention")
         #     reproduce_from_nni(os.path.join("nni_allergy_peanut_yoram_attention.csv"), "peanut", 6)
-        # except Exception as e:
-        #     print(e)
-        #     pass
-        # try:
-        #     print("nni_allergy_nut_yoram_attention")
-        #     reproduce_from_nni(os.path.join("nni_allergy_nut_yoram_attention.csv"), "nut", 6)
-        # except Exception as e:
-        #     print(e)
-        #     pass
-        # try:
-        #     print("nni_male_female_yoram_attention")
-        #     reproduce_from_nni(os.path.join("nni_male_female_yoram_attention.csv"), "male_female", 6)
-        # except Exception as e:
-        #     print(e)
-        #     pass
-        # try:
-        #     print("nni_nugent_yoram_attention")
-        #     reproduce_from_nni(os.path.join("nni_nugent_yoram_attention.csv"), "nugent", 6)
-        # except Exception as e:
-        #     print(e)
-        #     pass
-        # try:
-        #     print("nni_ibd_yoram_attention")
-        #     reproduce_from_nni(os.path.join("nni_ibd_yoram_attention.csv"), "ibd", 6)
-        # except Exception as e:
-        #     print(e)
-        #     pass
-        # try:
-        #     print("nni_ibd_chrone_yoram_attention")
-        #     reproduce_from_nni(os.path.join("nni_ibd_chrone_yoram_attention.csv"), "ibd_chrone", 6)
-        # except Exception as e:
-        #     print(e)
-        #     pass
-        # try:
-        #     print("nni_bw_yoram_attention")
-        #     reproduce_from_nni(os.path.join("nni_bw_yoram_attention.csv"), "bw", 6)
         # except Exception as e:
         #     print(e)
         #     pass

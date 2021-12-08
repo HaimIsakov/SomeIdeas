@@ -28,14 +28,16 @@ class GraphDataset(Dataset):
         dataset_dict = {}
         for i in range(self.samples_len):
             graph = self.create_microbiome_graphs.get_graph(i)
-            if 'X' in kwargs:
-                X = kwargs['X']
+            if not self.geometric_or_not:
                 dataset_dict[i] = {'graph': graph,
                                    'label': self.microbiome_dataset.get_label(i),
                                    'values_on_leaves': self.microbiome_dataset.get_leaves_values(i),
-                                   'values_on_nodes': self.create_microbiome_graphs.get_values_on_nodes_ordered_by_nodes(graph),
-                                   'adjacency_matrix': nx.adjacency_matrix(graph).todense(),
-                                   'graph_embed': X}
+                                   'values_on_nodes': self.create_microbiome_graphs.get_values_on_nodes_ordered_by_nodes(
+                                       graph),
+                                   'adjacency_matrix': nx.adjacency_matrix(graph).todense()}
+                if 'X' in kwargs:
+                    X = kwargs['X']
+                    dataset_dict[i]['graph_embed'] = X
             else:
                 data = from_networkx(graph, group_node_attrs=['val'])  # Notice: convert file has been changed explicitly
                 data.y = torch.tensor(self.microbiome_dataset.get_label(i))

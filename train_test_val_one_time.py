@@ -268,15 +268,3 @@ class TrainTestValOneTime:
                 pred += output.squeeze(dim=1).tolist()
         auc_result = roc_auc_score(true_labels, pred)
         return auc_result
-
-    #
-    # def calc_weighs_for_loss(self):
-    #     count_ones = 0
-    #     count_zeros = 0
-    #     for batch_index, (A, data, target) in enumerate(self.train_loader):
-    #         for i in target:
-    #             if i.item() == 1:
-    #                 count_ones += 1
-    #             if i.item() == 0:
-    #                 count_zeros += 1
-    #     return [1 / count_zeros, 1 / count_ones]

@@ -8,6 +8,7 @@ from tqdm import tqdm
 
 from AbideDatasetUtils import load_connectivity
 
+
 class AbideDataset(Dataset):
     def __init__(self, data_path, label_path, subject_list):
         self.dataset_dict = {}
