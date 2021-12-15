@@ -26,7 +26,7 @@ from MyDatasets import *
 LOG = logging.getLogger('nni_logger')
 K = 10  # For k-cross-validation
 # "gdm": MyDatasets.gdm_files,"male_vs_female_species": MyDatasets.male_vs_female_species,"allergy_or_not": MyDatasets.allergy_or_not_files,"allergy_milk_or_not": MyDatasets.allergy_milk_or_not_files
-datasets_dict = {"cirrhosis": MyDatasets.cirrhosis_files, "IBD": MyDatasets.ibd_files,
+datasets_dict = {"Cirrhosis": MyDatasets.cirrhosis_files, "IBD": MyDatasets.ibd_files,
                  "bw": MyDatasets.bw_files, "IBD_Chrone": MyDatasets.ibd_chrone_files,
                  "Male_vs_Female": MyDatasets.male_vs_female,
                  "nut": MyDatasets.nut, "peanut": MyDatasets.peanut, "nugent": MyDatasets.nugent,
@@ -70,7 +70,7 @@ class Main:
         test_dataset = self.create_dataset(test_data_file_path, test_tag_file_path, mission)
 
         if mission == "yoram_attention":
-            algorithm = "HOPE"
+            algorithm = "node2vec"
             print("Calculate embedding")
             graphs_list = train_val_dataset.create_microbiome_graphs.graphs_list
             X = find_embed(graphs_list, algorithm=algorithm)
@@ -243,10 +243,14 @@ if __name__ == '__main__':
         pytorch_geometric_mode = False
         add_attributes = False
 
-        # run_regular_abide_dataset(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode,
-        #                           add_attributes)
-        run_regular(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
-        # run_all_dataset(3, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
+        run_regular_abide_dataset(dataset_name, 1, cuda_number, nni_flag, pytorch_geometric_mode,
+                                  add_attributes)
+        run_regular_abide_dataset(dataset_name, 2, cuda_number, nni_flag, pytorch_geometric_mode,
+                                  add_attributes)
+        run_regular_abide_dataset(dataset_name, 3, cuda_number, nni_flag, pytorch_geometric_mode,
+                                  add_attributes)
+        # run_regular(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
+        # # run_all_dataset(6, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
 
         # try:
         #     print("nni_allergy_peanut_yoram_attention")
