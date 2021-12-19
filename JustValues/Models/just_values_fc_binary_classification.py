@@ -4,11 +4,12 @@ import torch.nn.functional as F
 
 
 class JustValuesOnNodes(nn.Module):
-    def __init__(self, data_size, RECEIVED_PARAMS):
+    def __init__(self, nodes_number, data_size, RECEIVED_PARAMS):
         super(JustValuesOnNodes, self).__init__()
         self.data_size = data_size
+        self.nodes_number = nodes_number
         self.RECEIVED_PARAMS = RECEIVED_PARAMS
-        self.fc1 = nn.Linear(self.data_size, int(self.RECEIVED_PARAMS["layer_1"]))  # input layer
+        self.fc1 = nn.Linear(self.data_size * self.nodes_number, int(self.RECEIVED_PARAMS["layer_1"]))  # input layer
         self.fc2 = nn.Linear(int(self.RECEIVED_PARAMS["layer_1"]), int(self.RECEIVED_PARAMS["layer_2"]))
         self.fc3 = nn.Linear(int(self.RECEIVED_PARAMS["layer_2"]), 1)
 
@@ -43,6 +44,7 @@ class JustValuesOnNodes(nn.Module):
         #     x = self.dropout(x)
         #     x = torch.tanh(self.fc2(x))
 
+        x = torch.flatten(x, start_dim=1)  # flatten the tensor
         x = self.classifier(x)
         x = self.fc3(x)
         return x

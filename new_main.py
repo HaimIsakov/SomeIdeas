@@ -85,19 +85,27 @@ class Main:
         train_metric, val_metric, test_metric, min_train_val_metric = trainer_and_tester.train_group_k_cross_validation(k=K)
         return train_metric, val_metric, test_metric, min_train_val_metric
 
-    def turn_on_train_abide_dataset(self):
+    def turn_on_train_abide_dataset(self, mission):
         data_path = "rois_ho"
         label_path = "Phenotypic_V1_0b_preprocessed1.csv"
         phenotype_dataset = pd.read_csv("Phenotypic_V1_0b_preprocessed1.csv")
         subject_list = [value for value in phenotype_dataset["FILE_ID"].tolist() if value != "no_filename"]
-        subject_list_train_index, subject_list_test_index = train_test_split(subject_list, test_size=0.3)
+        # The reason for random state is that the test dataset and train-validation dataset will always be the same
+        subject_list_train_val_index, subject_list_test_index = train_test_split(subject_list, test_size=0.3, random_state=0)
+
+        train_val_abide_dataset = AbideDataset(subject_list_train_val_index, mission)
+        test_abide_dataset = AbideDataset(subject_list_test_index, mission)
+
+        if mission == "yoram_attention":
+            algorithm = "node2vec"
+            print("Calculate embedding")
+            graphs_list = train_val_abide_dataset.graphs_list
+            X = find_embed(graphs_list, algorithm=algorithm)
+            kwargs = {'X': X}
 
         print("ABIDE Dataset Training-Validation Sets Graphs")
-        train_val_abide_dataset = AbideDataset(data_path, label_path, subject_list_train_index)
-        print("ABIDE Dataset Test set Graphs")
-        test_abide_dataset = AbideDataset(data_path, label_path, subject_list_test_index)
-
         train_val_abide_dataset.update_graphs(data_path, label_path)
+        print("ABIDE Dataset Test set Graphs")
         test_abide_dataset.update_graphs(data_path, label_path)
         directory_name = ""
         result_directory_name = os.path.join(directory_name, "Result_After_Proposal")
@@ -221,13 +229,15 @@ def run_regular_abide_dataset(dataset_name, mission_number, cuda_number, nni_fla
     RECEIVED_PARAMS["train_frac"] = np.float64(RECEIVED_PARAMS["train_frac"])
     RECEIVED_PARAMS["test_frac"] = np.float64(RECEIVED_PARAMS["test_frac"])
 
-    print("Dataset", dataset_name)
+    print("Dataset", "Abide Dataset")
+    print("Mission", mission_number)
     device = f"cuda:{cuda_number}" if torch.cuda.is_available() else "cpu"
     print("Device", device)
     main_runner = Main(dataset_name, mission_number, RECEIVED_PARAMS, device, nni_mode=nni_flag,
                        geometric_mode=pytorch_geometric_mode, add_attributes=add_attributes, plot_figures=False)
-    train_metric, val_metric, test_metric, min_train_val_metric = main_runner.turn_on_train_abide_dataset()
-    result_file_name = f"{dataset_name}"
+    mission_dict = {1: "just_values", 2: "just_graph", 3: "graph_and_values", 6:"yoram_attention"}
+    train_metric, val_metric, test_metric, min_train_val_metric = main_runner.turn_on_train_abide_dataset(mission_dict[mission_number])
+    result_file_name = f"{dataset_name}_{mission_dict[mission_number]}"
     results_dealing(train_metric, val_metric, test_metric, min_train_val_metric, nni_flag, RECEIVED_PARAMS, result_file_name)
 
 
@@ -243,14 +253,12 @@ if __name__ == '__main__':
         pytorch_geometric_mode = False
         add_attributes = False
 
-        run_regular_abide_dataset(dataset_name, 1, cuda_number, nni_flag, pytorch_geometric_mode,
-                                  add_attributes)
-        run_regular_abide_dataset(dataset_name, 2, cuda_number, nni_flag, pytorch_geometric_mode,
-                                  add_attributes)
-        run_regular_abide_dataset(dataset_name, 3, cuda_number, nni_flag, pytorch_geometric_mode,
-                                  add_attributes)
-        # run_regular(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
-        # # run_all_dataset(6, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
+        if dataset_name == "abide":
+            run_regular_abide_dataset(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode,
+                                      add_attributes)
+        else:
+            run_regular(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
+        # run_all_dataset(6, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
 
         # try:
         #     print("nni_allergy_peanut_yoram_attention")

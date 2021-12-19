@@ -115,8 +115,10 @@ class TrainTestValKTimes:
     def get_model(self):
         if not self.geometric_or_not:
             if self.train_val_dataset.mission == "just_values":
-                data_size = self.train_val_dataset.get_leaves_number()
-                model = JustValuesOnNodes(data_size, self.RECEIVED_PARAMS)
+                # nodes_number - changed only for abide dataset
+                data_size = self.train_val_dataset.get_vector_size()
+                nodes_number = self.train_val_dataset.get_leaves_number()
+                model = JustValuesOnNodes(nodes_number, data_size, self.RECEIVED_PARAMS)
             elif self.train_val_dataset.mission == "just_graph":
                 data_size = self.train_val_dataset.get_vector_size()
                 nodes_number = self.train_val_dataset.nodes_number()

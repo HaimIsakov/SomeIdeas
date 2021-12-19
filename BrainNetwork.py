@@ -10,10 +10,10 @@ from AbideDatasetUtils import load_connectivity
 
 
 class AbideDataset(Dataset):
-    def __init__(self, data_path, label_path, subject_list):
+    def __init__(self, subject_list, mission):
         self.dataset_dict = {}
         self.subject_list = subject_list
-        self.mission = "graph_and_values"
+        self.mission = mission
         #self.update_graphs(data_path, label_path)
 
     def __getitem__(self, index):
@@ -30,10 +30,13 @@ class AbideDataset(Dataset):
         return "Abide Dataset" + "len" + str(len(self))
 
     def get_vector_size(self):
-        return self.nodes_number()
+        return self.dataset_dict[0]['adjacency_matrix'].shape[1]
 
     def nodes_number(self):
         return self.dataset_dict[0]['adjacency_matrix'].shape[0]
+
+    def get_leaves_number(self):
+        return self.nodes_number()
 
     def set_dataset_dict(self,data_path, label_path, **kwargs):
         networks_dict = self.load_or_create_brain_network(data_path)
@@ -70,7 +73,6 @@ class AbideDataset(Dataset):
 
     def get_all_groups(self):
         return [self.dataset_dict[i]['subject'] for i in range(len(self.subject_list))]
-
 
 #if __name__ == "__main__":
 #    data_path = "rois_ho"
