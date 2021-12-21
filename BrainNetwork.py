@@ -1,11 +1,11 @@
 import os
 import csv
+import networkx as nx
 import numpy as np
 import pandas as pd
 from torch.utils.data import Dataset
 from torch import Tensor
 from tqdm import tqdm
-
 from AbideDatasetUtils import load_connectivity
 
 
@@ -14,6 +14,7 @@ class AbideDataset(Dataset):
         self.dataset_dict = {}
         self.subject_list = subject_list
         self.mission = mission
+        self.graphs_list = []*len(self.subject_list)
         #self.update_graphs(data_path, label_path)
 
     def __getitem__(self, index):
@@ -38,6 +39,12 @@ class AbideDataset(Dataset):
     def get_leaves_number(self):
         return self.nodes_number()
 
+    def update_graph_list(self, data_path):
+        networks_dict = self.load_or_create_brain_network(data_path)
+        for i, subject in enumerate(self.subject_list):
+            graph_from_adj_matrix = nx.from_numpy_matrix(self.dataset_dict[i]['adjacency_matrix'])
+            self.graphs_list[i] = graph_from_adj_matrix
+
     def set_dataset_dict(self,data_path, label_path, **kwargs):
         networks_dict = self.load_or_create_brain_network(data_path)
         label_dict = self.load_or_create_label_dict(label_path)
@@ -45,6 +52,8 @@ class AbideDataset(Dataset):
             self.dataset_dict[i] = {'subject': subject,
                                     'label': label_dict[subject],
                                     'adjacency_matrix': networks_dict[subject]}
+            graph_from_adj_matrix = nx.from_numpy_matrix(self.dataset_dict[i]['adjacency_matrix'])
+            self.graphs_list[i] = graph_from_adj_matrix
 
     def update_graphs(self, data_path, label_path, **kwargs):
         self.set_dataset_dict(data_path, label_path, **kwargs)

@@ -167,13 +167,16 @@ def reproduce_from_nni(nni_result_file, dataset_name, mission_number):
     nni_flag = False
     pytorch_geometric_mode = False
     add_attributes = False
-    cuda_number = 1
+    cuda_number = 3
     device = f"cuda:{cuda_number}" if torch.cuda.is_available() else "cpu"
     print("Device", device)
     for RECEIVED_PARAMS in params_list:
         main_runner = Main(dataset_name, mission_number, RECEIVED_PARAMS, device, nni_mode=nni_flag,
                            geometric_mode=pytorch_geometric_mode, add_attributes=add_attributes, plot_figures=False)
-        train_metric, val_metric, test_metric, min_train_val_metric = main_runner.turn_on_train()
+        if dataset_name == "abide":
+            train_metric, val_metric, test_metric, min_train_val_metric = main_runner.turn_on_train_abide_dataset(mission_dict[mission_number])
+        else:
+            train_metric, val_metric, test_metric, min_train_val_metric = main_runner.turn_on_train()
         result_file_name = f"{dataset_name}_{mission_dict[mission_number]}"
         results_dealing(train_metric, val_metric, test_metric, min_train_val_metric, nni_flag, RECEIVED_PARAMS, result_file_name)
         for k, v in RECEIVED_PARAMS.items():
@@ -254,15 +257,28 @@ if __name__ == '__main__':
         add_attributes = False
 
         if dataset_name == "abide":
-            run_regular_abide_dataset(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode,
-                                      add_attributes)
+           run_regular_abide_dataset(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode,
+                                     add_attributes)
         else:
-            run_regular(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
-        # run_all_dataset(6, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
+           run_regular(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
+        run_all_dataset(6, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
 
         # try:
-        #     print("nni_allergy_peanut_yoram_attention")
-        #     reproduce_from_nni(os.path.join("nni_allergy_peanut_yoram_attention.csv"), "peanut", 6)
+        #     print("more_regularization_nni_graph_and_values_abide")
+        #     reproduce_from_nni(os.path.join("more_regularization_nni_graph_and_values_abide.csv"), "abide", 3)
+        # except Exception as e:
+        #     print(e)
+        #     raise
+        #     # pass
+        # try:
+        #     print("more_regularization_nni_just_graph_abide")
+        #     reproduce_from_nni(os.path.join("more_regularization_nni_just_graph_abide.csv"), "abide", 2)
+        # except Exception as e:
+        #     print(e)
+        #     pass
+        # try:
+        #     print("more_regularization_nni_just_values_abide")
+        #     reproduce_from_nni(os.path.join("more_regularization_nni_just_values_abide.csv"), "abide", 1)
         # except Exception as e:
         #     print(e)
         #     pass

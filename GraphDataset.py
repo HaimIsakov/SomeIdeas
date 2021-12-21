@@ -4,10 +4,8 @@ import torch
 from torch.utils.data import Dataset
 from torch import Tensor, FloatTensor
 #from torch_geometric.utils import from_networkx
-
 from MicrobiomeDataset import MicrobiomeDataset
 from create_microbiome_graphs import CreateMicrobiomeGraphs
-from node2vec_embed import find_embed
 
 
 class GraphDataset(Dataset):
@@ -44,8 +42,8 @@ class GraphDataset(Dataset):
                 dataset_dict[i] = {'data': data}
         return dataset_dict
 
-    def get_joint_nodes(self):
-        return self.create_microbiome_graphs.find_common_nodes().keys()
+    # def get_joint_nodes(self):
+    #     return self.create_microbiome_graphs.find_common_nodes().keys()
 
     def update_graphs(self, **kwargs):
         # self.create_microbiome_graphs.create_graphs_with_common_nodes(union_train_and_test)

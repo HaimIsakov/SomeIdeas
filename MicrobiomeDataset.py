@@ -25,8 +25,8 @@ class MicrobiomeDataset:
     def add_groups(self):
         self.groups = list(self.tags['Group'])
 
-    def get_groups(self, indexes):
-        return [self.groups[i] for i in indexes]
+    # def get_groups(self, indexes):
+    #     return [self.groups[i] for i in indexes]
 
     def add_labels(self):
         self.labels = list(self.tags['Tag'])
