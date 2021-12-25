@@ -86,6 +86,7 @@ class Main:
         return train_metric, val_metric, test_metric, min_train_val_metric
 
     def turn_on_train_abide_dataset(self, mission):
+        kwargs = {}
         data_path = "rois_ho"
         label_path = "Phenotypic_V1_0b_preprocessed1.csv"
         phenotype_dataset = pd.read_csv("Phenotypic_V1_0b_preprocessed1.csv")
@@ -93,8 +94,8 @@ class Main:
         # The reason for random state is that the test dataset and train-validation dataset will always be the same
         subject_list_train_val_index, subject_list_test_index = train_test_split(subject_list, test_size=0.3, random_state=0)
 
-        train_val_abide_dataset = AbideDataset(subject_list_train_val_index, mission)
-        test_abide_dataset = AbideDataset(subject_list_test_index, mission)
+        train_val_abide_dataset = AbideDataset(data_path, label_path, subject_list_train_val_index, mission)
+        test_abide_dataset = AbideDataset(data_path, label_path, subject_list_test_index, mission)
 
         if mission == "yoram_attention":
             algorithm = "node2vec"
@@ -104,9 +105,9 @@ class Main:
             kwargs = {'X': X}
 
         print("ABIDE Dataset Training-Validation Sets Graphs")
-        train_val_abide_dataset.update_graphs(data_path, label_path)
+        train_val_abide_dataset.update_graphs(**kwargs)
         print("ABIDE Dataset Test set Graphs")
-        test_abide_dataset.update_graphs(data_path, label_path)
+        test_abide_dataset.update_graphs(**kwargs)
         directory_name = ""
         result_directory_name = os.path.join(directory_name, "Result_After_Proposal")
         trainer_and_tester = TrainTestValKTimes(self.RECEIVED_PARAMS, self.device, train_val_abide_dataset, test_abide_dataset,
@@ -261,7 +262,7 @@ if __name__ == '__main__':
                                      add_attributes)
         else:
            run_regular(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
-        run_all_dataset(6, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
+        # run_all_dataset(6, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
 
         # try:
         #     print("more_regularization_nni_graph_and_values_abide")

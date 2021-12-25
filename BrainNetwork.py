@@ -10,12 +10,16 @@ from AbideDatasetUtils import load_connectivity
 
 
 class AbideDataset(Dataset):
-    def __init__(self, subject_list, mission):
-        self.dataset_dict = {}
+    def __init__(self, data_path, label_path, subject_list, mission):
+        self.data_path = data_path
+        self.label_path = label_path
         self.subject_list = subject_list
+        self.networks_dict = self.load_or_create_brain_network()
+        self.label_dict = self.load_or_create_label_dict()
+        self.graphs_list = self.get_graph_list()
+        self.dataset_dict = {}
         self.mission = mission
-        self.graphs_list = []*len(self.subject_list)
-        #self.update_graphs(data_path, label_path)
+        # self.update_graphs(data_path, label_path)
 
     def __getitem__(self, index):
         label = self.dataset_dict[index]['label']
@@ -39,37 +43,37 @@ class AbideDataset(Dataset):
     def get_leaves_number(self):
         return self.nodes_number()
 
-    def update_graph_list(self, data_path):
-        networks_dict = self.load_or_create_brain_network(data_path)
+    def get_graph_list(self):
+        graphs_list = [0]*len(self.subject_list)
         for i, subject in enumerate(self.subject_list):
-            graph_from_adj_matrix = nx.from_numpy_matrix(self.dataset_dict[i]['adjacency_matrix'])
-            self.graphs_list[i] = graph_from_adj_matrix
+            graph_from_adj_matrix = nx.from_numpy_matrix(self.networks_dict[subject])
+            graphs_list[i] = graph_from_adj_matrix
+        return graphs_list
 
-    def set_dataset_dict(self,data_path, label_path, **kwargs):
-        networks_dict = self.load_or_create_brain_network(data_path)
-        label_dict = self.load_or_create_label_dict(label_path)
+    def set_dataset_dict(self, **kwargs):
         for i, subject in enumerate(self.subject_list):
             self.dataset_dict[i] = {'subject': subject,
-                                    'label': label_dict[subject],
-                                    'adjacency_matrix': networks_dict[subject]}
-            graph_from_adj_matrix = nx.from_numpy_matrix(self.dataset_dict[i]['adjacency_matrix'])
-            self.graphs_list[i] = graph_from_adj_matrix
+                                    'label': self.label_dict[subject],
+                                    'adjacency_matrix': self.networks_dict[subject]}
+            if 'X' in kwargs:
+                X = kwargs['X']
+                self.dataset_dict[i]['graph_embed'] = X
 
-    def update_graphs(self, data_path, label_path, **kwargs):
-        self.set_dataset_dict(data_path, label_path, **kwargs)
+    def update_graphs(self, **kwargs):
+        self.set_dataset_dict(**kwargs)
 
-    def load_or_create_brain_network(self, data_path):
+    def load_or_create_brain_network(self):
         networks_dict = {}
         for i, subject in tqdm(enumerate(self.subject_list), desc='Create Abide Networks', total=len(self.subject_list)):
-            file_path = os.path.join(data_path, f"{subject}_{data_path}.1D")
+            file_path = os.path.join(self.data_path, f"{subject}_{self.data_path}.1D")
             input_matrix = np.loadtxt(file_path)
             network = load_connectivity(input_matrix)
             networks_dict[subject] = network
         return networks_dict
 
-    def load_or_create_label_dict(self, label_path):
+    def load_or_create_label_dict(self):
         label_dict = {}
-        with open(label_path) as csv_file:
+        with open(self.label_path) as csv_file:
             reader = csv.DictReader(csv_file)
             for row in reader:
                 if row['FILE_ID'] in self.subject_list:
