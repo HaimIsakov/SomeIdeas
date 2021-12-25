@@ -6,7 +6,7 @@ import pandas as pd
 from torch.utils.data import Dataset
 from torch import Tensor
 from tqdm import tqdm
-from AbideDatasetUtils import load_connectivity
+from AbideDatasetUtils import *
 
 
 class AbideDataset(Dataset):
@@ -15,6 +15,7 @@ class AbideDataset(Dataset):
         self.label_path = label_path
         self.subject_list = subject_list
         self.networks_dict = self.load_or_create_brain_network()
+        # calc_avg_degree(self.networks_dict)
         self.label_dict = self.load_or_create_label_dict()
         self.graphs_list = self.get_graph_list()
         self.dataset_dict = {}
@@ -23,9 +24,10 @@ class AbideDataset(Dataset):
 
     def __getitem__(self, index):
         label = self.dataset_dict[index]['label']
-        # In GAT-Li paper they applied absolute value on adj matrix
-        adjacency_matrix = np.absolute(self.dataset_dict[index]['adjacency_matrix'])
-        values = self.dataset_dict[index]['adjacency_matrix']
+        # In GAT-Li paper they applied absolute value on adj matrix, and put 0 on the diagonal
+        adjacency_matrix = transform_adj_mat(self.dataset_dict[index]['adjacency_matrix'])
+        # values = self.dataset_dict[index]['adjacency_matrix']
+        values = self.dataset_dict[index]['values']
         return Tensor(values), Tensor(adjacency_matrix), label
 
     def __len__(self):
@@ -35,7 +37,8 @@ class AbideDataset(Dataset):
         return "Abide Dataset" + "len" + str(len(self))
 
     def get_vector_size(self):
-        return self.dataset_dict[0]['adjacency_matrix'].shape[1]
+        return 1
+        # return self.dataset_dict[0]['adjacency_matrix'].shape[1]
 
     def nodes_number(self):
         return self.dataset_dict[0]['adjacency_matrix'].shape[0]
@@ -54,7 +57,10 @@ class AbideDataset(Dataset):
         for i, subject in enumerate(self.subject_list):
             self.dataset_dict[i] = {'subject': subject,
                                     'label': self.label_dict[subject],
-                                    'adjacency_matrix': self.networks_dict[subject]}
+                                    'adjacency_matrix': self.networks_dict[subject],
+                                    'values': calc_sum_abs_corr(self.networks_dict[subject])}
+            # 'values': self.networks_dict[subject].copy()
+            # 'values': calc_first_eigen_vector(self.networks_dict[subject])
             if 'X' in kwargs:
                 X = kwargs['X']
                 self.dataset_dict[i]['graph_embed'] = X
@@ -67,7 +73,8 @@ class AbideDataset(Dataset):
         for i, subject in tqdm(enumerate(self.subject_list), desc='Create Abide Networks', total=len(self.subject_list)):
             file_path = os.path.join(self.data_path, f"{subject}_{self.data_path}.1D")
             input_matrix = np.loadtxt(file_path)
-            network = load_connectivity(input_matrix)
+            # load_connectivity_binary - Take only the correlations above some threshold
+            network = load_connectivity_origin(input_matrix)
             networks_dict[subject] = network
         return networks_dict
 
