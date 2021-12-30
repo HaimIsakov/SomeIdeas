@@ -11,7 +11,8 @@ class ValuesAndGraphStructure(nn.Module):
         self.device = device
         self.RECEIVED_PARAMS = RECEIVED_PARAMS
 
-        self.pre_weighting = nn.Linear(self.feature_size, int(self.RECEIVED_PARAMS["preweight"]))
+        # self.pre_weighting = nn.Linear(self.feature_size, int(self.RECEIVED_PARAMS["preweight"]))
+        self.pre_weighting = nn.Linear(1, int(self.RECEIVED_PARAMS["preweight"]))
         self.fc1 = nn.Linear(int(self.RECEIVED_PARAMS["preweight"]) * self.nodes_number, int(self.RECEIVED_PARAMS["layer_1"]))  # input layer
         self.fc2 = nn.Linear(int(self.RECEIVED_PARAMS["layer_1"]), int(self.RECEIVED_PARAMS["layer_2"]))
         self.fc3 = nn.Linear(int(self.RECEIVED_PARAMS["layer_2"]), 1)
@@ -20,6 +21,8 @@ class ValuesAndGraphStructure(nn.Module):
 
         self.alpha = nn.Parameter(torch.rand(1, requires_grad=True, device=self.device))
         self.activation_func_dict = {'relu': nn.ReLU(), 'elu': nn.ELU(), 'tanh': nn.Tanh()}
+        if self.feature_size > 1:
+            self.transform_mat_to_vec = nn.Linear(self.feature_size, 1)
 
         self.gcn_layer = nn.Sequential(
             self.pre_weighting,
@@ -38,6 +41,9 @@ class ValuesAndGraphStructure(nn.Module):
         # alpha_A = torch.mul(adjacency_matrix, self.alpha)  # 𝛼A  - this function does not forward gradients
         a, b, c = adjacency_matrix.shape
         d, e, f = x.shape
+        if self.feature_size > 1:
+            # For abide dataset where the feature matrix is matrix. We want to transform the matrix into a vector.
+            x = self.transform_mat_to_vec(x)
         I = torch.eye(b).to(self.device)
         alpha_I = I * self.alpha.expand_as(I)  # 𝛼I
         normalized_adjacency_matrix = self.calculate_adjacency_matrix(adjacency_matrix)  # Ã

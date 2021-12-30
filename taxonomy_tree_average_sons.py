@@ -38,10 +38,10 @@ def create_tax_tree(series, zeroflag=True):
     for i, (tax, val) in enumerate(series.items()):
         # adding the bacteria in every column
         bac.append(Bacteria(tax, val))
-        if len(bac[i].lst) == 1 and bac[i].lst[0] == "Bacteria":
+        if len(bac[i].lst) == 1 and "Bacteria" in bac[i].lst[0]:
             valdict[("Bacteria",)][0] += bac[i].val
             valdict[("Bacteria",)][1] = 1
-        if len(bac[i].lst) == 1 and bac[i].lst[0] == "Archaea":
+        if len(bac[i].lst) == 1 and "Archaea" in bac[i].lst[0]:
             valdict[("Archaea",)][0] += bac[i].val
             valdict[("Archaea",)][1] = 1
         # connecting to the root of the tempGraph

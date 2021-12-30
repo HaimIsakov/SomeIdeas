@@ -1,6 +1,6 @@
 import os
 
-origin_dir = "split_datasets"
+origin_dir = "split_datasets_new"
 
 
 class MyDatasets:
@@ -13,10 +13,14 @@ class MyDatasets:
         return self.datasets_dict[dataset_name]()
 
     def microbiome_files(self, dataset_name):
-        train_data_file_path = os.path.join(origin_dir, f'{dataset_name}_split_dataset', f'train_val_set_{dataset_name}_microbiome_no_zero_cols.csv')
+        print("origin_dir", origin_dir)
+        # train_data_file_path = os.path.join(origin_dir, f'{dataset_name}_split_dataset', f'train_val_set_{dataset_name}_microbiome_no_zero_cols.csv')
+        train_data_file_path = os.path.join(origin_dir, f'{dataset_name}_split_dataset', f'train_val_set_{dataset_name}_microbiome.csv')
         train_tag_file_path = os.path.join(origin_dir, f'{dataset_name}_split_dataset', f'train_val_set_{dataset_name}_tags.csv')
 
-        test_data_file_path = os.path.join(origin_dir, f'{dataset_name}_split_dataset', f'test_set_{dataset_name}_microbiome_no_zero_cols.csv')
+        # test_data_file_path = os.path.join(origin_dir, f'{dataset_name}_split_dataset', f'test_set_{dataset_name}_microbiome_no_zero_cols.csv')
+        test_data_file_path = os.path.join(origin_dir, f'{dataset_name}_split_dataset',
+                                           f'test_set_{dataset_name}_microbiome.csv')
         test_tag_file_path = os.path.join(origin_dir, f'{dataset_name}_split_dataset', f'test_set_{dataset_name}_tags.csv')
         return train_data_file_path, train_tag_file_path, test_data_file_path, test_tag_file_path
 

@@ -25,12 +25,17 @@ from MyDatasets import *
 
 LOG = logging.getLogger('nni_logger')
 K = 10  # For k-cross-validation
-# "gdm": MyDatasets.gdm_files,"male_vs_female_species": MyDatasets.male_vs_female_species,"allergy_or_not": MyDatasets.allergy_or_not_files,"allergy_milk_or_not": MyDatasets.allergy_milk_or_not_files
+# # "gdm": MyDatasets.gdm_files,"male_vs_female_species": MyDatasets.male_vs_female_species,"allergy_or_not": MyDatasets.allergy_or_not_files,"allergy_milk_or_not": MyDatasets.allergy_milk_or_not_files
+
+# datasets_dict = {"Cirrhosis": MyDatasets.cirrhosis_files, "IBD": MyDatasets.ibd_files,
+#                  "bw": MyDatasets.bw_files, "IBD_Chrone": MyDatasets.ibd_chrone_files,
+#                  "Male_vs_Female": MyDatasets.male_vs_female, "male_female": MyDatasets.male_vs_female,
+#                  "nut": MyDatasets.nut, "peanut": MyDatasets.peanut, "nugent": MyDatasets.nugent,
+#                  "milk_no_controls": MyDatasets.allergy_milk_no_controls}
 datasets_dict = {"Cirrhosis": MyDatasets.cirrhosis_files, "IBD": MyDatasets.ibd_files,
                  "bw": MyDatasets.bw_files, "IBD_Chrone": MyDatasets.ibd_chrone_files,
-                 "Male_vs_Female": MyDatasets.male_vs_female,
-                 "nut": MyDatasets.nut, "peanut": MyDatasets.peanut, "nugent": MyDatasets.nugent,
-                 "milk_no_controls": MyDatasets.allergy_milk_no_controls}
+                 "Male_vs_Female": MyDatasets.male_vs_female, "male_female": MyDatasets.male_vs_female,
+                 "nugent": MyDatasets.nugent}
 
 tasks_dict = {1: MyTasks.just_values, 2: MyTasks.just_graph_structure, 3: MyTasks.values_and_graph_structure,
               4: MyTasks.pytorch_geometric, 5: MyTasks.one_head_attention, 6: MyTasks.yoram_attention}
@@ -185,15 +190,26 @@ def reproduce_from_nni(nni_result_file, dataset_name, mission_number):
 
 
 def run_all_dataset(mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes):
-    for dataset_name in datasets_dict.keys():
+    datasets = ["nut", "peanut", "milk", "bw", "Cirrhosis", "IBD", "IBD_Chrone", "male_female", "nugent"]
+    # for dataset_name in datasets_dict.keys():
+    for dataset_name in datasets:
         try:
             run_regular(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
         except Exception as e:
             print(e)
 
 
+def run_all_missions(dataset_name, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes):
+    for mission in [1, 2, 3]:
+        try:
+            run_regular(dataset_name, mission, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
+        except Exception as e:
+            print(e)
+
+
 def run_all_datasets_missions(cuda_number, nni_flag, pytorch_geometric_mode, add_attributes):
-    for mission_number in tasks_dict.keys():
+    mission_dict = {1: "just_values", 2: "just_graph", 3: "graph_and_values", 6: "yoram_attention"}
+    for mission_number in mission_dict.keys():
         run_all_dataset(mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
 
 
@@ -257,6 +273,8 @@ if __name__ == '__main__':
         pytorch_geometric_mode = False
         add_attributes = False
 
+        # run_all_datasets_missions(cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
+        # run_all_missions(dataset_name, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
         if dataset_name == "abide":
            run_regular_abide_dataset(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode,
                                      add_attributes)

@@ -23,5 +23,5 @@ def remove_zero_cols_from_train_files(datasets_list):
 
 if __name__ == "__main__":
     datasets_list = ["milk_no_controls", "nut", "peanut", "bw",
-                     "Cirrhosis", "IBD_Chrone", "IBD", "Male_vs_Female", "nugent"]
+                     "Cirrhosis_split_dataset", "IBD_Chrone_split_dataset", "IBD", "Male_vs_Female", "nugent"]
     remove_zero_cols_from_train_files(datasets_list)

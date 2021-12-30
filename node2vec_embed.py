@@ -82,7 +82,7 @@ def find_embed2(graphs_list):
 
 
 if __name__ == '__main__':
-    datasets_lst = ["Male_vs_Female", "Cirrhosis", "IBD", "Black_vs_White", "IBD_Chrone", "nugent"]
+    datasets_lst = ["Male_vs_Female", "Cirrhosis_split_dataset", "IBD", "Black_vs_White", "IBD_Chrone_split_dataset", "nugent"]
     data_file_paths = [os.path.join("split_datasets", f'{dataset_name}_split_dataset', f'train_val_set_{dataset_name}_no_zero_cols_microbiome.csv')
                        for dataset_name in datasets_lst] + [os.path.join("split_datasets", "nut_split_dataset",
                                                                          "train_val_set_nut_microbiome.csv"),

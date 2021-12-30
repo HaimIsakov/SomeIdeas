@@ -37,8 +37,8 @@ class AbideDataset(Dataset):
         return "Abide Dataset" + "len" + str(len(self))
 
     def get_vector_size(self):
-        return 1
-        # return self.dataset_dict[0]['adjacency_matrix'].shape[1]
+        # return 1
+        return self.dataset_dict[0]['adjacency_matrix'].shape[1]
 
     def nodes_number(self):
         return self.dataset_dict[0]['adjacency_matrix'].shape[0]
@@ -58,7 +58,8 @@ class AbideDataset(Dataset):
             self.dataset_dict[i] = {'subject': subject,
                                     'label': self.label_dict[subject],
                                     'adjacency_matrix': self.networks_dict[subject],
-                                    'values': calc_sum_abs_corr(self.networks_dict[subject])}
+                                    'values': self.networks_dict[subject].copy()}
+            # 'values': calc_sum_abs_corr(self.networks_dict[subject])
             # 'values': self.networks_dict[subject].copy()
             # 'values': calc_first_eigen_vector(self.networks_dict[subject])
             if 'X' in kwargs:

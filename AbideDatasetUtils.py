@@ -24,10 +24,12 @@ def load_connectivity_binary(input_matrix):
     # np.fill_diagonal(new_network, 0)  # Since the diagonal has 1 correlation value
     return new_network
 
+
 def transform_adj_mat(adj_matrix):
     new_network = (np.abs(adj_matrix) > Threshold).astype(int)
     np.fill_diagonal(new_network, 0)
     return new_network
+
 
 def calc_first_eigen_vector(corr_mat):
     corr_mat_copy = corr_mat.copy()
@@ -41,12 +43,14 @@ def calc_first_eigen_vector(corr_mat):
     first_eigen_vector = np.expand_dims(first_eigen_vector, axis=1)
     return first_eigen_vector
 
+
 def calc_sum_abs_corr(corr_mat):
     corr_mat_copy = corr_mat.copy()
     corr_mat_copy = np.absolute(corr_mat_copy)
     sum_of_correlations = corr_mat_copy.sum(axis=1)
     sum_of_correlations = np.expand_dims(sum_of_correlations, axis=1)
     return sum_of_correlations
+
 
 def calc_avg_degree(networks_dict):
     thresholds = [.1, .2, .3, .4, .5, .6]
