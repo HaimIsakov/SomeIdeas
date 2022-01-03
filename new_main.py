@@ -275,26 +275,26 @@ if __name__ == '__main__':
 
         # run_all_datasets_missions(cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
         # run_all_missions(dataset_name, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
-        if dataset_name == "abide":
-           run_regular_abide_dataset(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode,
-                                     add_attributes)
-        else:
-           run_regular(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
+        # if dataset_name == "abide":
+        #    run_regular_abide_dataset(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode,
+        #                              add_attributes)
+        # else:
+        #    run_regular(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
         # run_all_dataset(6, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
 
-        # try:
-        #     print("more_regularization_nni_graph_and_values_abide")
-        #     reproduce_from_nni(os.path.join("more_regularization_nni_graph_and_values_abide.csv"), "abide", 3)
-        # except Exception as e:
-        #     print(e)
-        #     raise
-        #     # pass
-        # try:
-        #     print("more_regularization_nni_just_graph_abide")
-        #     reproduce_from_nni(os.path.join("more_regularization_nni_just_graph_abide.csv"), "abide", 2)
-        # except Exception as e:
-        #     print(e)
-        #     pass
+        try:
+            print("nni_abide_dataset_just_graph.csv")
+            reproduce_from_nni(os.path.join("nni_abide_dataset_just_graph.csv"), "abide", 2)
+        except Exception as e:
+            print(e)
+            raise
+            # pass
+        try:
+            print("nni_abide_dataset_values_and_graph")
+            reproduce_from_nni(os.path.join("nni_abide_dataset_just_graph"), "abide", 3)
+        except Exception as e:
+            print(e)
+            pass
         # try:
         #     print("more_regularization_nni_just_values_abide")
         #     reproduce_from_nni(os.path.join("more_regularization_nni_just_values_abide.csv"), "abide", 1)

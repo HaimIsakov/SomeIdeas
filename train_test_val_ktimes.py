@@ -46,6 +46,7 @@ class TrainTestValKTimes:
         gss_train_val = GroupShuffleSplit(n_splits=k, train_size=0.75)
         # gss_train_val = GroupKFold(n_splits=k)
         run = 0
+        rerun_counter = 0
         for train_idx, val_idx in gss_train_val.split(self.train_val_dataset, groups=self.train_val_dataset.get_all_groups()):
             print(f"Run {run}")
             # print("len of train set:", len(train_idx))
@@ -61,6 +62,24 @@ class TrainTestValKTimes:
                 early_stopping_results = trainer_and_tester.train()
             else:
                 early_stopping_results = trainer_and_tester.train_geometric()
+
+            # If the train auc is too low (under 0.5 for example) try to rerun the training process again
+            flag = self.rerun_if_bad_train_result(early_stopping_results)
+            while flag and rerun_counter <= 3:
+                print(f"Rerun this train-val split again because train auc is:{early_stopping_results['train_auc']:.4f}")
+                print(f"Rerun number {rerun_counter}")
+                model = self.get_model().to(self.device)
+                trainer_and_tester = TrainTestValOneTime(model, self.RECEIVED_PARAMS, train_loader, val_loader,
+                                                         test_loader,
+                                                         self.device)
+                if not self.geometric_or_not:
+                    early_stopping_results = trainer_and_tester.train()
+                else:
+                    early_stopping_results = trainer_and_tester.train_geometric()
+
+                flag = self.rerun_if_bad_train_result(early_stopping_results)
+                rerun_counter += 1  # rerun_counter - the number of chances we give the model to converge again
+
             if len(trainer_and_tester.alpha_list) > 0:
                 print(trainer_and_tester.alpha_list)
             min_val_train_auc = min(early_stopping_results['val_auc'], early_stopping_results['train_auc'])
@@ -77,6 +96,12 @@ class TrainTestValKTimes:
                 self.plot_acc_loss_auc(root, date, trainer_and_tester)
             run += 1
         return train_metric, val_metric, test_metric, min_train_val_metric
+
+    def rerun_if_bad_train_result(self, early_stopping_results, threshold=0.5):
+        flag = False
+        if early_stopping_results['train_auc'] <= threshold:
+            flag = True
+        return flag
 
     def create_directory_to_save_results(self):
         root = self.result_directory_name
