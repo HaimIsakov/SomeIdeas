@@ -21,10 +21,13 @@ class JustGraphStructure(nn.Module):
         self.dropout = nn.Dropout(p=self.RECEIVED_PARAMS["dropout"])
         self.activation_func_dict = {'relu': nn.ReLU(), 'elu': nn.ELU(), 'tanh': nn.Tanh()}
 
+        if self.feature_size > 1:
+            self.transform_mat_to_vec = nn.Linear(self.feature_size, 1)
+
         self.gcn_layer = nn.Sequential(
-            self.pre_weighting,
-            self.activation_func_dict[self.activation_func]
-        )
+                self.pre_weighting,
+                self.activation_func_dict[self.activation_func]
+            )
         self.classifier = nn.Sequential(
             self.fc1,
             self.activation_func_dict[self.activation_func],

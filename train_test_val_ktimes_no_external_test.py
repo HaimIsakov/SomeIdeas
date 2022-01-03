@@ -88,9 +88,9 @@ class TrainTestValKTimesNoExternalTest:
         train_loader = torch.utils.data.DataLoader(train_data, shuffle=True, batch_size=batch_size)
         val_loader = torch.utils.data.DataLoader(val_data, batch_size=batch_size, shuffle=False)
         test_loader = torch.utils.data.DataLoader(test_data, batch_size=batch_size, shuffle=False)
-        print("train loader size:", len(train_loader))
-        print("val loader size:", len(val_loader))
-        print("test loader size:", len(test_loader))
+        print("train loader size:", len(train_idx))
+        print("val loader size:", len(val_idx))
+        print("test loader size:", len(test_idx))
         return train_loader, val_loader, test_loader
 
     def get_model(self):
