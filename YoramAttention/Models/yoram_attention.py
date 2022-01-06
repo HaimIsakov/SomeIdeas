@@ -14,8 +14,11 @@ class YoramAttention(nn.Module):
         self.nodes_number = nodes_number
         self.device = device
         self.RECEIVED_PARAMS = RECEIVED_PARAMS
+        self.embedding_size = self.RECEIVED_PARAMS["embedding_size"]
+        if self.feature_size > 1:
+            self.transform_mat_to_vec = nn.Linear(self.feature_size, 1)
 
-        self.keys = nn.Linear(self.feature_size, int(self.RECEIVED_PARAMS["layer_1"]))
+        self.keys = nn.Linear(self.embedding_size, int(self.RECEIVED_PARAMS["layer_1"]))
         self.activation_func = self.RECEIVED_PARAMS['activation']
         self.dropout = nn.Dropout(p=self.RECEIVED_PARAMS["dropout"])
         self.activation_func_dict = {'relu': nn.ReLU(), 'elu': nn.ELU(), 'tanh': nn.Tanh()}
@@ -30,10 +33,14 @@ class YoramAttention(nn.Module):
         self.attention = None
 
     def forward(self, frequencies, node_embedding_vector):
+        print(self.keys)
+        print(node_embedding_vector.shape)
         attention_vector = F.softmax(self.keys(node_embedding_vector), dim=1)
         self.attention = attention_vector
         # self.get_attention_hist(attention_vector)
-
+        if self.feature_size > 1:
+            # For abide dataset where the feature matrix is matrix. We want to transform the matrix into a vector.
+            frequencies = self.transform_mat_to_vec(frequencies)
         output = torch.transpose(frequencies, 1, 2) @ attention_vector
         x = self.classifier(output)
         x = self.fc3(x)

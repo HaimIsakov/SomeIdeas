@@ -1,1 +1,2 @@
-{"activation": "relu", "batch_size": 30.0, "dropout": 0.0476454928671619, "epochs": 200.0, "layer_1": 50.0, "layer_2": 123.0, "learning_rate": 0.1792469062762424, "optimizer": "adam", "preweight": 4.0, "regularization": 0.0002511136917559, "test_frac": 0.15, "train_frac": 0.7}
+{"activation": "relu", "batch_size": 30.0, "dropout": 0.0476454928671619, "epochs": 200.0, "layer_1": 50.0, "layer_2": 123.0, "learning_rate": 0.1792469062762424, "optimizer": "adam", "preweight": 4.0, "regularization": 0.0002511136917559, "test_frac": 0.15, "train_frac": 0.7,
+"embedding_algorithm": "HOPE", "embedding_size": 128}

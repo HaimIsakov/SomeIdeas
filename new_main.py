@@ -98,10 +98,6 @@ class Main:
 
         directory_name, mission, params_file_path = my_tasks.get_task_files(self.task_number)
         result_directory_name = os.path.join(directory_name, "Result_After_Proposal")
-        # train_data_file_path, train_tag_file_path, test_data_file_path, test_tag_file_path = \
-        #     my_datasets.get_dataset_files(self.dataset_name)
-        # train_data_file_path, train_tag_file_path, test_data_file_path, test_tag_file_path = \
-        #     my_datasets.microbiome_files(self.dataset_name)
 
         train_val_test_data_file_path = os.path.join("split_datasets_new", f"{self.dataset_name}_split_dataset",
                                                 f"OTU_merged_{self.dataset_name}_after_mipmlp_taxonomy_7_group_sub PCA_epsilon_1_normalization_log_After_mean_zeroing_after_arrangement.csv")
@@ -109,13 +105,6 @@ class Main:
                                                       f"tag_{self.dataset_name}_file.csv")
 
         train_val_test_dataset = self.create_dataset(train_val_test_data_file_path, train_val_test_label_file_path, mission)
-        # if mission == "yoram_attention":
-        #     algorithm = "node2vec"
-        #     print("Calculate embedding")
-        #     graphs_list = train_val_dataset.create_microbiome_graphs.graphs_list
-        #     X = find_embed(graphs_list, algorithm=algorithm)
-        #     kwargs = {'X': X}
-
         train_val_test_dataset.update_graphs(**kwargs)
 
         trainer_and_tester = TrainTestValKTimesNoExternalTest(self.RECEIVED_PARAMS, self.device, train_val_test_dataset,
@@ -123,6 +112,26 @@ class Main:
                                                 geometric_or_not=self.geometric_mode, plot_figures=self.plot_figures)
 
         train_metric, val_metric, test_metric, min_train_val_metric = trainer_and_tester.train_group_k_cross_validation(k=K)
+        return train_metric, val_metric, test_metric, min_train_val_metric
+
+    def turn_on_train_abide_dataset_no_external_test(self, mission):
+        kwargs = {}
+        data_path = "rois_ho"
+        label_path = "Phenotypic_V1_0b_preprocessed1.csv"
+        phenotype_dataset = pd.read_csv("Phenotypic_V1_0b_preprocessed1.csv")
+        subject_list = [value for value in phenotype_dataset["FILE_ID"].tolist() if value != "no_filename"]
+
+        train_val_test_abide_dataset = AbideDataset(data_path, label_path, subject_list, mission)
+        train_val_test_abide_dataset.update_graphs(**kwargs)
+
+        directory_name = ""
+        result_directory_name = os.path.join(directory_name, "Result_After_Proposal")
+        trainer_and_tester = TrainTestValKTimesNoExternalTest(self.RECEIVED_PARAMS, self.device, train_val_test_abide_dataset,
+                                                result_directory_name, nni_flag=self.nni_mode,
+                                                geometric_or_not=self.geometric_mode, plot_figures=self.plot_figures)
+
+        train_metric, val_metric, test_metric, min_train_val_metric = trainer_and_tester.train_group_k_cross_validation(
+            k=K)
         return train_metric, val_metric, test_metric, min_train_val_metric
 
     def turn_on_train_abide_dataset(self, mission):
@@ -161,7 +170,7 @@ def set_arguments():
     parser = argparse.ArgumentParser(description='Main script of all models')
     parser.add_argument("--dataset", help="Dataset name", default="IBD", type=str)
     parser.add_argument("--task_number", help="Task number", default=1, type=int)
-    parser.add_argument("--device_num", help="Cuda Device Number", default=1, type=int)
+    parser.add_argument("--device_num", help="Cuda Device Number", default=3, type=int)
     parser.add_argument("--nni", help="is nni mode", default=0, type=int)
     return parser
 
@@ -226,6 +235,7 @@ def reproduce_from_nni(nni_result_file, dataset_name, mission_number):
 
 def run_all_dataset(mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes):
     datasets = ["nut", "peanut", "milk", "bw", "Cirrhosis", "IBD", "IBD_Chrone", "male_female", "nugent"]
+    # datasets = ["male_female"]
     # for dataset_name in datasets_dict.keys():
     for dataset_name in datasets:
         try:

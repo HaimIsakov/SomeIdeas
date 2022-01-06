@@ -1,1 +1,2 @@
-{"activation": "tanh", "batch_size": 10.0, "dropout": 0.3673963103807318, "epochs": 200.0, "layer_1": 76.0, "layer_2": 77.0, "learning_rate": 0.1405118932485149, "optimizer": "adam", "preweight": 4.0, "regularization": 7.909758530080246e-05, "test_frac": 0.15, "train_frac": 0.7}
+{"activation": "tanh", "batch_size": 10.0, "dropout": 0.3673963103807318, "epochs": 200.0, "layer_1": 76.0, "layer_2": 77.0, "learning_rate": 0.1405118932485149, "optimizer": "adam", "preweight": 4.0, "regularization": 7.909758530080246e-05, "test_frac": 0.15, "train_frac": 0.7,
+"embedding_algorithm": "HOPE", "embedding_size": 128}

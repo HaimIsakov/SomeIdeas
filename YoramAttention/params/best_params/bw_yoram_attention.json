@@ -1,1 +1,2 @@
-{"activation": "elu", "batch_size": 16.0, "dropout": 0.0, "epochs": 200.0, "layer_1": 5.0, "layer_2": 30.0, "learning_rate": 0.00274640812118588, "optimizer": "adam", "preweight": 10.0, "regularization": 0.0, "test_frac": 0.15, "train_frac": 0.7}
+{"activation": "elu", "batch_size": 16.0, "dropout": 0.0, "epochs": 200.0, "layer_1": 5.0, "layer_2": 30.0, "learning_rate": 0.00274640812118588, "optimizer": "adam", "preweight": 10.0, "regularization": 0.0, "test_frac": 0.15, "train_frac": 0.7,
+"embedding_algorithm": "HOPE", "embedding_size": 128}

@@ -21,6 +21,7 @@ class GraphDataset(Dataset):
         self.mission = mission
         self.geometric_or_not = geometric_or_not
         self.add_attributes = add_attributes
+        self.train_graphs_list = []
 
     def set_dataset_dict(self, **kwargs):
         dataset_dict = {}
@@ -44,6 +45,14 @@ class GraphDataset(Dataset):
 
     # def get_joint_nodes(self):
     #     return self.create_microbiome_graphs.find_common_nodes().keys()
+
+    def set_train_graphs_list(self, train_graphs_list):
+        self.train_graphs_list = train_graphs_list
+
+    def set_graph_embed_in_dataset_dict(self, embed_mat):
+        for i in range(self.samples_len):
+            if not self.geometric_or_not:
+                self.dataset_dict[i]['graph_embed'] = embed_mat
 
     def update_graphs(self, **kwargs):
         # self.create_microbiome_graphs.create_graphs_with_common_nodes(union_train_and_test)
