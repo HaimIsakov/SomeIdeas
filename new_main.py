@@ -135,35 +135,35 @@ class Main:
         return train_metric, val_metric, test_metric, min_train_val_metric
 
     def turn_on_train_abide_dataset(self, mission):
-            kwargs = {}
-            data_path = "rois_ho"
-            label_path = "Phenotypic_V1_0b_preprocessed1.csv"
-            phenotype_dataset = pd.read_csv("Phenotypic_V1_0b_preprocessed1.csv")
-            subject_list = [value for value in phenotype_dataset["FILE_ID"].tolist() if value != "no_filename"]
-            # The reason for random state is that the test dataset and train-validation dataset will always be the same
-            subject_list_train_val_index, subject_list_test_index = train_test_split(subject_list, test_size=0.3, random_state=0)
+        kwargs = {}
+        data_path = "rois_ho"
+        label_path = "Phenotypic_V1_0b_preprocessed1.csv"
+        phenotype_dataset = pd.read_csv("Phenotypic_V1_0b_preprocessed1.csv")
+        subject_list = [value for value in phenotype_dataset["FILE_ID"].tolist() if value != "no_filename"]
+        # The reason for random state is that the test dataset and train-validation dataset will always be the same
+        subject_list_train_val_index, subject_list_test_index = train_test_split(subject_list, test_size=0.3, random_state=0)
 
-            train_val_abide_dataset = AbideDataset(data_path, label_path, subject_list_train_val_index, mission)
-            test_abide_dataset = AbideDataset(data_path, label_path, subject_list_test_index, mission)
+        train_val_abide_dataset = AbideDataset(data_path, label_path, subject_list_train_val_index, mission)
+        test_abide_dataset = AbideDataset(data_path, label_path, subject_list_test_index, mission)
 
-            if mission == "yoram_attention":
-                algorithm = "node2vec"
-                print("Calculate embedding")
-                graphs_list = train_val_abide_dataset.graphs_list
-                X = find_embed(graphs_list, algorithm=algorithm)
-                kwargs = {'X': X}
+        if mission == "yoram_attention":
+            algorithm = "node2vec"
+            print("Calculate embedding")
+            graphs_list = train_val_abide_dataset.graphs_list
+            X = find_embed(graphs_list, algorithm=algorithm)
+            kwargs = {'X': X}
 
-            print("ABIDE Dataset Training-Validation Sets Graphs")
-            train_val_abide_dataset.update_graphs(**kwargs)
-            print("ABIDE Dataset Test set Graphs")
-            test_abide_dataset.update_graphs(**kwargs)
-            directory_name = ""
-            result_directory_name = os.path.join(directory_name, "Result_After_Proposal")
-            trainer_and_tester = TrainTestValKTimes(self.RECEIVED_PARAMS, self.device, train_val_abide_dataset, test_abide_dataset,
-                                                    result_directory_name, nni_flag=self.nni_mode,
-                                                    geometric_or_not=self.geometric_mode)
-            train_metric, val_metric, test_metric, min_train_val_metric = trainer_and_tester.train_group_k_cross_validation(k=K)
-            return train_metric, val_metric, test_metric, min_train_val_metric
+        print("ABIDE Dataset Training-Validation Sets Graphs")
+        train_val_abide_dataset.update_graphs(**kwargs)
+        print("ABIDE Dataset Test set Graphs")
+        test_abide_dataset.update_graphs(**kwargs)
+        directory_name = ""
+        result_directory_name = os.path.join(directory_name, "Result_After_Proposal")
+        trainer_and_tester = TrainTestValKTimes(self.RECEIVED_PARAMS, self.device, train_val_abide_dataset, test_abide_dataset,
+                                                result_directory_name, nni_flag=self.nni_mode,
+                                                geometric_or_not=self.geometric_mode)
+        train_metric, val_metric, test_metric, min_train_val_metric = trainer_and_tester.train_group_k_cross_validation(k=K)
+        return train_metric, val_metric, test_metric, min_train_val_metric
 
 
 def set_arguments():
@@ -305,7 +305,10 @@ def run_regular_abide_dataset(dataset_name, mission_number, cuda_number, nni_fla
     main_runner = Main(dataset_name, mission_number, RECEIVED_PARAMS, device, nni_mode=nni_flag,
                        geometric_mode=pytorch_geometric_mode, add_attributes=add_attributes, plot_figures=False)
     mission_dict = {1: "just_values", 2: "just_graph", 3: "graph_and_values", 6:"yoram_attention"}
-    train_metric, val_metric, test_metric, min_train_val_metric = main_runner.turn_on_train_abide_dataset(mission_dict[mission_number])
+
+    # train_metric, val_metric, test_metric, min_train_val_metric = main_runner.turn_on_train_abide_dataset(mission_dict[mission_number])
+    print("Run with no external test")
+    train_metric, val_metric, test_metric, min_train_val_metric = main_runner.turn_on_train_abide_dataset_no_external_test(mission_dict[mission_number])
     result_file_name = f"{dataset_name}_{mission_dict[mission_number]}"
     results_dealing(train_metric, val_metric, test_metric, min_train_val_metric, nni_flag, RECEIVED_PARAMS, result_file_name)
 

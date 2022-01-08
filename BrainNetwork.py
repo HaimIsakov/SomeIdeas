@@ -17,18 +17,32 @@ class AbideDataset(Dataset):
         self.networks_dict = self.load_or_create_brain_network()
         # calc_avg_degree(self.networks_dict)
         self.label_dict = self.load_or_create_label_dict()
-        self.graphs_list = self.get_graph_list()
+        # self.graphs_list = self.get_graph_list()
         self.dataset_dict = {}
         self.mission = mission
+        self.train_graphs_list = []
         # self.update_graphs(data_path, label_path)
 
     def __getitem__(self, index):
+        index_value = self.dataset_dict[index]
+        if self.mission == "just_values" or self.mission == "just_graph" or self.mission == "graph_and_values":
+            # values = self.dataset_dict[index]['adjacency_matrix']
+            values = index_value['values']
+            # In GAT-Li paper they applied absolute value on adj matrix, and put 0 on the diagonal
+            adjacency_matrix = transform_adj_mat(index_value['adjacency_matrix'])
+        if self.mission == "yoram_attention":
+            values = index_value['values']
+            adjacency_matrix = index_value['graph_embed']  # TODO: it is not the actual adj mat - so Fix it
+
         label = self.dataset_dict[index]['label']
-        # In GAT-Li paper they applied absolute value on adj matrix, and put 0 on the diagonal
-        adjacency_matrix = transform_adj_mat(self.dataset_dict[index]['adjacency_matrix'])
-        # values = self.dataset_dict[index]['adjacency_matrix']
-        values = self.dataset_dict[index]['values']
         return Tensor(values), Tensor(adjacency_matrix), label
+
+    def set_train_graphs_list(self, train_graphs_list):
+        self.train_graphs_list = train_graphs_list
+
+    def set_graph_embed_in_dataset_dict(self, embed_mat):
+        for i, subject in enumerate(self.subject_list):
+            self.dataset_dict[i]['graph_embed'] = embed_mat
 
     def __len__(self):
         return len(self.dataset_dict)
@@ -58,7 +72,8 @@ class AbideDataset(Dataset):
             self.dataset_dict[i] = {'subject': subject,
                                     'label': self.label_dict[subject],
                                     'adjacency_matrix': self.networks_dict[subject],
-                                    'values': self.networks_dict[subject].copy()}
+                                    'values': self.networks_dict[subject].copy(),
+                                    'graph': nx.from_numpy_matrix(self.networks_dict[subject])}
             # 'values': calc_sum_abs_corr(self.networks_dict[subject])
             # 'values': self.networks_dict[subject].copy()
             # 'values': calc_first_eigen_vector(self.networks_dict[subject])
@@ -75,6 +90,7 @@ class AbideDataset(Dataset):
             file_path = os.path.join(self.data_path, f"{subject}_{self.data_path}.1D")
             input_matrix = np.loadtxt(file_path)
             # load_connectivity_binary - Take only the correlations above some threshold
+            # network = load_connectivity_binary(input_matrix)
             network = load_connectivity_origin(input_matrix)
             networks_dict[subject] = network
         return networks_dict

@@ -33,8 +33,8 @@ class YoramAttention(nn.Module):
         self.attention = None
 
     def forward(self, frequencies, node_embedding_vector):
-        print(self.keys)
-        print(node_embedding_vector.shape)
+        # print(self.keys)
+        # print(node_embedding_vector.shape)
         attention_vector = F.softmax(self.keys(node_embedding_vector), dim=1)
         self.attention = attention_vector
         # self.get_attention_hist(attention_vector)

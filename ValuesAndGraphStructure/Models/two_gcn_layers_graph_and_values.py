@@ -8,74 +8,124 @@ class TwoLayersGCNValuesGraph(nn.Module):
         super(TwoLayersGCNValuesGraph, self).__init__()
         self.feature_size = feature_size
         self.nodes_number = nodes_number
-        self.RECEIVED_PARAMS = RECEIVED_PARAMS
-        self.gcn_layer1 = nn.Linear(self.feature_size, int(self.RECEIVED_PARAMS["preweight"]))
-        self.gcn_layer2 = nn.Linear(int(self.RECEIVED_PARAMS["preweight"]), int(self.RECEIVED_PARAMS["layer_1"]))
-        self.fc1 = nn.Linear(int(self.RECEIVED_PARAMS["layer_1"]) * self.nodes_number, int(self.RECEIVED_PARAMS["layer_2"]))
-        self.fc2 = nn.Linear(int(self.RECEIVED_PARAMS["layer_2"]), 1)
         self.device = device
-        self.alpha = nn.Parameter(torch.rand(1, requires_grad=True)).to(self.device)
+        self.RECEIVED_PARAMS = RECEIVED_PARAMS
+
+        # self.pre_weighting = nn.Linear(self.feature_size, int(self.RECEIVED_PARAMS["preweight"]))
+        self.pre_weighting = nn.Linear(1, int(self.RECEIVED_PARAMS["preweight"]))
+        gcn2_dim = int(self.RECEIVED_PARAMS["preweight"]) + int(abs(int(self.RECEIVED_PARAMS["preweight"]) - int(self.RECEIVED_PARAMS["layer_1"]))/2)
+        self.pre_weighting2 = nn.Linear(int(self.RECEIVED_PARAMS["preweight"]), gcn2_dim)
+        self.fc1 = nn.Linear(gcn2_dim * self.nodes_number, int(self.RECEIVED_PARAMS["layer_1"]))  # input layer
+        self.fc2 = nn.Linear(int(self.RECEIVED_PARAMS["layer_1"]), int(self.RECEIVED_PARAMS["layer_2"]))
+        self.fc3 = nn.Linear(int(self.RECEIVED_PARAMS["layer_2"]), 1)
         self.activation_func = self.RECEIVED_PARAMS['activation']
         self.dropout = nn.Dropout(p=self.RECEIVED_PARAMS["dropout"])
 
+        self.alpha = nn.Parameter(torch.rand(1, requires_grad=True, device=self.device))
+        self.activation_func_dict = {'relu': nn.ReLU(), 'elu': nn.ELU(), 'tanh': nn.Tanh()}
+        if self.feature_size > 1:
+            self.transform_mat_to_vec = nn.Linear(self.feature_size, 1)
+
+        self.gcn_layer = nn.Sequential(
+            self.pre_weighting,
+            self.activation_func_dict[self.activation_func]
+        )
+        self.gcn_layer2 = nn.Sequential(
+            self.pre_weighting2,
+            self.activation_func_dict[self.activation_func]
+        )
+        self.classifier = nn.Sequential(
+            self.fc1,
+            self.activation_func_dict[self.activation_func],
+            self.dropout,
+            self.fc2,
+            self.activation_func_dict[self.activation_func],
+        )
+
     def forward(self, x, adjacency_matrix):
         # multiply the matrix adjacency_matrix by (learnt scalar) self.alpha
-        # alpha_A = torch.mul(adjacency_matrix, self.alpha)  # 𝛼A
-        alpha_A = adjacency_matrix * self.alpha.expand_as(adjacency_matrix)  # 𝛼A
-
-        a, b, c = alpha_A.shape
+        # alpha_A = torch.mul(adjacency_matrix, self.alpha)  # 𝛼A  - this function does not forward gradients
+        a, b, c = adjacency_matrix.shape
         d, e, f = x.shape
+        if self.feature_size > 1:
+            # For abide dataset where the feature matrix is matrix. We want to transform the matrix into a vector.
+            x = self.transform_mat_to_vec(x)
+
+        # First GCN Layer
         I = torch.eye(b).to(self.device)
-        alpha_A_plus_I = alpha_A + I  # 𝛼A + I
-        normalized_adjacency_matrix = self.calculate_adjacency_matrix(alpha_A_plus_I)
-        x = torch.matmul(normalized_adjacency_matrix, x)  # (𝛼A + I)·x
-        if self.activation_func == 'relu':
-            x = F.relu(self.gcn_layer1(x))  # (𝛼A + I)·x·W
-            x = torch.matmul(normalized_adjacency_matrix, x)  # (𝛼A + I)·x
-            x = F.relu(self.gcn_layer2(x))
-            # a/d variables are the batch size
-            # x = x.view(d, 1, -1)
-            x = torch.flatten(x, start_dim=1)  # flatten the tensor
-            x = F.relu(self.fc1(x))
-            x = self.dropout(x)
-            # x = F.relu(self.fc2(x))
-        elif self.activation_func == 'elu':
-            x = F.elu(self.gcn_layer1(x))  # (𝛼A + I)·x·W
-            x = torch.matmul(normalized_adjacency_matrix, x)  # (𝛼A + I)·x
-            x = F.elu(self.gcn_layer2(x))
-            # x = x.view(d, 1, -1)
-            x = torch.flatten(x, start_dim=1)  # flatten the tensor
-            x = F.elu(self.fc1(x))
-            x = self.dropout(x)
-            # x = F.elu(self.fc2(x))
-        elif self.activation_func == 'tanh':
-            x = torch.tanh(self.gcn_layer1(x))  # (𝛼A + I)·x·W
-            x = torch.matmul(normalized_adjacency_matrix, x)  # (𝛼A + I)·x
-            x = torch.tanh(self.gcn_layer2(x))
-            # x = x.view(d, 1, -1)
-            x = torch.flatten(x, start_dim=1)  # flatten the tensor
-            x = torch.tanh(self.fc1(x))
-            x = self.dropout(x)
-            # x = torch.tanh(self.fc2(x))
-        elif self.activation_func == 'srss':
-            x = self.srss(self.gcn_layer1(x))  # (𝛼A + I)·x·W
-            x = torch.matmul(normalized_adjacency_matrix, x)  # (𝛼A + I)·x
-            x = self.srss(self.gcn_layer2(x))  # (𝛼A + I)·x·W
-            # x = x.view(d, 1, -1)
-            x = torch.flatten(x, start_dim=1)  # flatten the tensor
-            x = self.srss(self.fc1(x))
-            x = self.dropout(x)
-            # x = self.srss(self.fc2(x))
-        x = self.fc2(x)
+        alpha_I = I * self.alpha.expand_as(I)  # 𝛼I
+        normalized_adjacency_matrix = self.calculate_adjacency_matrix(adjacency_matrix)  # Ã
+        alpha_I_plus_A = alpha_I + normalized_adjacency_matrix  # 𝛼I + Ã
+        x = torch.matmul(alpha_I_plus_A, x)  # (𝛼I + Ã)·x
+
+        x = self.gcn_layer(x)
+        # Second GCN Layer
+        x = torch.matmul(alpha_I_plus_A, x)  # (𝛼I + Ã)·x
+        x = self.gcn_layer2(x)
+
+        x = torch.flatten(x, start_dim=1)  # flatten the tensor
+        x = self.classifier(x)
+        x = self.fc3(x)
         return x
 
-    def srss(self, x):
-        return 1 - 2 / (x**2 + 1)
-
-    def calculate_adjacency_matrix(self, batched_adjacency_matrix):
-        # D^(-0.5)
-        def calc_d_minus_root_sqr(batched_adjacency_matrix):
-            return torch.stack([torch.diag(torch.pow(adjacency_matrix.sum(1), -0.5)) for adjacency_matrix in batched_adjacency_matrix])
-        D__minus_sqrt = calc_d_minus_root_sqr(batched_adjacency_matrix)
-        normalized_adjacency = torch.matmul(torch.matmul(D__minus_sqrt, batched_adjacency_matrix), D__minus_sqrt)
-        return normalized_adjacency
+    # def forward(self, x, adjacency_matrix):
+    #     # multiply the matrix adjacency_matrix by (learnt scalar) self.alpha
+    #     # alpha_A = torch.mul(adjacency_matrix, self.alpha)  # 𝛼A
+    #     alpha_A = adjacency_matrix * self.alpha.expand_as(adjacency_matrix)  # 𝛼A
+    #
+    #     a, b, c = alpha_A.shape
+    #     d, e, f = x.shape
+    #     I = torch.eye(b).to(self.device)
+    #     alpha_A_plus_I = alpha_A + I  # 𝛼A + I
+    #     normalized_adjacency_matrix = self.calculate_adjacency_matrix(alpha_A_plus_I)
+    #     x = torch.matmul(normalized_adjacency_matrix, x)  # (𝛼A + I)·x
+    #     if self.activation_func == 'relu':
+    #         x = F.relu(self.gcn_layer1(x))  # (𝛼A + I)·x·W
+    #         x = torch.matmul(normalized_adjacency_matrix, x)  # (𝛼A + I)·x
+    #         x = F.relu(self.gcn_layer2(x))
+    #         # a/d variables are the batch size
+    #         # x = x.view(d, 1, -1)
+    #         x = torch.flatten(x, start_dim=1)  # flatten the tensor
+    #         x = F.relu(self.fc1(x))
+    #         x = self.dropout(x)
+    #         # x = F.relu(self.fc2(x))
+    #     elif self.activation_func == 'elu':
+    #         x = F.elu(self.gcn_layer1(x))  # (𝛼A + I)·x·W
+    #         x = torch.matmul(normalized_adjacency_matrix, x)  # (𝛼A + I)·x
+    #         x = F.elu(self.gcn_layer2(x))
+    #         # x = x.view(d, 1, -1)
+    #         x = torch.flatten(x, start_dim=1)  # flatten the tensor
+    #         x = F.elu(self.fc1(x))
+    #         x = self.dropout(x)
+    #         # x = F.elu(self.fc2(x))
+    #     elif self.activation_func == 'tanh':
+    #         x = torch.tanh(self.gcn_layer1(x))  # (𝛼A + I)·x·W
+    #         x = torch.matmul(normalized_adjacency_matrix, x)  # (𝛼A + I)·x
+    #         x = torch.tanh(self.gcn_layer2(x))
+    #         # x = x.view(d, 1, -1)
+    #         x = torch.flatten(x, start_dim=1)  # flatten the tensor
+    #         x = torch.tanh(self.fc1(x))
+    #         x = self.dropout(x)
+    #         # x = torch.tanh(self.fc2(x))
+    #     elif self.activation_func == 'srss':
+    #         x = self.srss(self.gcn_layer1(x))  # (𝛼A + I)·x·W
+    #         x = torch.matmul(normalized_adjacency_matrix, x)  # (𝛼A + I)·x
+    #         x = self.srss(self.gcn_layer2(x))  # (𝛼A + I)·x·W
+    #         # x = x.view(d, 1, -1)
+    #         x = torch.flatten(x, start_dim=1)  # flatten the tensor
+    #         x = self.srss(self.fc1(x))
+    #         x = self.dropout(x)
+    #         # x = self.srss(self.fc2(x))
+    #     x = self.fc2(x)
+    #     return x
+    #
+    # def srss(self, x):
+    #     return 1 - 2 / (x**2 + 1)
+    #
+    # def calculate_adjacency_matrix(self, batched_adjacency_matrix):
+    #     # D^(-0.5)
+    #     def calc_d_minus_root_sqr(batched_adjacency_matrix):
+    #         return torch.stack([torch.diag(torch.pow(adjacency_matrix.sum(1), -0.5)) for adjacency_matrix in batched_adjacency_matrix])
+    #     D__minus_sqrt = calc_d_minus_root_sqr(batched_adjacency_matrix)
+    #     normalized_adjacency = torch.matmul(torch.matmul(D__minus_sqrt, batched_adjacency_matrix), D__minus_sqrt)
+    #     return normalized_adjacency
