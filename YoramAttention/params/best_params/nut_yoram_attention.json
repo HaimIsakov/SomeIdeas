@@ -1,2 +1,2 @@
 {"activation": "elu", "batch_size": 30.0, "dropout": 0.244654264731658, "epochs": 200.0, "layer_1": 191.0, "layer_2": 179.0, "learning_rate": 0.1767458926721755, "optimizer": "adam", "preweight": 6.0, "regularization": 6.889202499850221e-05, "test_frac": 0.15, "train_frac": 0.7,
-"embedding_algorithm": "HOPE", "embedding_size": 128}
+"embedding_algorithm": "LaplacianEigenmaps", "embedding_size": 128}

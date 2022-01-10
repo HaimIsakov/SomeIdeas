@@ -5,6 +5,9 @@ import networkx as nx
 import numpy as np
 import pandas as pd
 import seaborn as sns
+from gem.embedding.lap import LaplacianEigenmaps
+from gem.embedding.gf import GraphFactorization
+from gem.embedding.lle import LocallyLinearEmbedding
 from gem.embedding.hope import HOPE
 from node2vec import Node2Vec
 from sklearn.manifold import TSNE
@@ -67,6 +70,10 @@ def find_embed(graphs_list, algorithm="node2vec"):
 
     if algorithm == "HOPE":
         embedding = HOPE(d=128, beta=0.01)
+        embedding.learn_embedding(graph=G, edge_f=None, is_weighted=True, no_python=True)
+        X = embedding.get_embedding()
+    if algorithm == "LaplacianEigenmaps":
+        embedding = LaplacianEigenmaps(d=128)
         embedding.learn_embedding(graph=G, edge_f=None, is_weighted=True, no_python=True)
         X = embedding.get_embedding()
     else:

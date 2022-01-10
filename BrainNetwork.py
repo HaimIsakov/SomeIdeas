@@ -90,8 +90,8 @@ class AbideDataset(Dataset):
             file_path = os.path.join(self.data_path, f"{subject}_{self.data_path}.1D")
             input_matrix = np.loadtxt(file_path)
             # load_connectivity_binary - Take only the correlations above some threshold
-            # network = load_connectivity_binary(input_matrix)
-            network = load_connectivity_origin(input_matrix)
+            network = load_connectivity_binary(input_matrix)
+            # network = load_connectivity_origin(input_matrix)
             networks_dict[subject] = network
         return networks_dict
 

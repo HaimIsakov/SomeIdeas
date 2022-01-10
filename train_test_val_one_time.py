@@ -1,6 +1,6 @@
 import torch
 import torch.nn.functional as F
-from sklearn.metrics import roc_auc_score
+from sklearn.metrics import roc_auc_score, f1_score
 from torch import optim
 import numpy as np
 # from torch.optim.lr_scheduler import ReduceLROnPlateau
@@ -15,7 +15,7 @@ SCHEDULER_FACTOR = 0.75
 
 
 class TrainTestValOneTime:
-    def __init__(self, model, RECEIVED_PARAMS, train_loader, val_loader, test_loader, device, early_stopping=True):
+    def __init__(self, model, RECEIVED_PARAMS, train_loader, val_loader, test_loader, device, num_classes=1, early_stopping=True):
         self.model = model
         self.train_loader = train_loader
         self.val_loader = val_loader
@@ -29,6 +29,14 @@ class TrainTestValOneTime:
         self.alpha_list = []
         self.val_auc = 0.0
         self.early_stopping = early_stopping
+        self.num_classes = num_classes
+
+    def loss(self, output, target):
+        if self.num_classes == 1:
+            loss = F.binary_cross_entropy_with_logits(output, target.unsqueeze(dim=1).float())
+        else:
+            loss = F.cross_entropy(output, target.unsqueeze(dim=1).float())
+        return loss
 
     def calc_loss_test(self, data_loader, job=VAL_JOB):
         self.model.eval()
@@ -37,7 +45,8 @@ class TrainTestValOneTime:
             for data, adjacency_matrix, target in data_loader:
                 data, adjacency_matrix, target = data.to(self.device), adjacency_matrix.to(self.device), target.to(self.device)
                 output = self.model(data, adjacency_matrix)
-                loss = F.binary_cross_entropy_with_logits(output, target.unsqueeze(dim=1).float())
+                loss = self.loss(output, target)
+                # loss = F.binary_cross_entropy_with_logits(output, target.unsqueeze(dim=1).float())
                 # loss = F.binary_cross_entropy_with_logits(output, target.unsqueeze(dim=1).float(),
                 #                                           weight=torch.Tensor(
                 #                                               [self.loss_weights[i] for i in target]).unsqueeze(
@@ -64,6 +73,22 @@ class TrainTestValOneTime:
             raise
         return auc_result
 
+    def calc_f1_score(self, data_loader, job=VAL_JOB):
+        self.model.eval()
+        true_labels = []
+        pred = []
+        with torch.no_grad():
+            for data, adjacency_matrix, target in data_loader:
+                data, adjacency_matrix, target = data.to(self.device), adjacency_matrix.to(self.device), target.to(self.device)
+                output = self.model(data, adjacency_matrix)
+                output = F.softmax(output, dim=1)
+                _, y_pred_tags = torch.max(output, dim=1)
+                true_labels += target.tolist()
+                pred += y_pred_tags.tolist()
+
+        f1_macro_result = f1_score(true_labels, pred, average='macro')
+        return f1_macro_result
+
     def train(self):
         optimizer = self.get_optimizer()
         epochs = int(self.RECEIVED_PARAMS['epochs'])
@@ -80,7 +105,8 @@ class TrainTestValOneTime:
                 data, adjacency_matrix, target = data.to(self.device), adjacency_matrix.to(self.device), target.to(self.device)
                 optimizer.zero_grad()  # clear the gradients of all optimized variables
                 net_out = self.model(data, adjacency_matrix)  # forward pass: compute predicted outputs by passing inputs to the model
-                loss = F.binary_cross_entropy_with_logits(net_out, target.unsqueeze(dim=1).float())
+                # loss = F.binary_cross_entropy_with_logits(net_out, target.unsqueeze(dim=1).float())
+                loss = self.loss(net_out, target)
                 loss.backward()  # backward pass: compute gradient of the loss with respect to model parameters
                 optimizer.step()  # perform a single optimization step (parameter update)
                 batched_train_loss.append(loss.item())

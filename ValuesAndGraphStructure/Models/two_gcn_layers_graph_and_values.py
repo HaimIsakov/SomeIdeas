@@ -14,6 +14,7 @@ class TwoLayersGCNValuesGraph(nn.Module):
         # self.pre_weighting = nn.Linear(self.feature_size, int(self.RECEIVED_PARAMS["preweight"]))
         self.pre_weighting = nn.Linear(1, int(self.RECEIVED_PARAMS["preweight"]))
         gcn2_dim = int(self.RECEIVED_PARAMS["preweight"]) + int(abs(int(self.RECEIVED_PARAMS["preweight"]) - int(self.RECEIVED_PARAMS["layer_1"]))/2)
+        print("GCN 2 DIM:", gcn2_dim)
         self.pre_weighting2 = nn.Linear(int(self.RECEIVED_PARAMS["preweight"]), gcn2_dim)
         self.fc1 = nn.Linear(gcn2_dim * self.nodes_number, int(self.RECEIVED_PARAMS["layer_1"]))  # input layer
         self.fc2 = nn.Linear(int(self.RECEIVED_PARAMS["layer_1"]), int(self.RECEIVED_PARAMS["layer_2"]))
@@ -42,6 +43,7 @@ class TwoLayersGCNValuesGraph(nn.Module):
             self.activation_func_dict[self.activation_func],
         )
 
+
     def forward(self, x, adjacency_matrix):
         # multiply the matrix adjacency_matrix by (learnt scalar) self.alpha
         # alpha_A = torch.mul(adjacency_matrix, self.alpha)  # 𝛼A  - this function does not forward gradients
@@ -67,6 +69,24 @@ class TwoLayersGCNValuesGraph(nn.Module):
         x = self.classifier(x)
         x = self.fc3(x)
         return x
+
+    def calculate_adjacency_matrix(self, batched_adjacency_matrix):
+        # D^(-0.5)
+        def calc_d_minus_root_sqr(batched_adjacency_matrix):
+            r = []
+            for adjacency_matrix in batched_adjacency_matrix:
+                sum_of_each_row = adjacency_matrix.sum(1)
+                sum_of_each_row_plus_one = torch.where(sum_of_each_row != 0, sum_of_each_row, torch.tensor(1.0, device=self.device))
+                r.append(torch.diag(torch.pow(sum_of_each_row_plus_one, -0.5)))
+            s = torch.stack(r)
+            if torch.isnan(s).any():
+                print("Alpha when stuck", self.alpha.item())
+                print("batched_adjacency_matrix", torch.isnan(batched_adjacency_matrix).any())
+                print("The model is stuck", torch.isnan(s).any())
+            return s
+        D__minus_sqrt = calc_d_minus_root_sqr(batched_adjacency_matrix)
+        normalized_adjacency = torch.matmul(torch.matmul(D__minus_sqrt, batched_adjacency_matrix), D__minus_sqrt)
+        return normalized_adjacency
 
     # def forward(self, x, adjacency_matrix):
     #     # multiply the matrix adjacency_matrix by (learnt scalar) self.alpha

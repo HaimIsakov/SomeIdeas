@@ -4,7 +4,7 @@ import torch.nn.functional as F
 
 
 class ValuesAndGraphStructure(nn.Module):
-    def __init__(self, nodes_number, feature_size, RECEIVED_PARAMS, device):
+    def __init__(self, nodes_number, feature_size, RECEIVED_PARAMS, device, num_classes=1):
         super(ValuesAndGraphStructure, self).__init__()
         self.feature_size = feature_size
         self.nodes_number = nodes_number
@@ -15,7 +15,7 @@ class ValuesAndGraphStructure(nn.Module):
         self.pre_weighting = nn.Linear(1, int(self.RECEIVED_PARAMS["preweight"]))
         self.fc1 = nn.Linear(int(self.RECEIVED_PARAMS["preweight"]) * self.nodes_number, int(self.RECEIVED_PARAMS["layer_1"]))  # input layer
         self.fc2 = nn.Linear(int(self.RECEIVED_PARAMS["layer_1"]), int(self.RECEIVED_PARAMS["layer_2"]))
-        self.fc3 = nn.Linear(int(self.RECEIVED_PARAMS["layer_2"]), 1)
+        self.fc3 = nn.Linear(int(self.RECEIVED_PARAMS["layer_2"]), num_classes)
         self.activation_func = self.RECEIVED_PARAMS['activation']
         self.dropout = nn.Dropout(p=self.RECEIVED_PARAMS["dropout"])
 
@@ -36,25 +36,6 @@ class ValuesAndGraphStructure(nn.Module):
             self.activation_func_dict[self.activation_func],
         )
 
-    def forward(self, x, adjacency_matrix):
-        # multiply the matrix adjacency_matrix by (learnt scalar) self.alpha
-        # alpha_A = torch.mul(adjacency_matrix, self.alpha)  # 𝛼A  - this function does not forward gradients
-        a, b, c = adjacency_matrix.shape
-        d, e, f = x.shape
-        if self.feature_size > 1:
-            # For abide dataset where the feature matrix is matrix. We want to transform the matrix into a vector.
-            x = self.transform_mat_to_vec(x)
-        I = torch.eye(b).to(self.device)
-        alpha_I = I * self.alpha.expand_as(I)  # 𝛼I
-        normalized_adjacency_matrix = self.calculate_adjacency_matrix(adjacency_matrix)  # Ã
-        alpha_I_plus_A = alpha_I + normalized_adjacency_matrix  # 𝛼I + Ã
-        x = torch.matmul(alpha_I_plus_A, x)  # (𝛼I + Ã)·x
-
-        x = self.gcn_layer(x)
-        x = torch.flatten(x, start_dim=1)  # flatten the tensor
-        x = self.classifier(x)
-        x = self.fc3(x)
-        return x
 
     # def forward(self, x, adjacency_matrix):
     #     # multiply the matrix adjacency_matrix by (learnt scalar) self.alpha

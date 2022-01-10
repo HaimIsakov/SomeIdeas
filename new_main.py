@@ -327,7 +327,7 @@ if __name__ == '__main__':
 
         # run_all_datasets_missions(cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
         # run_all_missions(dataset_name, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
-        if dataset_name == "abide":
+        if dataset_name == "abide" or dataset_name == "abide1":
            run_regular_abide_dataset(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode,
                                      add_attributes)
         else:
