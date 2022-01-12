@@ -3,8 +3,9 @@ import numpy as np
 import torch
 from sklearn.model_selection import GroupShuffleSplit, train_test_split
 from torch.utils.data import DataLoader
+
+from DoubleGcnLayers.Models.two_gcn_layers_graph_and_values import TwoLayersGCNValuesGraph
 from OneHeadAttention.Models.ofek_model import AttentionGCN
-from ValuesAndGraphStructure.Models.two_gcn_layers_graph_and_values import TwoLayersGCNValuesGraph
 from train_test_val_one_time import TrainTestValOneTime
 from YoramAttention.Models.yoram_attention import YoramAttention
 from train_test_val_one_time import TrainTestValOneTime
@@ -161,10 +162,10 @@ class TrainTestValKTimesNoExternalTest:
                 data_size = self.train_val_test_dataset.get_vector_size()
                 nodes_number = self.train_val_test_dataset.nodes_number()
                 model = ValuesAndGraphStructure(nodes_number, data_size, self.RECEIVED_PARAMS, self.device)
-                # print("*******************************************************************************")
-                # print("Two layers GCN")
-                # print("*******************************************************************************")
-                # model = TwoLayersGCNValuesGraph(nodes_number, data_size, self.RECEIVED_PARAMS, self.device)
+            elif self.train_val_test_dataset.mission == "double_gcn_layer":
+                data_size = self.train_val_test_dataset.get_vector_size()
+                nodes_number = self.train_val_test_dataset.nodes_number()
+                model = TwoLayersGCNValuesGraph(nodes_number, data_size, self.RECEIVED_PARAMS, self.device)
             elif self.train_val_test_dataset.mission == "one_head_attention":
                 # data_size = self.train_val_dataset.get_vector_size()
                 data_size = 128

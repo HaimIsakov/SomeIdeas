@@ -1,6 +1,6 @@
 import os
 
-tasks_dict2 = {1: 'just_values', 2: 'just_graph', 3: 'graph_and_values', 5: 'one_head_attention'}
+# tasks_dict2 = {1: 'just_values', 2: 'just_graph', 3: 'graph_and_values', 5: 'one_head_attention'}
 class MyTasks:
     def __init__(self, tasks_dict, dataset):
         self.tasks_dict = tasks_dict
@@ -37,6 +37,18 @@ class MyTasks:
         except:
             print("Use default params file")
             params_file_path = os.path.join(directory_name, 'Models', f"{mission}_params_file.json")
+        return directory_name, mission, params_file_path
+
+    # @staticmethod
+    def double_gcn_layers(self):
+        directory_name = "DoubleGcnLayers"
+        mission = 'double_gcn_layer'
+        try:
+            # TODO: Run NNI on double GCN Layer, at the meantime use the parameters from gmic+V
+            params_file_path = os.path.join("ValuesAndGraphStructure", 'params', "best_params", f"{self.dataset}_graph_and_values.json")
+        except:
+            print("Use default params file")
+            params_file_path = os.path.join("ValuesAndGraphStructure", 'Models', f"{mission}_params_file.json")
         return directory_name, mission, params_file_path
 
     # @staticmethod

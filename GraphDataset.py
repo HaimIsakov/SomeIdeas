@@ -81,7 +81,7 @@ class GraphDataset(Dataset):
             if self.mission == "just_values":
                 values = index_value['values_on_leaves']
                 adjacency_matrix = index_value['adjacency_matrix']
-            elif self.mission == "just_graph" or self.mission == "graph_and_values":
+            elif self.mission == "just_graph" or self.mission == "graph_and_values" or self.mission == "double_gcn_layer":
                 values = index_value['values_on_nodes']
                 adjacency_matrix = index_value['adjacency_matrix']
             elif self.mission == "yoram_attention":

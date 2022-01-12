@@ -39,7 +39,7 @@ datasets_dict = {"Cirrhosis": MyDatasets.cirrhosis_files, "IBD": MyDatasets.ibd_
                  "nugent": MyDatasets.nugent}
 
 tasks_dict = {1: MyTasks.just_values, 2: MyTasks.just_graph_structure, 3: MyTasks.values_and_graph_structure,
-              4: MyTasks.pytorch_geometric, 5: MyTasks.one_head_attention, 6: MyTasks.yoram_attention}
+              4: MyTasks.double_gcn_layers, 5: MyTasks.one_head_attention, 6: MyTasks.yoram_attention}
 
 
 class Main:
@@ -186,18 +186,19 @@ def results_dealing(train_metric, val_metric, test_metric, min_train_val_metric,
     std_test_metric = np.std(test_metric)
 
     if nni_flag:
-        LOG.debug("\n \nMean Validation Set AUC: ", mean_min_train_val_metric, " +- ", std_min_train_val_metric)
-        LOG.debug("\nMean Test Set AUC: ", mean_test_metric, " +- ", std_test_metric)
+        LOG.debug("\n \nMean Validation Set metric: ", mean_min_train_val_metric, " +- ", std_min_train_val_metric)
+        LOG.debug("\nMean Test Set metric: ", mean_test_metric, " +- ", std_test_metric)
         nni.report_intermediate_result(mean_test_metric)
         nni.report_final_result(mean_min_train_val_metric)
     else:
         result_file_name = f"{result_file_name}_val_mean_{mean_val_metric:.3f}_test_mean_{mean_test_metric:.3f}.csv"
         f = open(result_file_name, 'w', newline='')
         writer = csv.writer(f)
-        writer.writerow([","] + [f"Run{i}" for i in range(len(val_metric))] + ["", "Mean+-std"])
-        writer.writerow(['val_auc'] + val_metric + ["", str(mean_val_metric) + "+-" + str(std_val_metric)])
-        writer.writerow(['test_auc'] + test_metric + ["", str(mean_test_metric) + "+-" + str(std_test_metric)])
-        writer.writerow(['train_auc'] + train_metric + ["", str(mean_train_metric) + "+-" + str(std_train_metric)])
+        writer.writerow([","] + [f"Run{i}" for i in range(len(val_metric))] + ["", "Mean", "std"])
+        writer.writerow(['Train_metric'] + train_metric + ["", str(mean_train_metric), str(std_train_metric)])
+        writer.writerow(['Val_metric'] + val_metric + ["", str(mean_val_metric), str(std_val_metric)])
+        writer.writerow(['Test_metric'] + test_metric + ["", str(mean_test_metric), str(std_test_metric)])
+
         writer.writerow([])
         writer.writerow([])
         for key, value in RECEIVED_PARAMS.items():
@@ -205,10 +206,10 @@ def results_dealing(train_metric, val_metric, test_metric, min_train_val_metric,
         f.close()
 
     print("\n \nMean minimum Validation and Train Sets AUC: ", mean_min_train_val_metric, " +- ", std_min_train_val_metric)
+    print("Mean Train Set AUC: ", mean_train_metric, " +- ", std_train_metric)
     print("Mean Validation Set AUC: ", mean_val_metric, " +- ", std_val_metric)
     print("Mean Test Set AUC: ", mean_test_metric, " +- ", std_test_metric)
-    print("Mean Train Set AUC: ", mean_train_metric, " +- ", std_train_metric)
-
+    return train_metric, val_metric, test_metric
 
 def reproduce_from_nni(nni_result_file, dataset_name, mission_number):
     mission_dict = {1: "just_values", 2: "just_graph", 3: "graph_and_values"}
@@ -235,11 +236,13 @@ def reproduce_from_nni(nni_result_file, dataset_name, mission_number):
 
 def run_all_dataset(mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes):
     datasets = ["nut", "peanut", "milk", "bw", "Cirrhosis", "IBD", "IBD_Chrone", "male_female", "nugent"]
-    # datasets = ["male_female"]
-    # for dataset_name in datasets_dict.keys():
+    datasets_results_dict = {}
     for dataset_name in datasets:
         try:
-            run_regular(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
+            train_metric, val_metric, test_metric = \
+                run_regular(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
+            datasets_results_dict[dataset_name] = {"train_metric": train_metric, "val_metric": val_metric,
+                                                   "test_metric": test_metric}
         except Exception as e:
             print(e)
 
@@ -284,7 +287,7 @@ def run_regular(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geo
     result_file_name = f"{dataset_name}_{mission}"
 
     results_dealing(train_metric, val_metric, test_metric, min_train_val_metric, nni_flag, RECEIVED_PARAMS, result_file_name)
-
+    return train_metric, val_metric, test_metric
 
 def run_regular_abide_dataset(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes):
     params_file_path = "abide_dataset_params.json"
