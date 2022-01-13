@@ -29,7 +29,7 @@ class TrainTestValOneTime:
         self.alpha_list = []
         self.val_auc = 0.0
         self.early_stopping = early_stopping
-        self.num_classes = num_classes
+        self.num_classes = num_classes if str(self.train_loader) != "cancer" else 34
 
     def loss(self, output, target):
         if self.num_classes == 1:
@@ -61,33 +61,37 @@ class TrainTestValOneTime:
         pred = []
         with torch.no_grad():
             for data, adjacency_matrix, target in data_loader:
-                data, adjacency_matrix, target = data.to(self.device), adjacency_matrix.to(self.device), target.to(self.device)
+                data, adjacency_matrix, target = data.to(self.device), adjacency_matrix.to(self.device), \
+                                                 target.to(self.device)
                 output = self.model(data, adjacency_matrix)
-                output = torch.sigmoid(output)
                 true_labels += target.tolist()
-                pred += output.squeeze(dim=1).tolist()
-        try:
-            auc_result = roc_auc_score(true_labels, pred)
-        except:
-            print("An Error")
-            raise
-        return auc_result
+                if self.num_classes == 1:
+                    output = torch.sigmoid(output)
+                    pred += output.squeeze(dim=1).tolist()
+                else:
+                    output = F.softmax(output, dim=1)
+                    _, y_pred_tags = torch.max(output, dim=1)
+                    pred += y_pred_tags.tolist()
+        if self.num_classes == 1:
+            metric_result = roc_auc_score(true_labels, pred)
+        else:
+            metric_result = f1_score(true_labels, pred, average='macro')
+        return metric_result
 
-    def calc_f1_score(self, data_loader, job=VAL_JOB):
-        self.model.eval()
-        true_labels = []
-        pred = []
-        with torch.no_grad():
-            for data, adjacency_matrix, target in data_loader:
-                data, adjacency_matrix, target = data.to(self.device), adjacency_matrix.to(self.device), target.to(self.device)
-                output = self.model(data, adjacency_matrix)
-                output = F.softmax(output, dim=1)
-                _, y_pred_tags = torch.max(output, dim=1)
-                true_labels += target.tolist()
-                pred += y_pred_tags.tolist()
-
-        f1_macro_result = f1_score(true_labels, pred, average='macro')
-        return f1_macro_result
+    # def calc_f1_score(self, data_loader, job=VAL_JOB):
+    #     self.model.eval()
+    #     true_labels = []
+    #     pred = []
+    #     with torch.no_grad():
+    #         for data, adjacency_matrix, target in data_loader:
+    #             data, adjacency_matrix, target = data.to(self.device), adjacency_matrix.to(self.device), target.to(self.device)
+    #             output = self.model(data, adjacency_matrix)
+    #             output = F.softmax(output, dim=1)
+    #             _, y_pred_tags = torch.max(output, dim=1)
+    #             true_labels += target.tolist()
+    #             pred += y_pred_tags.tolist()
+    #     f1_macro_result = f1_score(true_labels, pred, average='macro')
+    #     return f1_macro_result
 
     def train(self):
         optimizer = self.get_optimizer()
@@ -168,9 +172,9 @@ class TrainTestValOneTime:
         average_train_loss = np.average(batched_train_loss)
         self.train_loss_vec.append(average_train_loss)  # record training loss
         train_auc = self.calc_auc(self.train_loader, TRAIN_JOB)
+        val_auc = self.calc_auc(self.val_loader, VAL_JOB)
         self.train_auc_vec.append(train_auc)
         val_loss = self.calc_loss_test(self.val_loader, VAL_JOB)
-        val_auc = self.calc_auc(self.val_loader, VAL_JOB)
         self.val_auc_vec.append(val_auc)
         self.val_loss_vec.append(val_loss)
         return average_train_loss, train_auc, val_loss, val_auc

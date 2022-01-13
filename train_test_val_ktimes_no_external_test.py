@@ -1,4 +1,6 @@
 import os
+from collections import Counter
+
 import numpy as np
 import torch
 from sklearn.model_selection import GroupShuffleSplit, train_test_split
@@ -29,8 +31,8 @@ class TrainTestValKTimesNoExternalTest:
         # self.node_order = self.dataset.node_order
 
     def train_group_k_cross_validation(self, k=5):
-        train_frac = float(self.RECEIVED_PARAMS['train_frac'])
-        val_frac = float(self.RECEIVED_PARAMS['test_frac'])
+        # train_frac = float(self.RECEIVED_PARAMS['train_frac'])
+        # val_frac = float(self.RECEIVED_PARAMS['test_frac'])
 
         dataset_len = len(self.train_val_test_dataset)
 
@@ -100,6 +102,7 @@ class TrainTestValKTimesNoExternalTest:
         for index in indices:
             label_dict[index] = dataset_dict[index]['label']
         labels_values = list(label_dict.values())
+        # labels_distribution = Counter(labels_values)
         labels_distribution = {0: labels_values.count(0), 1: labels_values.count(1)}
         return labels_distribution
 

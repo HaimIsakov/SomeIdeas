@@ -1,12 +1,14 @@
 import os
+os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0,1,2,3,4,5,6,7"
+
 from sklearn.model_selection import train_test_split
 from BrainNetwork import AbideDataset
+from cancer_data.CancerDataset import CancerDataset
 from nni_functions_utils import run_again_from_nni_results_csv
 from node2vec_embed import find_embed
 from train_test_val_ktimes_no_external_test import TrainTestValKTimesNoExternalTest
 
-os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"] = "0,1,2,3"
 import pandas as pd
 import numpy
 import argparse
@@ -54,58 +56,32 @@ class Main:
         self.add_attributes = add_attributes
         self.plot_figures = plot_figures
 
-    def create_dataset(self, data_file_path, tag_file_path, mission):
-        cur_dataset = GraphDataset(data_file_path, tag_file_path, mission, self.add_attributes, self.geometric_mode)
+    def create_dataset(self, data_path, label_path, subject_list, mission):
+        if self.dataset_name == "abide":
+            cur_dataset = AbideDataset(data_path, label_path, subject_list, mission)
+        elif self.dataset_name == "cancer":
+            adj_mat_path = os.path.join("cancer_data", "new_cancer_adj_matrix.csv")
+            cur_dataset = CancerDataset(adj_mat_path, data_path, label_path, subject_list, mission)
+        elif self.dataset_name == "tcr":
+            cur_dataset = None
+        else:
+            cur_dataset = GraphDataset(data_path, label_path, mission, self.add_attributes, self.geometric_mode)
+
+        cur_dataset.update_graphs()
         return cur_dataset
 
-    def turn_on_train(self):
+    def play(self):
         kwargs = {}
         my_tasks = MyTasks(tasks_dict, self.dataset_name)
         my_datasets = MyDatasets(datasets_dict)
 
         directory_name, mission, params_file_path = my_tasks.get_task_files(self.task_number)
+        print("No external test set")
+        train_val_test_data_file_path, train_val_test_label_file_path, subject_list\
+            = my_datasets.get_dataset_files(self.dataset_name)
         result_directory_name = os.path.join(directory_name, "Result_After_Proposal")
-        # train_data_file_path, train_tag_file_path, test_data_file_path, test_tag_file_path = \
-        #     my_datasets.get_dataset_files(self.dataset_name)
-        train_data_file_path, train_tag_file_path, test_data_file_path, test_tag_file_path = \
-            my_datasets.microbiome_files(self.dataset_name)
-
-        print("Training-Validation Sets Graphs")
-        train_val_dataset = self.create_dataset(train_data_file_path, train_tag_file_path, mission)
-        print("Test set Graphs")
-        test_dataset = self.create_dataset(test_data_file_path, test_tag_file_path, mission)
-
-        if mission == "yoram_attention":
-            algorithm = "node2vec"
-            print("Calculate embedding")
-            graphs_list = train_val_dataset.create_microbiome_graphs.graphs_list
-            X = find_embed(graphs_list, algorithm=algorithm)
-            kwargs = {'X': X}
-
-        train_val_dataset.update_graphs(**kwargs)
-        test_dataset.update_graphs(**kwargs)
-
-        trainer_and_tester = TrainTestValKTimes(self.RECEIVED_PARAMS, self.device, train_val_dataset, test_dataset,
-                                                result_directory_name, nni_flag=self.nni_mode,
-                                                geometric_or_not=self.geometric_mode, plot_figures=self.plot_figures)
-        train_metric, val_metric, test_metric, min_train_val_metric = trainer_and_tester.train_group_k_cross_validation(k=K)
-        return train_metric, val_metric, test_metric, min_train_val_metric
-
-    def turn_on_train_no_external_test(self):
-        kwargs = {}
-        my_tasks = MyTasks(tasks_dict, self.dataset_name)
-        my_datasets = MyDatasets(datasets_dict)
-
-        directory_name, mission, params_file_path = my_tasks.get_task_files(self.task_number)
-        result_directory_name = os.path.join(directory_name, "Result_After_Proposal")
-
-        train_val_test_data_file_path = os.path.join("split_datasets_new", f"{self.dataset_name}_split_dataset",
-                                                f"OTU_merged_{self.dataset_name}_after_mipmlp_taxonomy_7_group_sub PCA_epsilon_1_normalization_log_After_mean_zeroing_after_arrangement.csv")
-        train_val_test_label_file_path = os.path.join("split_datasets_new", f"{self.dataset_name}_split_dataset",
-                                                      f"tag_{self.dataset_name}_file.csv")
-
-        train_val_test_dataset = self.create_dataset(train_val_test_data_file_path, train_val_test_label_file_path, mission)
-        train_val_test_dataset.update_graphs(**kwargs)
+        train_val_test_dataset = self.create_dataset(train_val_test_data_file_path, train_val_test_label_file_path,
+                                                         subject_list, mission)
 
         trainer_and_tester = TrainTestValKTimesNoExternalTest(self.RECEIVED_PARAMS, self.device, train_val_test_dataset,
                                                 result_directory_name, nni_flag=self.nni_mode,
@@ -114,56 +90,69 @@ class Main:
         train_metric, val_metric, test_metric, min_train_val_metric = trainer_and_tester.train_group_k_cross_validation(k=K)
         return train_metric, val_metric, test_metric, min_train_val_metric
 
-    def turn_on_train_abide_dataset_no_external_test(self, mission):
-        kwargs = {}
-        data_path = "rois_ho"
-        label_path = "Phenotypic_V1_0b_preprocessed1.csv"
-        phenotype_dataset = pd.read_csv("Phenotypic_V1_0b_preprocessed1.csv")
-        subject_list = [value for value in phenotype_dataset["FILE_ID"].tolist() if value != "no_filename"]
+    # def turn_on_train(self):
+    #     kwargs = {}
+    #     my_tasks = MyTasks(tasks_dict, self.dataset_name)
+    #     my_datasets = MyDatasets(datasets_dict)
+    #
+    #     directory_name, mission, params_file_path = my_tasks.get_task_files(self.task_number)
+    #     result_directory_name = os.path.join(directory_name, "Result_After_Proposal")
+    #     # train_data_file_path, train_tag_file_path, test_data_file_path, test_tag_file_path = \
+    #     #     my_datasets.get_dataset_files(self.dataset_name)
+    #     train_data_file_path, train_tag_file_path, test_data_file_path, test_tag_file_path = \
+    #         my_datasets.microbiome_files(self.dataset_name)
+    #
+    #     print("Training-Validation Sets Graphs")
+    #     train_val_dataset = self.create_dataset(train_data_file_path, train_tag_file_path, mission)
+    #     print("Test set Graphs")
+    #     test_dataset = self.create_dataset(test_data_file_path, test_tag_file_path, mission)
+    #
+    #     if mission == "yoram_attention":
+    #         algorithm = "node2vec"
+    #         print("Calculate embedding")
+    #         graphs_list = train_val_dataset.create_microbiome_graphs.graphs_list
+    #         X = find_embed(graphs_list, algorithm=algorithm)
+    #         kwargs = {'X': X}
+    #
+    #     train_val_dataset.update_graphs(**kwargs)
+    #     test_dataset.update_graphs(**kwargs)
+    #
+    #     trainer_and_tester = TrainTestValKTimes(self.RECEIVED_PARAMS, self.device, train_val_dataset, test_dataset,
+    #                                             result_directory_name, nni_flag=self.nni_mode,
+    #                                             geometric_or_not=self.geometric_mode, plot_figures=self.plot_figures)
+    #     train_metric, val_metric, test_metric, min_train_val_metric = trainer_and_tester.train_group_k_cross_validation(k=K)
+    #     return train_metric, val_metric, test_metric, min_train_val_metric
 
-        train_val_test_abide_dataset = AbideDataset(data_path, label_path, subject_list, mission)
-        train_val_test_abide_dataset.update_graphs(**kwargs)
-
-        directory_name = ""
-        result_directory_name = os.path.join(directory_name, "Result_After_Proposal")
-        trainer_and_tester = TrainTestValKTimesNoExternalTest(self.RECEIVED_PARAMS, self.device, train_val_test_abide_dataset,
-                                                result_directory_name, nni_flag=self.nni_mode,
-                                                geometric_or_not=self.geometric_mode, plot_figures=self.plot_figures)
-
-        train_metric, val_metric, test_metric, min_train_val_metric = trainer_and_tester.train_group_k_cross_validation(
-            k=K)
-        return train_metric, val_metric, test_metric, min_train_val_metric
-
-    def turn_on_train_abide_dataset(self, mission):
-        kwargs = {}
-        data_path = "rois_ho"
-        label_path = "Phenotypic_V1_0b_preprocessed1.csv"
-        phenotype_dataset = pd.read_csv("Phenotypic_V1_0b_preprocessed1.csv")
-        subject_list = [value for value in phenotype_dataset["FILE_ID"].tolist() if value != "no_filename"]
-        # The reason for random state is that the test dataset and train-validation dataset will always be the same
-        subject_list_train_val_index, subject_list_test_index = train_test_split(subject_list, test_size=0.3, random_state=0)
-
-        train_val_abide_dataset = AbideDataset(data_path, label_path, subject_list_train_val_index, mission)
-        test_abide_dataset = AbideDataset(data_path, label_path, subject_list_test_index, mission)
-
-        if mission == "yoram_attention":
-            algorithm = "node2vec"
-            print("Calculate embedding")
-            graphs_list = train_val_abide_dataset.graphs_list
-            X = find_embed(graphs_list, algorithm=algorithm)
-            kwargs = {'X': X}
-
-        print("ABIDE Dataset Training-Validation Sets Graphs")
-        train_val_abide_dataset.update_graphs(**kwargs)
-        print("ABIDE Dataset Test set Graphs")
-        test_abide_dataset.update_graphs(**kwargs)
-        directory_name = ""
-        result_directory_name = os.path.join(directory_name, "Result_After_Proposal")
-        trainer_and_tester = TrainTestValKTimes(self.RECEIVED_PARAMS, self.device, train_val_abide_dataset, test_abide_dataset,
-                                                result_directory_name, nni_flag=self.nni_mode,
-                                                geometric_or_not=self.geometric_mode)
-        train_metric, val_metric, test_metric, min_train_val_metric = trainer_and_tester.train_group_k_cross_validation(k=K)
-        return train_metric, val_metric, test_metric, min_train_val_metric
+    # def turn_on_train_abide_dataset(self, mission):
+    #     kwargs = {}
+    #     data_path = "rois_ho"
+    #     label_path = "Phenotypic_V1_0b_preprocessed1.csv"
+    #     phenotype_dataset = pd.read_csv("Phenotypic_V1_0b_preprocessed1.csv")
+    #     subject_list = [value for value in phenotype_dataset["FILE_ID"].tolist() if value != "no_filename"]
+    #     # The reason for random state is that the test dataset and train-validation dataset will always be the same
+    #     subject_list_train_val_index, subject_list_test_index = train_test_split(subject_list, test_size=0.3, random_state=0)
+    #
+    #     train_val_abide_dataset = AbideDataset(data_path, label_path, subject_list_train_val_index, mission)
+    #     test_abide_dataset = AbideDataset(data_path, label_path, subject_list_test_index, mission)
+    #
+    #     if mission == "yoram_attention":
+    #         algorithm = "node2vec"
+    #         print("Calculate embedding")
+    #         graphs_list = train_val_abide_dataset.graphs_list
+    #         X = find_embed(graphs_list, algorithm=algorithm)
+    #         kwargs = {'X': X}
+    #
+    #     print("ABIDE Dataset Training-Validation Sets Graphs")
+    #     train_val_abide_dataset.update_graphs(**kwargs)
+    #     print("ABIDE Dataset Test set Graphs")
+    #     test_abide_dataset.update_graphs(**kwargs)
+    #     directory_name = ""
+    #     result_directory_name = os.path.join(directory_name, "Result_After_Proposal")
+    #     trainer_and_tester = TrainTestValKTimes(self.RECEIVED_PARAMS, self.device, train_val_abide_dataset, test_abide_dataset,
+    #                                             result_directory_name, nni_flag=self.nni_mode,
+    #                                             geometric_or_not=self.geometric_mode)
+    #     train_metric, val_metric, test_metric, min_train_val_metric = trainer_and_tester.train_group_k_cross_validation(k=K)
+    #     return train_metric, val_metric, test_metric, min_train_val_metric
 
 
 def set_arguments():
@@ -211,6 +200,7 @@ def results_dealing(train_metric, val_metric, test_metric, min_train_val_metric,
     print("Mean Test Set AUC: ", mean_test_metric, " +- ", std_test_metric)
     return train_metric, val_metric, test_metric
 
+
 def reproduce_from_nni(nni_result_file, dataset_name, mission_number):
     mission_dict = {1: "just_values", 2: "just_graph", 3: "graph_and_values"}
     params_list = run_again_from_nni_results_csv(nni_result_file, n_rows=5)
@@ -224,10 +214,7 @@ def reproduce_from_nni(nni_result_file, dataset_name, mission_number):
     for RECEIVED_PARAMS in params_list:
         main_runner = Main(dataset_name, mission_number, RECEIVED_PARAMS, device, nni_mode=nni_flag,
                            geometric_mode=pytorch_geometric_mode, add_attributes=add_attributes, plot_figures=False)
-        if dataset_name == "abide":
-            train_metric, val_metric, test_metric, min_train_val_metric = main_runner.turn_on_train_abide_dataset(mission_dict[mission_number])
-        else:
-            train_metric, val_metric, test_metric, min_train_val_metric = main_runner.turn_on_train()
+        train_metric, val_metric, test_metric, min_train_val_metric = main_runner.play()
         result_file_name = f"{dataset_name}_{mission_dict[mission_number]}"
         results_dealing(train_metric, val_metric, test_metric, min_train_val_metric, nni_flag, RECEIVED_PARAMS, result_file_name)
         for k, v in RECEIVED_PARAMS.items():
@@ -240,7 +227,7 @@ def run_all_dataset(mission_number, cuda_number, nni_flag, pytorch_geometric_mod
     for dataset_name in datasets:
         try:
             train_metric, val_metric, test_metric = \
-                run_regular(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
+                runner(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
             datasets_results_dict[dataset_name] = {"train_metric": train_metric, "val_metric": val_metric,
                                                    "test_metric": test_metric}
         except Exception as e:
@@ -250,7 +237,7 @@ def run_all_dataset(mission_number, cuda_number, nni_flag, pytorch_geometric_mod
 def run_all_missions(dataset_name, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes):
     for mission in [1, 2, 3]:
         try:
-            run_regular(dataset_name, mission, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
+            runner(dataset_name, mission, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
         except Exception as e:
             print(e)
 
@@ -261,59 +248,45 @@ def run_all_datasets_missions(cuda_number, nni_flag, pytorch_geometric_mode, add
         run_all_dataset(mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
 
 
-def run_regular(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes):
-    my_tasks = MyTasks(tasks_dict, dataset_name)
-    directory_name, mission, params_file_path = my_tasks.get_task_files(mission_number)
-    if nni_flag:
-        RECEIVED_PARAMS = nni.get_next_parameter()
-    else:
-        RECEIVED_PARAMS = json.load(open(params_file_path, 'r'))
-    RECEIVED_PARAMS["learning_rate"] = np.float64(RECEIVED_PARAMS["learning_rate"])
-    RECEIVED_PARAMS["dropout"] = np.float64(RECEIVED_PARAMS["dropout"])
-    RECEIVED_PARAMS["regularization"] = np.float64(RECEIVED_PARAMS["regularization"])
-    RECEIVED_PARAMS["train_frac"] = np.float64(RECEIVED_PARAMS["train_frac"])
-    RECEIVED_PARAMS["test_frac"] = np.float64(RECEIVED_PARAMS["test_frac"])
-
-    print("Dataset", dataset_name)
+def runner(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes):
     device = f"cuda:{cuda_number}" if torch.cuda.is_available() else "cpu"
     print("Device", device)
-    print("Task", mission)
-    main_runner = Main(dataset_name, mission_number, RECEIVED_PARAMS, device, nni_mode=nni_flag,
-                       geometric_mode=pytorch_geometric_mode, add_attributes=add_attributes, plot_figures=False)
-    # train_metric, val_metric, test_metric, min_train_val_metric = main_runner.turn_on_train()
+    mission_dict = {1: "just_values", 2: "just_graph", 3: "graph_and_values", 4: "double_gcn_layer",
+                    6: "yoram_attention"}
+    if dataset_name == "abide" or dataset_name == "abide1":
+        params_file_path = "abide_dataset_params.json"  # TODO: add best parameters from nni
+        if nni_flag:
+            RECEIVED_PARAMS = nni.get_next_parameter()
+        else:
+            RECEIVED_PARAMS = json.load(open(params_file_path, 'r'))
 
-    print("Run with no external test")
-    train_metric, val_metric, test_metric, min_train_val_metric = main_runner.turn_on_train_no_external_test()
-    result_file_name = f"{dataset_name}_{mission}"
+        print("Dataset", dataset_name)
+        print("Mission", mission_number)
 
-    results_dealing(train_metric, val_metric, test_metric, min_train_val_metric, nni_flag, RECEIVED_PARAMS, result_file_name)
-    return train_metric, val_metric, test_metric
-
-def run_regular_abide_dataset(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes):
-    params_file_path = "abide_dataset_params.json"
-    if nni_flag:
-        RECEIVED_PARAMS = nni.get_next_parameter()
+    elif dataset_name == "cancer":
+        my_tasks = MyTasks(tasks_dict, dataset_name)
+        directory_name, mission, params_file_path = my_tasks.get_task_files(mission_number)
+        params_file_path = os.path.join(directory_name, 'Models', f"{mission}_params_file.json")
+        if nni_flag:
+            RECEIVED_PARAMS = nni.get_next_parameter()
+        else:
+            RECEIVED_PARAMS = json.load(open(params_file_path, 'r'))
     else:
-        RECEIVED_PARAMS = json.load(open(params_file_path, 'r'))
-    RECEIVED_PARAMS["learning_rate"] = np.float64(RECEIVED_PARAMS["learning_rate"])
-    RECEIVED_PARAMS["dropout"] = np.float64(RECEIVED_PARAMS["dropout"])
-    RECEIVED_PARAMS["regularization"] = np.float64(RECEIVED_PARAMS["regularization"])
-    RECEIVED_PARAMS["train_frac"] = np.float64(RECEIVED_PARAMS["train_frac"])
-    RECEIVED_PARAMS["test_frac"] = np.float64(RECEIVED_PARAMS["test_frac"])
+        my_tasks = MyTasks(tasks_dict, dataset_name)
+        directory_name, mission, params_file_path = my_tasks.get_task_files(mission_number)
+        if nni_flag:
+            RECEIVED_PARAMS = nni.get_next_parameter()
+        else:
+            RECEIVED_PARAMS = json.load(open(params_file_path, 'r'))
+        print("Dataset", dataset_name)
+        print("Task", mission)
 
-    print("Dataset", "Abide Dataset")
-    print("Mission", mission_number)
-    device = f"cuda:{cuda_number}" if torch.cuda.is_available() else "cpu"
-    print("Device", device)
     main_runner = Main(dataset_name, mission_number, RECEIVED_PARAMS, device, nni_mode=nni_flag,
                        geometric_mode=pytorch_geometric_mode, add_attributes=add_attributes, plot_figures=False)
-    mission_dict = {1: "just_values", 2: "just_graph", 3: "graph_and_values", 6:"yoram_attention"}
-
-    # train_metric, val_metric, test_metric, min_train_val_metric = main_runner.turn_on_train_abide_dataset(mission_dict[mission_number])
-    print("Run with no external test")
-    train_metric, val_metric, test_metric, min_train_val_metric = main_runner.turn_on_train_abide_dataset_no_external_test(mission_dict[mission_number])
+    train_metric, val_metric, test_metric, min_train_val_metric = main_runner.play()
     result_file_name = f"{dataset_name}_{mission_dict[mission_number]}"
     results_dealing(train_metric, val_metric, test_metric, min_train_val_metric, nni_flag, RECEIVED_PARAMS, result_file_name)
+    return train_metric, val_metric, test_metric
 
 
 if __name__ == '__main__':
@@ -330,11 +303,8 @@ if __name__ == '__main__':
 
         # run_all_datasets_missions(cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
         # run_all_missions(dataset_name, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
-        if dataset_name == "abide" or dataset_name == "abide1":
-           run_regular_abide_dataset(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode,
-                                     add_attributes)
-        else:
-           run_regular(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
+
+        runner(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
         # run_all_dataset(6, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
 
         # try:

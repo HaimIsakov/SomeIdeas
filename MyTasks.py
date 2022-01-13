@@ -16,7 +16,11 @@ class MyTasks:
         directory_name = "JustValues"
         mission = 'just_values'
         # params_file_path = os.path.join(directory_name, 'params', "params_file_1_gcn_just_values", f"{self.dataset}_{mission}_params.json")
-        params_file_path = os.path.join(directory_name, 'params', "best_params", f"{self.dataset}_{mission}.json")
+        try:
+            params_file_path = os.path.join(directory_name, 'params', "best_params", f"{self.dataset}_{mission}.json")
+        except:
+            print("Use default params file")
+            params_file_path = os.path.join(directory_name, 'Models', f"{mission}_params_file.json")
         return directory_name, mission, params_file_path
 
     # @staticmethod
