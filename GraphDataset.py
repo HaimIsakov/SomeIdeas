@@ -81,7 +81,8 @@ class GraphDataset(Dataset):
             if self.mission == "just_values":
                 values = index_value['values_on_leaves']
                 adjacency_matrix = index_value['adjacency_matrix']
-            elif self.mission == "just_graph" or self.mission == "graph_and_values" or self.mission == "double_gcn_layer":
+            elif self.mission == "just_graph" or self.mission == "graph_and_values" \
+                    or self.mission == "double_gcn_layer" or self.mission == "concat_graph_and_values":
                 values = index_value['values_on_nodes']
                 adjacency_matrix = index_value['adjacency_matrix']
             elif self.mission == "yoram_attention":
@@ -95,6 +96,8 @@ class GraphDataset(Dataset):
                 values = np.tile(np.array([values]).transpose(), (1, 128))
                 # print("values after repeat", values.shape)
                 adjacency_matrix = index_value['graph_embed']  # TODO: it is not the actual adj mat - so Fix it
+            else:
+                print("The task was not added here")
             return Tensor(values), Tensor(adjacency_matrix), label
         else:
             return index_value['data']
