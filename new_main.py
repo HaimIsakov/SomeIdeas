@@ -4,7 +4,7 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "0,1,2,3,4,5,6,7"
 
 from sklearn.model_selection import train_test_split
 from BrainNetwork import AbideDataset
-from cancer_data.CancerDataset import CancerDataset
+# from cancer_data.CancerDataset import CancerDataset
 from nni_functions_utils import run_again_from_nni_results_csv
 from node2vec_embed import find_embed
 from train_test_val_ktimes_no_external_test import TrainTestValKTimesNoExternalTest
@@ -44,6 +44,8 @@ tasks_dict = {1: MyTasks.just_values, 2: MyTasks.just_graph_structure, 3: MyTask
               4: MyTasks.double_gcn_layers, 5: MyTasks.one_head_attention, 6: MyTasks.yoram_attention,
               7: MyTasks.concat_graph_and_values}
 
+mission_dict = {1: "just_values", 2: "just_graph", 3: "graph_and_values", 4: "double_gcn_layer",
+                6: "yoram_attention", 7: "concat_graph_and_values"}
 
 class Main:
     def __init__(self, dataset_name, task_number, RECEIVED_PARAMS, device, nni_mode=False, geometric_mode=False,
@@ -105,7 +107,7 @@ class Main:
     #
     #     print("Training-Validation Sets Graphs")
     #     train_val_dataset = self.create_dataset(train_data_file_path, train_tag_file_path, mission)
-    #     print("Test set Graphs")
+    #     print("Final_Test set Graphs")
     #     test_dataset = self.create_dataset(test_data_file_path, test_tag_file_path, mission)
     #
     #     if mission == "yoram_attention":
@@ -145,7 +147,7 @@ class Main:
     #
     #     print("ABIDE Dataset Training-Validation Sets Graphs")
     #     train_val_abide_dataset.update_graphs(**kwargs)
-    #     print("ABIDE Dataset Test set Graphs")
+    #     print("ABIDE Dataset Final_Test set Graphs")
     #     test_abide_dataset.update_graphs(**kwargs)
     #     directory_name = ""
     #     result_directory_name = os.path.join(directory_name, "Result_After_Proposal")
@@ -177,7 +179,7 @@ def results_dealing(train_metric, val_metric, test_metric, min_train_val_metric,
 
     if nni_flag:
         LOG.debug("\n \nMean Validation Set metric: ", mean_min_train_val_metric, " +- ", std_min_train_val_metric)
-        LOG.debug("\nMean Test Set metric: ", mean_test_metric, " +- ", std_test_metric)
+        LOG.debug("\nMean Final_Test Set metric: ", mean_test_metric, " +- ", std_test_metric)
         nni.report_intermediate_result(mean_test_metric)
         nni.report_final_result(mean_min_train_val_metric)
     else:
@@ -198,12 +200,12 @@ def results_dealing(train_metric, val_metric, test_metric, min_train_val_metric,
     print("\n \nMean minimum Validation and Train Sets AUC: ", mean_min_train_val_metric, " +- ", std_min_train_val_metric)
     print("Mean Train Set AUC: ", mean_train_metric, " +- ", std_train_metric)
     print("Mean Validation Set AUC: ", mean_val_metric, " +- ", std_val_metric)
-    print("Mean Test Set AUC: ", mean_test_metric, " +- ", std_test_metric)
+    print("Mean Final_Test Set AUC: ", mean_test_metric, " +- ", std_test_metric)
     return train_metric, val_metric, test_metric
 
 
 def reproduce_from_nni(nni_result_file, dataset_name, mission_number):
-    mission_dict = {1: "just_values", 2: "just_graph", 3: "graph_and_values"}
+    # mission_dict = {1: "just_values", 2: "just_graph", 3: "graph_and_values"}
     params_list = run_again_from_nni_results_csv(nni_result_file, n_rows=5)
     # params_list = run_again_from_nni_results_csv_format2(nni_result_file, n_rows=5)
     nni_flag = False
@@ -223,7 +225,7 @@ def reproduce_from_nni(nni_result_file, dataset_name, mission_number):
 
 
 def run_all_dataset(mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes):
-    datasets = ["bw", "Cirrhosis", "IBD", "IBD_Chrone", "male_female", "nugent", "milk", "nut", "peanut"]
+    datasets = ["milk", "nut", "peanut"]
     datasets_results_dict = {}
     for dataset_name in datasets:
         try:
@@ -244,7 +246,7 @@ def run_all_missions(dataset_name, cuda_number, nni_flag, pytorch_geometric_mode
 
 
 def run_all_datasets_missions(cuda_number, nni_flag, pytorch_geometric_mode, add_attributes):
-    mission_dict = {1: "just_values", 2: "just_graph", 3: "graph_and_values", 6: "yoram_attention"}
+    # mission_dict = {1: "just_values", 2: "just_graph", 3: "graph_and_values", 6: "yoram_attention"}
     for mission_number in mission_dict.keys():
         run_all_dataset(mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
 
@@ -252,8 +254,8 @@ def run_all_datasets_missions(cuda_number, nni_flag, pytorch_geometric_mode, add
 def runner(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes):
     device = f"cuda:{cuda_number}" if torch.cuda.is_available() else "cpu"
     print("Device", device)
-    mission_dict = {1: "just_values", 2: "just_graph", 3: "graph_and_values", 4: "double_gcn_layer",
-                    6: "yoram_attention", 7: "concat_graph_and_values"}
+    # mission_dict = {1: "just_values", 2: "just_graph", 3: "graph_and_values", 4: "double_gcn_layer",
+    #                 6: "yoram_attention", 7: "concat_graph_and_values"}
     if dataset_name == "abide" or dataset_name == "abide1":
         params_file_path = "abide_dataset_params.json"  # TODO: add best parameters from nni
         if nni_flag:
@@ -268,6 +270,7 @@ def runner(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometri
         my_tasks = MyTasks(tasks_dict, dataset_name)
         directory_name, mission, params_file_path = my_tasks.get_task_files(mission_number)
         params_file_path = os.path.join(directory_name, 'Models', f"{mission}_params_file.json")
+        print(params_file_path)
         if nni_flag:
             RECEIVED_PARAMS = nni.get_next_parameter()
         else:
@@ -305,8 +308,8 @@ if __name__ == '__main__':
         # run_all_datasets_missions(cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
         # run_all_missions(dataset_name, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
 
-        # runner(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
-        run_all_dataset(7, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
+        runner(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
+        # run_all_dataset(7, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
 
         # try:
         #     print("nni_abide_dataset_just_graph.csv")

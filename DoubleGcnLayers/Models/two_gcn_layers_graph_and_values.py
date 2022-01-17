@@ -43,7 +43,6 @@ class TwoLayersGCNValuesGraph(nn.Module):
             self.activation_func_dict[self.activation_func],
         )
 
-
     def forward(self, x, adjacency_matrix):
         # multiply the matrix adjacency_matrix by (learnt scalar) self.alpha
         # alpha_A = torch.mul(adjacency_matrix, self.alpha)  # 𝛼A  - this function does not forward gradients
