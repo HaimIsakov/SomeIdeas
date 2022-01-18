@@ -9,10 +9,11 @@ class MyDatasets:
     def __init__(self, datasets_dict):
         self.datasets_dict = datasets_dict
 
-    def get_dataset_files(self, dataset_name):
+    def get_dataset_files_no_external_test(self, dataset_name):
         # if dataset_name not in self.datasets_dict:
         #     print("Dataset is not in global datasets dictionary")
         # return self.datasets_dict[dataset_name]()
+        # For no external_test
         subject_list = []
         if dataset_name == "abide":
             train_val_test_data_file_path = "rois_ho"
@@ -32,6 +33,45 @@ class MyDatasets:
             train_val_test_label_file_path = os.path.join("split_datasets_new", f"{dataset_name}_split_dataset",
                                                           f"tag_{dataset_name}_file.csv")
         return train_val_test_data_file_path, train_val_test_label_file_path, subject_list
+
+    def get_dataset_files_yes_external_test(self, dataset_name):
+        subject_list = []
+        train_subject_list, test_subject_list = [], []
+        if dataset_name == "abide":
+            # train_val_test_data_file_path = "rois_ho"
+            # train_val_test_label_file_path = "Phenotypic_V1_0b_preprocessed1.csv"
+            # phenotype_df = pd.read_csv(train_val_test_label_file_path)
+            # subject_list = [value for value in phenotype_df["FILE_ID"].tolist() if value != "no_filename"]
+            raise NotImplementedError
+        elif dataset_name == "cancer":
+            train_val_test_data_file_path = os.path.join("cancer_data", "new_cancer_data.csv")  # It contains both train and test set
+            train_val_test_label_file_path = os.path.join("cancer_data", "new_cancer_label.csv")  # It contains both train and test set
+            adj_mat_path = "new_cancer_adj_matrix.csv"
+            subject_list = range(11070)
+            raise NotImplementedError
+        elif dataset_name == "tcr":
+            train_data_file_path = os.path.join("TCR_dataset", "final_sample_files", "Final_Train")
+            train_tag_file_path = os.path.join("TCR_dataset", "samples.csv")
+            test_data_file_path = os.path.join("TCR_dataset", "final_sample_files", "Final_Test")
+            test_tag_file_path = os.path.join("TCR_dataset", "samples.csv")
+            adj_mat_path = "distance_matrix.csv"
+            label_df = pd.read_csv(train_tag_file_path)
+            label_df["sample"] = label_df["sample"] + "_" + label_df['status']
+            label_df.set_index("sample", inplace=True)
+            train_subject_list = list(label_df[label_df["test/train"] == "train"].index)
+            test_subject_list = list(label_df[label_df["test/train"] == "test"].index)
+        else:
+            train_data_file_path = os.path.join(origin_dir, f'{dataset_name}_split_dataset',
+                                                f'train_val_set_{dataset_name}_microbiome.csv')
+            train_tag_file_path = os.path.join(origin_dir, f'{dataset_name}_split_dataset',
+                                               f'train_val_set_{dataset_name}_tags.csv')
+
+            test_data_file_path = os.path.join(origin_dir, f'{dataset_name}_split_dataset',
+                                               f'test_set_{dataset_name}_microbiome.csv')
+            test_tag_file_path = os.path.join(origin_dir, f'{dataset_name}_split_dataset',
+                                              f'test_set_{dataset_name}_tags.csv')
+        return train_data_file_path, train_tag_file_path, test_data_file_path, test_tag_file_path, \
+               train_subject_list, test_subject_list
 
     def microbiome_files(self, dataset_name):
         print("origin_dir", origin_dir)

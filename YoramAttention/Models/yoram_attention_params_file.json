@@ -9,4 +9,6 @@
   "train_frac": 0.7,
   "test_frac": 0.15,
   "epochs": 200,
-  "preweight": 10}
+  "preweight": 10,
+  "embedding_algorithm": "node2vec",
+  "embedding_size": 128}

@@ -84,6 +84,8 @@ class GraphDataset(Dataset):
             elif self.mission == "just_graph" or self.mission == "graph_and_values" \
                     or self.mission == "double_gcn_layer" or self.mission == "concat_graph_and_values":
                 values = index_value['values_on_nodes']
+                # print(np.array(index_value['values_on_nodes']) + 1e-300)
+                # values = np.log(np.array(index_value['values_on_nodes']) + 1e-300)
                 adjacency_matrix = index_value['adjacency_matrix']
             elif self.mission == "yoram_attention":
                 values = index_value['values_on_nodes']

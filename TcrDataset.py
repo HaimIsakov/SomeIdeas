@@ -8,11 +8,11 @@ from tqdm import tqdm
 
 
 class TCRDataset(Dataset):
-    def __init__(self, data_path, label_path, subject_list, mission):
+    def __init__(self, adj_mat_path, data_path, label_path, subject_list, mission):
         self.data_path = data_path
         self.label_path = label_path
         self.subject_list = subject_list
-        self.adj_mat = self.from_distance_mat_to_adj_matrix()
+        self.adj_mat = self.from_distance_mat_to_adj_matrix(adj_mat_path)
         self.label_dict = self.load_or_create_label_dict()
         self.values_df = self.load_or_create_values_dict()
         self.networks_dict = self.load_or_create_tcr_network()
@@ -28,10 +28,11 @@ class TCRDataset(Dataset):
         index_value = self.dataset_dict[index]
         if self.mission == "just_values" or self.mission == "just_graph" or self.mission == "graph_and_values"\
                 or self.mission == "double_gcn_layer" or self.mission == "concat_graph_and_values":
-            values = index_value['values']
+            values = np.expand_dims(index_value['values'], axis=1)
             adjacency_matrix = index_value['adjacency_matrix']
         if self.mission == "yoram_attention":
-            values = index_value['values']
+            # values = index_value['values']
+            values = np.expand_dims(index_value['values'], axis=1)
             adjacency_matrix = index_value['graph_embed']  # TODO: it is not the actual adj mat - so Fix it
 
         label = self.dataset_dict[index]['label']
@@ -45,7 +46,7 @@ class TCRDataset(Dataset):
             self.dataset_dict[i]['graph_embed'] = embed_mat
 
     def __len__(self):
-        return len(self.dataset_dict)
+        return len(self.subject_list)
 
     def __repr__(self):
         return "TCR Dataset" + "_len" + str(len(self))
@@ -66,8 +67,8 @@ class TCRDataset(Dataset):
             graphs_list[i] = graph_from_adj_matrix
         return graphs_list
 
-    def from_distance_mat_to_adj_matrix(self):
-        distance_mat_df = pd.read_csv(os.path.join("TCR_dataset", "distance_matrix.csv"), index_col=0)
+    def from_distance_mat_to_adj_matrix(self, adj_mat_path):
+        distance_mat_df = pd.read_csv(adj_mat_path, index_col=0)
         network_values = distance_mat_df.values
         np.fill_diagonal(network_values, 1)
         network_values = 1 / network_values
@@ -79,9 +80,9 @@ class TCRDataset(Dataset):
         for i, subject in enumerate(self.subject_list):
             self.dataset_dict[i] = {'subject': subject,
                                     'label': self.label_dict[subject],
-                                    'adjacency_matrix': self.networks_dict[subject],
+                                    'adjacency_matrix': self.networks_dict[subject].values,
                                     'values': self.values_df[subject],
-                                    'graph': nx.from_numpy_matrix(self.networks_dict[subject])}
+                                    'graph': nx.from_numpy_matrix(self.networks_dict[subject].values)}
             if 'X' in kwargs:
                 X = kwargs['X']
                 self.dataset_dict[i]['graph_embed'] = X
@@ -92,11 +93,14 @@ class TCRDataset(Dataset):
     def load_or_create_values_dict(self):
         values_dict = {}
         for i, subject in enumerate(self.subject_list):
+            # print(subject)
             values_list = []
             file_path = os.path.join(self.data_path, f"final_{subject}.csv")
             tcr_sample_df = pd.read_csv(file_path, index_col=0)
+            tcr_sample_df = np.log(tcr_sample_df.groupby("combined").sum() + 1e-300)
             golden_tcr = list(tcr_sample_df.index)
             all_tcrs = list(self.adj_mat.index)
+            # print(tcr_sample_df.to_dict())
             tcr_sample_dict = tcr_sample_df.to_dict()['frequency']
             all_tcrs_minus_golden_tcr = list(set(all_tcrs) - set(golden_tcr))
             for tcr in all_tcrs_minus_golden_tcr:
@@ -128,6 +132,7 @@ class TCRDataset(Dataset):
         label_df = pd.read_csv(self.label_path, usecols=["sample", 'status'])
         label_df["sample"] = label_df["sample"] + "_" + label_df['status']
         label_df.set_index("sample", inplace=True)
+        label_df = label_df.loc[self.subject_list]
         label_df["status"] = label_df["status"].map({"negative": 0, "positive": 1})
         label_dict = label_df.to_dict()['status']
         return label_dict
@@ -136,12 +141,12 @@ class TCRDataset(Dataset):
     #     return [self.dataset_dict[i]['subject'] for i in range(len(self.subject_list))]
 
 
-if __name__ == "__main__":
-    mission = 1
-    data_path = os.path.join("TCR_dataset", "final_sample_files", "Final_Test")
-    label_path = os.path.join("TCR_dataset", "samples.csv")
-    phenotype_dataset = pd.read_csv(label_path)
-    phenotype_dataset = phenotype_dataset[phenotype_dataset["test/train"] == "test"]
-    subject_list = [sample + "_" + sign for sample, sign in zip(phenotype_dataset["sample"].tolist(),
-                                                               phenotype_dataset["status"].tolist())]
-    tcr_dataset = TCRDataset(data_path, label_path, subject_list, mission)
+# if __name__ == "__main__":
+#     mission = 1
+#     data_path = os.path.join("TCR_dataset", "final_sample_files", "Final_Test")
+#     label_path = os.path.join("TCR_dataset", "samples.csv")
+#     phenotype_dataset = pd.read_csv(label_path)
+#     phenotype_dataset = phenotype_dataset[phenotype_dataset["test/train"] == "test"]
+#     subject_list = [sample + "_" + sign for sample, sign in zip(phenotype_dataset["sample"].tolist(),
+#                                                                phenotype_dataset["status"].tolist())]
+#     tcr_dataset = TCRDataset(data_path, label_path, subject_list, mission)

@@ -1,4 +1,7 @@
 import os
+
+from TcrDataset import TCRDataset
+
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
 os.environ["CUDA_VISIBLE_DEVICES"] = "0,1,2,3,4,5,6,7"
 
@@ -66,30 +69,44 @@ class Main:
             adj_mat_path = os.path.join("cancer_data", "new_cancer_adj_matrix.csv")
             cur_dataset = CancerDataset(adj_mat_path, data_path, label_path, subject_list, mission)
         elif self.dataset_name == "tcr":
-            cur_dataset = None
+            adj_mat_path = os.path.join("TCR_dataset", "distance_matrix.csv")
+            cur_dataset = TCRDataset(adj_mat_path, data_path, label_path, subject_list, mission)
         else:
             cur_dataset = GraphDataset(data_path, label_path, mission, self.add_attributes, self.geometric_mode)
 
         cur_dataset.update_graphs()
         return cur_dataset
 
-    def play(self):
+    def play(self, external_test=True):
         kwargs = {}
         my_tasks = MyTasks(tasks_dict, self.dataset_name)
         my_datasets = MyDatasets(datasets_dict)
 
         directory_name, mission, params_file_path = my_tasks.get_task_files(self.task_number)
-        print("No external test set")
-        train_val_test_data_file_path, train_val_test_label_file_path, subject_list\
-            = my_datasets.get_dataset_files(self.dataset_name)
         result_directory_name = os.path.join(directory_name, "Result_After_Proposal")
-        train_val_test_dataset = self.create_dataset(train_val_test_data_file_path, train_val_test_label_file_path,
+
+        if not external_test:
+            print("No external test set")
+            train_val_test_data_file_path, train_val_test_label_file_path, subject_list\
+                = my_datasets.get_dataset_files_no_external_test(self.dataset_name)
+            train_val_test_dataset = self.create_dataset(train_val_test_data_file_path,
+                                                         train_val_test_label_file_path,
                                                          subject_list, mission)
 
-        trainer_and_tester = TrainTestValKTimesNoExternalTest(self.RECEIVED_PARAMS, self.device, train_val_test_dataset,
-                                                result_directory_name, nni_flag=self.nni_mode,
-                                                geometric_or_not=self.geometric_mode, plot_figures=self.plot_figures)
+            trainer_and_tester = TrainTestValKTimesNoExternalTest(self.RECEIVED_PARAMS, self.device, train_val_test_dataset,
+                                                    result_directory_name, nni_flag=self.nni_mode,
+                                                    geometric_or_not=self.geometric_mode, plot_figures=self.plot_figures)
+        else:
+            print("With external test set")
+            train_data_file_path, train_tag_file_path, test_data_file_path, test_tag_file_path, train_subject_list, \
+            test_subject_list = my_datasets.get_dataset_files_yes_external_test(self.dataset_name)
 
+            test_dataset = self.create_dataset(test_data_file_path, test_tag_file_path, test_subject_list, mission)
+            train_val_dataset = self.create_dataset(train_data_file_path, train_tag_file_path, train_subject_list, mission)
+
+            trainer_and_tester = TrainTestValKTimes(self.RECEIVED_PARAMS, self.device, train_val_dataset, test_dataset,
+                                                    result_directory_name, nni_flag=self.nni_mode,
+                                                    geometric_or_not=self.geometric_mode, plot_figures=self.plot_figures)
         train_metric, val_metric, test_metric, min_train_val_metric = trainer_and_tester.train_group_k_cross_validation(k=K)
         return train_metric, val_metric, test_metric, min_train_val_metric
 
@@ -275,6 +292,17 @@ def runner(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometri
             RECEIVED_PARAMS = nni.get_next_parameter()
         else:
             RECEIVED_PARAMS = json.load(open(params_file_path, 'r'))
+
+    elif dataset_name == "tcr":
+        my_tasks = MyTasks(tasks_dict, dataset_name)
+        directory_name, mission, params_file_path = my_tasks.get_task_files(mission_number)
+        params_file_path = os.path.join(directory_name, 'Models', f"{mission}_params_file.json")
+        print(params_file_path)
+        if nni_flag:
+            RECEIVED_PARAMS = nni.get_next_parameter()
+        else:
+            RECEIVED_PARAMS = json.load(open(params_file_path, 'r'))
+
     else:
         my_tasks = MyTasks(tasks_dict, dataset_name)
         directory_name, mission, params_file_path = my_tasks.get_task_files(mission_number)
@@ -294,6 +322,7 @@ def runner(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometri
 
 
 if __name__ == '__main__':
+    print(pd.__version__)
     try:
         parser = set_arguments()
         args = parser.parse_args()

@@ -5,11 +5,10 @@ import numpy as np
 import torch
 from sklearn.model_selection import GroupShuffleSplit, train_test_split
 from torch.utils.data import DataLoader
-
+from train_test_val_ktimes_utils import *
 from ConcatGraphAndValues.concat_graph_and_values import ConcatValuesAndGraphStructure
 from DoubleGcnLayers.Models.two_gcn_layers_graph_and_values import TwoLayersGCNValuesGraph
 from OneHeadAttention.Models.ofek_model import AttentionGCN
-from train_test_val_one_time import TrainTestValOneTime
 from YoramAttention.Models.yoram_attention import YoramAttention
 from train_test_val_one_time import TrainTestValOneTime
 from JustGraphStructure.Models.just_graph_structure import JustGraphStructure
@@ -40,20 +39,18 @@ class TrainTestValKTimesNoExternalTest:
         train_metric, val_metric, test_metric, min_train_val_metric = [], [], [], []
         run = 0
         for i in range(k):
-            # train_idx, val_idx, test_idx = \
-            #     np.split(np.array(range(dataset_len)), [int(.6 * dataset_len), int(.8 * dataset_len)])
             indexes_array = np.array(range(dataset_len))
-            train_idx, test_idx = train_test_split(indexes_array, test_size=0.2)
-            train_idx, val_idx = train_test_split(train_idx, test_size=0.25)  # 0.25 x 0.8 = 0.2
+            train_idx, test_idx = train_test_split(indexes_array, test_size=0.2, shuffle=True)
+            train_idx, val_idx = train_test_split(train_idx, test_size=0.25, shuffle=True)  # 0.25 x 0.8 = 0.2
             print("Val indexes", val_idx)
             print(f"Run {run}")
             # print("len of train set:", len(train_idx))
             # print("len of val set:", len(val_idx))
 
             train_loader, val_loader, test_loader = self.create_data_loaders(train_idx, val_idx, test_idx)
-            print("Train labels", self.get_labels_distribution(train_loader))
-            print("val labels", self.get_labels_distribution(val_loader))
-            print("test labels", self.get_labels_distribution(test_loader))
+            print("Train labels", get_labels_distribution(train_loader))
+            print("val labels", get_labels_distribution(val_loader))
+            print("test labels", get_labels_distribution(test_loader))
             model = self.get_model().to(self.device)
             trainer_and_tester = TrainTestValOneTime(model, self.RECEIVED_PARAMS, train_loader, val_loader, test_loader,
                                                      self.device)
@@ -79,7 +76,7 @@ class TrainTestValKTimesNoExternalTest:
             early_stopping_results = trainer_and_tester.train_geometric()
 
         # # If the train auc is too low (under 0.5 for example) try to rerun the training process again
-        flag = self.rerun_if_bad_train_result(early_stopping_results)
+        flag = rerun_if_bad_train_result(early_stopping_results)
         while flag and rerun_counter <= 3:
             print(f"Rerun this train-val split again because train auc is:{early_stopping_results['train_auc']:.4f}")
             print(f"Rerun number {rerun_counter}")
@@ -92,26 +89,26 @@ class TrainTestValKTimesNoExternalTest:
             else:
                 early_stopping_results = trainer_and_tester.train_geometric()
 
-            flag = self.rerun_if_bad_train_result(early_stopping_results)
+            flag = rerun_if_bad_train_result(early_stopping_results)
             rerun_counter += 1  # rerun_counter - the number of chances we give the model to converge again
         return early_stopping_results
 
-    def get_labels_distribution(self, data_loader):
-        dataset_dict = data_loader.dataset.dataset.dataset_dict
-        indices = data_loader.dataset.indices
-        label_dict = {}
-        for index in indices:
-            label_dict[index] = dataset_dict[index]['label']
-        labels_values = list(label_dict.values())
-        # labels_distribution = Counter(labels_values)
-        labels_distribution = {0: labels_values.count(0), 1: labels_values.count(1)}
-        return labels_distribution
-
-    def rerun_if_bad_train_result(self, early_stopping_results, threshold=0.5):
-        flag = False
-        if early_stopping_results['train_auc'] <= threshold:
-            flag = True
-        return flag
+    # def get_labels_distribution(self, data_loader):
+    #     dataset_dict = data_loader.dataset.dataset.dataset_dict
+    #     indices = data_loader.dataset.indices
+    #     label_dict = {}
+    #     for index in indices:
+    #         label_dict[index] = dataset_dict[index]['label']
+    #     labels_values = list(label_dict.values())
+    #     # labels_distribution = Counter(labels_values)
+    #     labels_distribution = {0: labels_values.count(0), 1: labels_values.count(1)}
+    #     return labels_distribution
+    #
+    # def rerun_if_bad_train_result(self, early_stopping_results, threshold=0.5):
+    #     flag = False
+    #     if early_stopping_results['train_auc'] <= threshold:
+    #         flag = True
+    #     return flag
 
     def create_data_loaders(self, train_idx, val_idx, test_idx):
         batch_size = int(self.RECEIVED_PARAMS['batch_size'])
@@ -120,7 +117,7 @@ class TrainTestValKTimesNoExternalTest:
         val_data = torch.utils.data.Subset(self.train_val_test_dataset, val_idx)
         test_data = torch.utils.data.Subset(self.train_val_test_dataset, test_idx)
         # Get and set train_graphs_list
-        train_graphs_list = self.get_train_graphs_list(train_data)
+        train_graphs_list = get_train_graphs_list(train_data)
         self.train_val_test_dataset.set_train_graphs_list(train_graphs_list)
         self.find_embed_for_attention()
         # Dataloader
@@ -132,14 +129,14 @@ class TrainTestValKTimesNoExternalTest:
         print("test loader size:", len(test_idx))
         return train_loader, val_loader, test_loader
 
-    def get_train_graphs_list(self, train_data):
-        dataset_dict = train_data.dataset.dataset_dict
-        indices = train_data.indices
-        graphs_dict = {}
-        for index in indices:
-            graphs_dict[index] = dataset_dict[index]['graph']
-        train_graphs_list = list(graphs_dict.values())
-        return train_graphs_list
+    # def get_train_graphs_list(self, train_data):
+    #     dataset_dict = train_data.dataset.dataset_dict
+    #     indices = train_data.indices
+    #     graphs_dict = {}
+    #     for index in indices:
+    #         graphs_dict[index] = dataset_dict[index]['graph']
+    #     train_graphs_list = list(graphs_dict.values())
+    #     return train_graphs_list
 
     def find_embed_for_attention(self):
         if "embedding_algorithm" not in self.RECEIVED_PARAMS or self.train_val_test_dataset.mission != "yoram_attention":
