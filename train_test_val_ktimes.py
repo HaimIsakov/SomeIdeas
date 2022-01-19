@@ -146,6 +146,7 @@ class TrainTestValKTimes:
             # Get and set train_graphs_list
             train_graphs_list = get_train_graphs_list(train_data)
             self.train_val_dataset.set_train_graphs_list(train_graphs_list)
+            self.test_dataset.set_train_graphs_list(train_graphs_list)
             self.find_embed_for_attention()
             # Dataloader
             train_loader = torch.utils.data.DataLoader(train_data, shuffle=True, batch_size=batch_size)
@@ -173,6 +174,7 @@ class TrainTestValKTimes:
         graphs_list = self.train_val_dataset.train_graphs_list
         graph_embedding_matrix = find_embed(graphs_list, algorithm=algorithm)
         self.train_val_dataset.set_graph_embed_in_dataset_dict(graph_embedding_matrix)
+        self.test_dataset.set_graph_embed_in_dataset_dict(graph_embedding_matrix)
 
     def get_model(self):
         if not self.geometric_or_not:

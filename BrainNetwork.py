@@ -88,7 +88,7 @@ class AbideDataset(Dataset):
     def load_or_create_brain_network(self):
         networks_dict = {}
         for i, subject in tqdm(enumerate(self.subject_list), desc='Create Abide Networks', total=len(self.subject_list)):
-            file_path = os.path.join(self.data_path, f"{subject}_{self.data_path}.1D")
+            file_path = os.path.join(self.data_path, f"{subject}_rois_ho.1D")
             input_matrix = np.loadtxt(file_path)
             # load_connectivity_binary - Take only the correlations above some threshold
             # network = load_connectivity_binary(input_matrix)

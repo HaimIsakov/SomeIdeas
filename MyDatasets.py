@@ -1,6 +1,7 @@
 import os
 
 import pandas as pd
+from sklearn.model_selection import train_test_split
 
 origin_dir = "split_datasets_new"
 
@@ -38,11 +39,18 @@ class MyDatasets:
         subject_list = []
         train_subject_list, test_subject_list = [], []
         if dataset_name == "abide":
-            # train_val_test_data_file_path = "rois_ho"
-            # train_val_test_label_file_path = "Phenotypic_V1_0b_preprocessed1.csv"
-            # phenotype_df = pd.read_csv(train_val_test_label_file_path)
-            # subject_list = [value for value in phenotype_df["FILE_ID"].tolist() if value != "no_filename"]
-            raise NotImplementedError
+            train_data_file_path = os.path.join("rois_ho", "final_sample_files", "Final_Train")
+            train_tag_file_path = os.path.join("rois_ho", "Phenotypic_V1_0b_preprocessed1.csv")
+            test_data_file_path = os.path.join("rois_ho", "final_sample_files", "Final_Test")
+            test_tag_file_path = os.path.join("rois_ho", "Phenotypic_V1_0b_preprocessed1.csv")
+            for subdir, dirs, files in os.walk(os.path.join("rois_ho", "final_sample_files", "Final_Train")):
+                for file in files:
+                    file_id = file.split("_rois_ho")[0]
+                    train_subject_list.append(file_id)
+            for subdir, dirs, files in os.walk(os.path.join("rois_ho", "final_sample_files", "Final_Test")):
+                for file in files:
+                    file_id = file.split("_rois_ho")[0]
+                    test_subject_list.append(file_id)
         elif dataset_name == "cancer":
             train_val_test_data_file_path = os.path.join("cancer_data", "new_cancer_data.csv")  # It contains both train and test set
             train_val_test_label_file_path = os.path.join("cancer_data", "new_cancer_label.csv")  # It contains both train and test set

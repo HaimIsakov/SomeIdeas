@@ -322,7 +322,6 @@ def runner(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometri
 
 
 if __name__ == '__main__':
-    print(pd.__version__)
     try:
         parser = set_arguments()
         args = parser.parse_args()

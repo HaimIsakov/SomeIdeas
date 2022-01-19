@@ -78,21 +78,6 @@ class TrainTestValOneTime:
             metric_result = f1_score(true_labels, pred, average='macro')
         return metric_result
 
-    # def calc_f1_score(self, data_loader, job=VAL_JOB):
-    #     self.model.eval()
-    #     true_labels = []
-    #     pred = []
-    #     with torch.no_grad():
-    #         for data, adjacency_matrix, target in data_loader:
-    #             data, adjacency_matrix, target = data.to(self.device), adjacency_matrix.to(self.device), target.to(self.device)
-    #             output = self.model(data, adjacency_matrix)
-    #             output = F.softmax(output, dim=1)
-    #             _, y_pred_tags = torch.max(output, dim=1)
-    #             true_labels += target.tolist()
-    #             pred += y_pred_tags.tolist()
-    #     f1_macro_result = f1_score(true_labels, pred, average='macro')
-    #     return f1_macro_result
-
     def train(self):
         optimizer = self.get_optimizer()
         epochs = int(self.RECEIVED_PARAMS['epochs'])
