@@ -5,6 +5,7 @@
 import json
 import os
 from datetime import datetime
+from pathlib import Path
 
 import numpy as np
 from sklearn.model_selection import GroupShuffleSplit, GroupKFold, train_test_split
@@ -16,7 +17,9 @@ from ConcatGraphAndValues.concat_graph_and_values import ConcatValuesAndGraphStr
 from DoubleGcnLayers.Models.two_gcn_layers_graph_and_values import TwoLayersGCNValuesGraph
 from OneHeadAttention.Models.ofek_model import AttentionGCN
 from YoramAttention.Models.yoram_attention import YoramAttention
+from distance_matrix import create_distance_matrix
 from node2vec_embed import find_embed
+from ofek_files_utils_functions import HistoMaker
 from train_test_val_one_time import TrainTestValOneTime
 from JustGraphStructure.Models.just_graph_structure import JustGraphStructure
 from JustValues.Models.just_values_fc_binary_classification import JustValuesOnNodes
@@ -62,7 +65,7 @@ class TrainTestValKTimes:
             if run == 0 and not self.nni_flag and self.plot_figures:
                 date, directory_root = self.create_directory_to_save_results()
 
-            train_loader, val_loader, test_loader = self.create_data_loaders(train_idx, val_idx)
+            train_loader, val_loader, test_loader = self.create_data_loaders(i, train_idx, val_idx)
             print("Train labels", get_labels_distribution(train_loader))
             print("val labels", get_labels_distribution(val_loader))
             # print("test labels", get_labels_distribution(test_loader))
@@ -137,9 +140,27 @@ class TrainTestValKTimes:
             rerun_counter += 1  # rerun_counter - the number of chances we give the model to converge again
         return early_stopping_results
 
-    def create_data_loaders(self, train_idx, val_idx):
+    def create_data_loaders(self, i, train_idx, val_idx):
         batch_size = int(self.RECEIVED_PARAMS['batch_size'])
         if not self.geometric_or_not:
+            # For Tcr dataset
+            if "TCR" in str(self.train_val_dataset):
+                print(train_idx)
+                train = HistoMaker("train", len(train_idx))
+                file_directory_path = os.path.join("TCR_Dataset2", "Train")  # TCR_Dataset2 exists only in server
+                print(self.train_val_dataset.subject_list)
+                files = [Path(os.path.join(file_directory_path, self.train_val_dataset.subject_list[id] + ".csv"))
+                         for id in train_idx]
+                train.save_data(file_directory_path, files=files)
+                numrec = 125
+                train.outlier_finder(i, numrec=numrec)
+                create_distance_matrix(i, self.device)
+                self.train_val_dataset.run_number = i
+                self.test_dataset.run_number = i
+                self.train_val_dataset.calc_golden_tcrs()
+                self.train_val_dataset.update_graphs()
+                self.test_dataset.calc_golden_tcrs()
+                self.test_dataset.update_graphs()
             # Datasets
             train_data = torch.utils.data.Subset(self.train_val_dataset, train_idx)
             val_data = torch.utils.data.Subset(self.train_val_dataset, val_idx)

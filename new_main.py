@@ -69,7 +69,8 @@ class Main:
             adj_mat_path = os.path.join("cancer_data", "new_cancer_adj_matrix.csv")
             cur_dataset = CancerDataset(adj_mat_path, data_path, label_path, subject_list, mission)
         elif self.dataset_name == "tcr":
-            adj_mat_path = os.path.join("TCR_dataset", "distance_matrix.csv")
+            # adj_mat_path = os.path.join("TCR_dataset", "distance_matrix.csv")
+            adj_mat_path = os.path.join("TCR_dataset", "distance_matrix2.csv")
             cur_dataset = TCRDataset(adj_mat_path, data_path, label_path, subject_list, mission)
         else:
             cur_dataset = GraphDataset(data_path, label_path, mission, self.add_attributes, self.geometric_mode)
@@ -255,7 +256,7 @@ def run_all_dataset(mission_number, cuda_number, nni_flag, pytorch_geometric_mod
 
 
 def run_all_missions(dataset_name, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes):
-    for mission in [1, 2, 3]:
+    for mission in [1, 2, 3, 4, 6, 7]:
         try:
             runner(dataset_name, mission, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
         except Exception as e:
@@ -334,27 +335,27 @@ if __name__ == '__main__':
         add_attributes = False
 
         # run_all_datasets_missions(cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
-        # run_all_missions(dataset_name, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
+        run_all_missions(dataset_name, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
 
-        runner(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
+        # runner(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
         # run_all_dataset(7, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
 
         # try:
-        #     print("nni_abide_dataset_just_graph.csv")
-        #     reproduce_from_nni(os.path.join("nni_abide_dataset_just_graph.csv"), "abide", 2)
+        #     print("nni_tcr_dataset_just_graph.csv")
+        #     reproduce_from_nni(os.path.join("tcr_nni_just_graph.csv"), "tcr", 2)
         # except Exception as e:
         #     print(e)
         #     raise
         #     # pass
         # try:
-        #     print("nni_abide_dataset_values_and_graph")
-        #     reproduce_from_nni(os.path.join("nni_abide_dataset_just_graph"), "abide", 3)
+        #     print("nni_tcr_dataset_values_and_graph")
+        #     reproduce_from_nni(os.path.join("nni_tcr_values_and_graph.csv"), "tcr", 3)
         # except Exception as e:
         #     print(e)
         #     pass
         # try:
-        #     print("more_regularization_nni_just_values_abide")
-        #     reproduce_from_nni(os.path.join("more_regularization_nni_just_values_abide.csv"), "abide", 1)
+        #     print("nni_tcr_dataset_just_values")
+        #     reproduce_from_nni(os.path.join("nni_tcr_just_values.csv"), "tcr", 1)
         # except Exception as e:
         #     print(e)
         #     pass

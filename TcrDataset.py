@@ -6,22 +6,27 @@ from torch.utils.data import Dataset
 from torch import Tensor
 from tqdm import tqdm
 
+from ofek_files_utils_functions import HistoMaker
+
 
 class TCRDataset(Dataset):
     def __init__(self, adj_mat_path, data_path, label_path, subject_list, mission):
         self.data_path = data_path
         self.label_path = label_path
         self.subject_list = subject_list
-        self.adj_mat = self.from_distance_mat_to_adj_matrix(adj_mat_path)
+        self.adj_mat = None
+        self.values_df = None
+        self.networks_dict = None
+        # self.adj_mat = self.from_distance_mat_to_adj_matrix(adj_mat_path)
         self.label_dict = self.load_or_create_label_dict()
-        self.values_df = self.load_or_create_values_dict()
-        self.networks_dict = self.load_or_create_tcr_network()
+        # self.values_df = self.load_or_create_values_dict()
+        # self.networks_dict = self.load_or_create_tcr_network()
         # calc_avg_degree(self.networks_dict)
-
         # self.graphs_list = self.get_graph_list()
         self.dataset_dict = {}
         self.mission = mission
         self.train_graphs_list = []
+        self.run_number = 0
         # self.update_graphs(data_path, label_path)
 
     def __getitem__(self, index):
@@ -88,18 +93,27 @@ class TCRDataset(Dataset):
                 self.dataset_dict[i]['graph_embed'] = X
 
     def update_graphs(self, **kwargs):
-        self.set_dataset_dict(**kwargs)
+        if self.adj_mat is not None:
+            self.set_dataset_dict(**kwargs)
 
     def load_or_create_values_dict(self):
         values_dict = {}
         for i, subject in enumerate(self.subject_list):
             # print(subject)
             values_list = []
-            file_path = os.path.join(self.data_path, f"final_{subject}.csv")
-            tcr_sample_df = pd.read_csv(file_path, index_col=0)
+            path = os.path.join(self.data_path, subject + ".csv")
+            print(path)
+            sample_df = pd.read_csv(path)
+            all_tcrs = list(self.adj_mat.index)
+            intersec = set(all_tcrs) & set(sample_df["combined"])
+            new_sample_df = sample_df[["combined", "frequency"]]
+            new_sample_df.set_index("combined", inplace=True)
+            new_sample_df_only_tcr_list = new_sample_df.loc[intersec]
+            tcr_sample_df = new_sample_df_only_tcr_list
+            # file_path = os.path.join(self.data_path, f"final_{subject}.csv")
+            # tcr_sample_df = pd.read_csv(file_path, index_col=0)
             tcr_sample_df = np.log(tcr_sample_df.groupby("combined").sum() + 1e-300)
             golden_tcr = list(tcr_sample_df.index)
-            all_tcrs = list(self.adj_mat.index)
             # print(tcr_sample_df.to_dict())
             tcr_sample_dict = tcr_sample_df.to_dict()['frequency']
             all_tcrs_minus_golden_tcr = list(set(all_tcrs) - set(golden_tcr))
@@ -114,8 +128,18 @@ class TCRDataset(Dataset):
     def load_or_create_tcr_network(self):
         networks_dict = {}
         for i, subject in tqdm(enumerate(self.subject_list), desc='Create TCR Networks', total=len(self.subject_list)):
-            file_path = os.path.join(self.data_path, f"final_{subject}.csv")
-            tcr_sample_df = pd.read_csv(file_path, index_col=0)
+            # file_path = os.path.join(self.data_path, f"final_{subject}.csv")
+            # tcr_sample_df = pd.read_csv(file_path, index_col=0)
+            path = os.path.join(self.data_path, subject + ".csv")
+            print(path)
+            sample_df = pd.read_csv(path)
+            all_tcrs = list(self.adj_mat.index)
+            intersec = set(all_tcrs) & set(sample_df["combined"])
+            new_sample_df = sample_df[["combined", "frequency"]]
+            new_sample_df.set_index("combined", inplace=True)
+            new_sample_df_only_tcr_list = new_sample_df.loc[intersec]
+            tcr_sample_df = new_sample_df_only_tcr_list
+
             tcr_sample_df = tcr_sample_df.groupby("combined").sum()  # sum the repetitions
             golden_tcr = list(tcr_sample_df.index)
             all_tcrs = list(self.adj_mat.index)
@@ -136,6 +160,12 @@ class TCRDataset(Dataset):
         label_df["status"] = label_df["status"].map({"negative": 0, "positive": 1})
         label_dict = label_df.to_dict()['status']
         return label_dict
+
+    def calc_golden_tcrs(self):
+        adj_mat_path = f"dist_mat_{self.run_number}.csv"
+        self.adj_mat = self.from_distance_mat_to_adj_matrix(adj_mat_path)
+        self.values_df = self.load_or_create_values_dict()
+        self.networks_dict = self.load_or_create_tcr_network()
 
     # def get_all_groups(self):
     #     return [self.dataset_dict[i]['subject'] for i in range(len(self.subject_list))]
