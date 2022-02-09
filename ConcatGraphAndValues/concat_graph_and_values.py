@@ -37,7 +37,6 @@ class ConcatValuesAndGraphStructure(nn.Module):
 
     def forward(self, x, adjacency_matrix):
         # multiply the matrix adjacency_matrix by (learnt scalar) self.alpha
-        # alpha_A = torch.mul(adjacency_matrix, self.alpha)  # 𝛼A  - this function does not forward gradients
         a, b, c = adjacency_matrix.shape
         d, e, f = x.shape
         if self.feature_size > 1:
@@ -49,6 +48,7 @@ class ConcatValuesAndGraphStructure(nn.Module):
         alpha_I_plus_A = alpha_I + normalized_adjacency_matrix  # 𝛼I + Ã
         ones_vector = torch.ones(x.shape).to(self.device)
         gcn_output = torch.matmul(alpha_I_plus_A, ones_vector)  # (𝛼I + Ã)·1
+
         gcn_output = self.gcn_layer(gcn_output)
         gcn_output = torch.flatten(gcn_output, start_dim=1)  # flatten the tensor
 

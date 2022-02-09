@@ -1,3 +1,5 @@
+from copy import copy, deepcopy
+
 import networkx as nx
 import numpy as np
 import torch
@@ -79,25 +81,17 @@ class GraphDataset(Dataset):
             label = index_value['label']
 
             if self.mission == "just_values":
-                values = index_value['values_on_leaves']
-                adjacency_matrix = index_value['adjacency_matrix']
+                values = deepcopy(index_value['values_on_leaves'])
+                adjacency_matrix = deepcopy(index_value['adjacency_matrix'])
             elif self.mission == "just_graph" or self.mission == "graph_and_values" \
                     or self.mission == "double_gcn_layer" or self.mission == "concat_graph_and_values":
-                values = index_value['values_on_nodes']
+                values = deepcopy(index_value['values_on_nodes'])
                 # print(np.array(index_value['values_on_nodes']) + 1e-300)
                 # values = np.log(np.array(index_value['values_on_nodes']) + 1e-300)
-                adjacency_matrix = index_value['adjacency_matrix']
+                adjacency_matrix = deepcopy(index_value['adjacency_matrix'])
             elif self.mission == "yoram_attention":
-                values = index_value['values_on_nodes']
-                adjacency_matrix = index_value['graph_embed']  # TODO: it is not the actual adj mat - so Fix it
-            elif self.mission == "one_head_attention":
-                values = np.array(index_value['values_on_nodes'])
-                # print("values before repeat", values.shape)
-                # values = np.expand_dims(values, axis=1)
-                # values = values.repeat(1, self.nodes_number())
-                values = np.tile(np.array([values]).transpose(), (1, 128))
-                # print("values after repeat", values.shape)
-                adjacency_matrix = index_value['graph_embed']  # TODO: it is not the actual adj mat - so Fix it
+                values = deepcopy(index_value['values_on_nodes'])
+                adjacency_matrix = deepcopy(index_value['graph_embed'])  # TODO: it is not the actual adj mat - so Fix it
             else:
                 print("The task was not added here")
             return Tensor(values), Tensor(adjacency_matrix), label

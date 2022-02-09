@@ -90,6 +90,7 @@ class TrainTestValKTimesNoExternalTest:
                 early_stopping_results = trainer_and_tester.train_geometric()
 
             flag = rerun_if_bad_train_result(early_stopping_results)
+            flag = rerun_if_bad_train_result(early_stopping_results)
             rerun_counter += 1  # rerun_counter - the number of chances we give the model to converge again
         return early_stopping_results
 

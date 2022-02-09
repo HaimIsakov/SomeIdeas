@@ -4,7 +4,9 @@
 # from pytorch_geometric import GCN
 import json
 import os
+import pickle
 from datetime import datetime
+from pathlib import Path
 
 import numpy as np
 from sklearn.model_selection import GroupShuffleSplit, GroupKFold, train_test_split
@@ -16,7 +18,9 @@ from ConcatGraphAndValues.concat_graph_and_values import ConcatValuesAndGraphStr
 from DoubleGcnLayers.Models.two_gcn_layers_graph_and_values import TwoLayersGCNValuesGraph
 from OneHeadAttention.Models.ofek_model import AttentionGCN
 from YoramAttention.Models.yoram_attention import YoramAttention
+from distance_matrix import create_distance_matrix
 from node2vec_embed import find_embed
+from ofek_files_utils_functions import HistoMaker
 from train_test_val_one_time import TrainTestValOneTime
 from JustGraphStructure.Models.just_graph_structure import JustGraphStructure
 from JustValues.Models.just_values_fc_binary_classification import JustValuesOnNodes
@@ -45,24 +49,29 @@ class TrainTestValKTimes:
         # self.node_order = self.dataset.node_order
 
     def train_group_k_cross_validation(self, k=5):
-        train_frac = float(self.RECEIVED_PARAMS['train_frac'])
-        val_frac = float(self.RECEIVED_PARAMS['test_frac'])
+        # train_frac = float(self.RECEIVED_PARAMS['train_frac'])
+        # val_frac = float(self.RECEIVED_PARAMS['test_frac'])
         dataset_len = len(self.train_val_dataset)
         train_metric, val_metric, test_metric, min_train_val_metric = [], [], [], []
         # gss_train_val = GroupShuffleSplit(n_splits=k, train_size=0.75)
         # gss_train_val = GroupKFold(n_splits=k)
         run = 0
-        rerun_counter = 0
         for i in range(k):
             indexes_array = np.array(range(dataset_len))
-            train_idx, val_idx = train_test_split(indexes_array, test_size=0.2, shuffle=True)
+            # Add seed for tcr dataset hyper-parameters tuning
+            if self.nni_flag and "TCR" in str(self.train_val_dataset):
+                # TODO : Remove random state
+                print("Random state", i)
+                train_idx, val_idx = train_test_split(indexes_array, test_size=0.2, shuffle=True, random_state=i)
+            else:
+                train_idx, val_idx = train_test_split(indexes_array, test_size=0.2, shuffle=True)
             print(f"Run {run}")
             # print("len of train set:", len(train_idx))
             # print("len of val set:", len(val_idx))
             if run == 0 and not self.nni_flag and self.plot_figures:
                 date, directory_root = self.create_directory_to_save_results()
 
-            train_loader, val_loader, test_loader = self.create_data_loaders(train_idx, val_idx)
+            train_loader, val_loader, test_loader = self.create_data_loaders(i, train_idx, val_idx)
             print("Train labels", get_labels_distribution(train_loader))
             print("val labels", get_labels_distribution(val_loader))
             # print("test labels", get_labels_distribution(test_loader))
@@ -71,29 +80,6 @@ class TrainTestValKTimes:
                                                      self.device)
 
             early_stopping_results = self.start_training_process(trainer_and_tester, train_loader, val_loader, test_loader)
-
-            # if not self.geometric_or_not:
-            #     early_stopping_results = trainer_and_tester.train()
-            # else:
-            #     early_stopping_results = trainer_and_tester.train_geometric()
-            #
-            # # If the train auc is too low (under 0.5 for example) try to rerun the training process again
-            # flag = rerun_if_bad_train_result(early_stopping_results)
-            # while flag and rerun_counter <= 3:
-            #     print(f"Rerun this train-val split again because train auc is:{early_stopping_results['train_auc']:.4f}")
-            #     print(f"Rerun number {rerun_counter}")
-            #     model = self.get_model().to(self.device)
-            #     trainer_and_tester = TrainTestValOneTime(model, self.RECEIVED_PARAMS, train_loader, val_loader,
-            #                                              test_loader,
-            #                                              self.device)
-            #     if not self.geometric_or_not:
-            #         early_stopping_results = trainer_and_tester.train()
-            #     else:
-            #         early_stopping_results = trainer_and_tester.train_geometric()
-            #
-            #     flag = rerun_if_bad_train_result(early_stopping_results)
-            #     rerun_counter += 1  # rerun_counter - the number of chances we give the model to converge again
-
             if len(trainer_and_tester.alpha_list) > 0:
                 print(trainer_and_tester.alpha_list)
             min_val_train_auc = min(early_stopping_results['val_auc'], early_stopping_results['train_auc'])
@@ -137,9 +123,39 @@ class TrainTestValKTimes:
             rerun_counter += 1  # rerun_counter - the number of chances we give the model to converge again
         return early_stopping_results
 
-    def create_data_loaders(self, train_idx, val_idx):
+    def create_data_loaders(self, i, train_idx, val_idx):
         batch_size = int(self.RECEIVED_PARAMS['batch_size'])
         if not self.geometric_or_not:
+            # For Tcr dataset
+            if "TCR" in str(self.train_val_dataset):
+                adj_mat_path = f"dist_mat_{i}.csv"
+                if not self.nni_flag or not os.path.isfile(adj_mat_path):
+                    train = HistoMaker("train", len(train_idx))
+                    file_directory_path = os.path.join("TCR_Dataset2", "Train")  # TCR_Dataset2 exists only in server
+                    files = [Path(os.path.join(file_directory_path, self.train_val_dataset.subject_list[id] + ".csv"))
+                             for id in train_idx]
+                    numrec = 125
+                    cutoff = 7.0
+                    print("Here, we do calculate again the golden-tcrs")
+                    train.save_data(file_directory_path, files=files)
+                    train.outlier_finder(i, numrec=numrec, cutoff=cutoff)
+                    create_distance_matrix(i, self.device)
+                    self.train_val_dataset.run_number = i
+                    self.test_dataset.run_number = i
+                    self.train_val_dataset.calc_golden_tcrs()
+                    self.train_val_dataset.update_graphs()
+                    self.test_dataset.calc_golden_tcrs()
+                    self.test_dataset.update_graphs()
+                else:
+                    print("Here, we do not calculate again the golden-tcrs")
+                    self.train_val_dataset.dataset_dict = pickle.load(open(f"dataset_dict_train_{i}.pkl", 'rb'))
+                    self.test_dataset.dataset_dict = pickle.load(open(f"dataset_dict_test_{i}.pkl", 'rb'))
+
+                # with open(f"dataset_dict_train_{i}.pkl", "wb") as f:
+                #     pickle.dump(self.train_val_dataset.dataset_dict, f)
+                #
+                # with open(f"dataset_dict_test_{i}.pkl", "wb") as f:
+                #     pickle.dump(self.test_dataset.dataset_dict, f)
             # Datasets
             train_data = torch.utils.data.Subset(self.train_val_dataset, train_idx)
             val_data = torch.utils.data.Subset(self.train_val_dataset, val_idx)

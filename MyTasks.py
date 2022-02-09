@@ -16,9 +16,8 @@ class MyTasks:
         directory_name = "JustValues"
         mission = 'just_values'
         # params_file_path = os.path.join(directory_name, 'params', "params_file_1_gcn_just_values", f"{self.dataset}_{mission}_params.json")
-        try:
-            params_file_path = os.path.join(directory_name, 'params', "best_params", f"{self.dataset}_{mission}.json")
-        except:
+        params_file_path = os.path.join(directory_name, 'params', "best_params", f"{self.dataset}_{mission}.json")
+        if not os.path.isfile(params_file_path):
             print("Use default params file")
             params_file_path = os.path.join(directory_name, 'Models', f"{mission}_params_file.json")
         return directory_name, mission, params_file_path
@@ -29,16 +28,17 @@ class MyTasks:
         mission = 'just_graph'
         # params_file_path = os.path.join(directory_name, 'params', "params_file_1_gcn_just_values", f"{self.dataset}_{mission}_params.json")
         params_file_path = os.path.join(directory_name, 'params', "best_params", f"{self.dataset}_{mission}.json")
+        if not os.path.isfile(params_file_path):
+            print("Use default params file")
+            params_file_path = os.path.join(directory_name, 'Models', f"{mission}_params_file.json")
         return directory_name, mission, params_file_path
 
     # @staticmethod
     def values_and_graph_structure(self):
         directory_name = "ValuesAndGraphStructure"
         mission = 'graph_and_values'
-        try:
-            # params_file_path = os.path.join(directory_name, 'params', "params_file_1_gcn_just_values", f"{self.dataset}_{mission}_params.json")
-            params_file_path = os.path.join(directory_name, 'params', "best_params", f"{self.dataset}_{mission}.json")
-        except:
+        params_file_path = os.path.join(directory_name, 'params', "best_params", f"{self.dataset}_{mission}.json")
+        if not os.path.isfile(params_file_path):
             print("Use default params file")
             params_file_path = os.path.join(directory_name, 'Models', f"{mission}_params_file.json")
         return directory_name, mission, params_file_path
@@ -47,24 +47,20 @@ class MyTasks:
     def double_gcn_layers(self):
         directory_name = "DoubleGcnLayers"
         mission = 'double_gcn_layer'
-        try:
-            # TODO: Run NNI on double GCN Layer, at the meantime use the parameters from gmic+V
-            params_file_path = os.path.join("ValuesAndGraphStructure", 'params', "best_params", f"{self.dataset}_graph_and_values.json")
-        except:
+        params_file_path = os.path.join("ValuesAndGraphStructure", 'Models', f"{mission}_params_file.json")
+        if not os.path.isfile(params_file_path):
             print("Use default params file")
-            params_file_path = os.path.join("ValuesAndGraphStructure", 'Models', f"{mission}_params_file.json")
+            params_file_path = os.path.join(directory_name, 'Models', f"{mission}_params_file.json")
         return directory_name, mission, params_file_path
 
     # @staticmethod
     def concat_graph_and_values(self):
         directory_name = "ConcatGraphAndValues"
         mission = 'concat_graph_and_values'
-        try:
-            # TODO: Run NNI on concat_graph_and_values, at the meantime use the parameters from gmic+V
-            params_file_path = os.path.join("ValuesAndGraphStructure", 'params', "best_params", f"{self.dataset}_graph_and_values.json")
-        except:
+        params_file_path = os.path.join("ValuesAndGraphStructure", 'Models', f"{mission}_params_file.json")
+        if not os.path.isfile(params_file_path):
             print("Use default params file")
-            params_file_path = os.path.join("ValuesAndGraphStructure", 'Models', f"{mission}_params_file.json")
+            params_file_path = os.path.join(directory_name, 'Models', f"{mission}_params_file.json")
         return directory_name, mission, params_file_path
 
 
@@ -84,9 +80,8 @@ class MyTasks:
     def yoram_attention(self):
         directory_name = "YoramAttention"
         mission = 'yoram_attention'
-        try:
-            params_file_path = os.path.join(directory_name, 'params', "best_params", f"{self.dataset}_{mission}.json")
-        except:
+        params_file_path = os.path.join(directory_name, 'params', "best_params", f"{self.dataset}_{mission}.json")
+        if not os.path.isfile(params_file_path):
             print("Use default params file")
             params_file_path = os.path.join(directory_name, 'Models', f"{mission}_params_file.json")
         return directory_name, mission, params_file_path

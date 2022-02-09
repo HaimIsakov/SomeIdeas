@@ -58,16 +58,31 @@ class MyDatasets:
             subject_list = range(11070)
             raise NotImplementedError
         elif dataset_name == "tcr":
-            train_data_file_path = os.path.join("TCR_dataset", "final_sample_files", "Final_Train")
+            # train_data_file_path = os.path.join("TCR_dataset", "final_sample_files", "Final_Train")
+            train_data_file_path = os.path.join("TCR_Dataset2", "Train")
+            # train_data_file_path = os.path.join("TCR_Dataset2", "Transpose_Train")
+
             train_tag_file_path = os.path.join("TCR_dataset", "samples.csv")
-            test_data_file_path = os.path.join("TCR_dataset", "final_sample_files", "Final_Test")
+            # test_data_file_path = os.path.join("TCR_dataset", "final_sample_files", "Final_Test")
+            test_data_file_path = os.path.join("TCR_Dataset2", "Test")
+            # test_data_file_path = os.path.join("TCR_Dataset2", "Transpose_Test")
+
             test_tag_file_path = os.path.join("TCR_dataset", "samples.csv")
-            adj_mat_path = "distance_matrix.csv"
+            # adj_mat_path = "distance_matrix.csv"
             label_df = pd.read_csv(train_tag_file_path)
             label_df["sample"] = label_df["sample"] + "_" + label_df['status']
             label_df.set_index("sample", inplace=True)
             train_subject_list = list(label_df[label_df["test/train"] == "train"].index)
             test_subject_list = list(label_df[label_df["test/train"] == "test"].index)
+        elif dataset_name == "gdm":
+            train_data_file_path = os.path.join("ShaharGdm", "train_val_set_gdm.csv")
+            train_tag_file_path = os.path.join("ShaharGdm", "train_val_set_gdm_tags.csv")
+            test_data_file_path = os.path.join("ShaharGdm", "test_set_gdm.csv")
+            test_tag_file_path = os.path.join("ShaharGdm", "test_set_gdm_tags.csv")
+            train_label_df = pd.read_csv(train_tag_file_path, index_col=0)
+            test_label_df = pd.read_csv(test_tag_file_path, index_col=0)
+            train_subject_list = list(train_label_df.index)
+            test_subject_list = list(test_label_df.index)
         else:
             train_data_file_path = os.path.join(origin_dir, f'{dataset_name}_split_dataset',
                                                 f'train_val_set_{dataset_name}_microbiome.csv')

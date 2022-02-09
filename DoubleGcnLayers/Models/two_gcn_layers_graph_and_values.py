@@ -12,11 +12,17 @@ class TwoLayersGCNValuesGraph(nn.Module):
         self.RECEIVED_PARAMS = RECEIVED_PARAMS
 
         # self.pre_weighting = nn.Linear(self.feature_size, int(self.RECEIVED_PARAMS["preweight"]))
-        self.pre_weighting = nn.Linear(1, int(self.RECEIVED_PARAMS["preweight"]))
-        gcn2_dim = int(self.RECEIVED_PARAMS["preweight"]) + int(abs(int(self.RECEIVED_PARAMS["preweight"]) - int(self.RECEIVED_PARAMS["layer_1"]))/2)
-        print("GCN 2 DIM:", gcn2_dim)
+        self.pre_weighting = nn.Linear(self.feature_size, int(self.RECEIVED_PARAMS["preweight"]))
+        if "preweight2" not in self.RECEIVED_PARAMS:
+            gcn2_dim = int(self.RECEIVED_PARAMS["preweight"]) + int(
+                abs(int(self.RECEIVED_PARAMS["preweight"]) - int(self.RECEIVED_PARAMS["layer_1"])) / 2)
+            print("GCN 2 DIM:", gcn2_dim)
+        else:
+            gcn2_dim = int(self.RECEIVED_PARAMS["preweight2"])
+
         self.pre_weighting2 = nn.Linear(int(self.RECEIVED_PARAMS["preweight"]), gcn2_dim)
-        self.fc1 = nn.Linear(gcn2_dim * self.nodes_number, int(self.RECEIVED_PARAMS["layer_1"]))  # input layer
+        self.fc1 = nn.Linear(gcn2_dim * self.nodes_number,
+                             int(self.RECEIVED_PARAMS["layer_1"]))
         self.fc2 = nn.Linear(int(self.RECEIVED_PARAMS["layer_1"]), int(self.RECEIVED_PARAMS["layer_2"]))
         self.fc3 = nn.Linear(int(self.RECEIVED_PARAMS["layer_2"]), 1)
         self.activation_func = self.RECEIVED_PARAMS['activation']
@@ -44,30 +50,31 @@ class TwoLayersGCNValuesGraph(nn.Module):
         )
 
     def forward(self, x, adjacency_matrix):
-        # multiply the matrix adjacency_matrix by (learnt scalar) self.alpha
-        # alpha_A = torch.mul(adjacency_matrix, self.alpha)  # 𝛼A  - this function does not forward gradients
         a, b, c = adjacency_matrix.shape
         d, e, f = x.shape
-        if self.feature_size > 1:
-            # For abide dataset where the feature matrix is matrix. We want to transform the matrix into a vector.
-            x = self.transform_mat_to_vec(x)
 
-        # First GCN Layer
         I = torch.eye(b).to(self.device)
+        # multiply the matrix adjacency_matrix by (learnt scalar) self.alpha
         alpha_I = I * self.alpha.expand_as(I)  # 𝛼I
         normalized_adjacency_matrix = self.calculate_adjacency_matrix(adjacency_matrix)  # Ã
         alpha_I_plus_A = alpha_I + normalized_adjacency_matrix  # 𝛼I + Ã
-        x = torch.matmul(alpha_I_plus_A, x)  # (𝛼I + Ã)·x
 
-        x = self.gcn_layer(x)
+        if self.feature_size > 1:
+            # For abide dataset where the feature matrix is matrix. We want to transform the matrix into a vector.
+            x_input = self.transform_mat_to_vec(x)
+            x_input = torch.matmul(alpha_I_plus_A, x_input)  # (𝛼I + Ã)·x
+        else:
+            x_input = torch.matmul(alpha_I_plus_A, x)  # (𝛼I + Ã)·x
+        # First GCN Layer
+        x_input = self.gcn_layer(x_input)
         # Second GCN Layer
-        x = torch.matmul(alpha_I_plus_A, x)  # (𝛼I + Ã)·x
-        x = self.gcn_layer2(x)
+        x_input = torch.matmul(alpha_I_plus_A, x_input)  # (𝛼I + Ã)·x
+        x_input = self.gcn_layer2(x_input)
 
-        x = torch.flatten(x, start_dim=1)  # flatten the tensor
-        x = self.classifier(x)
-        x = self.fc3(x)
-        return x
+        x_input = torch.flatten(x_input, start_dim=1)  # flatten the tensor
+        x_input = self.classifier(x_input)
+        x_input = self.fc3(x_input)
+        return x_input
 
     def calculate_adjacency_matrix(self, batched_adjacency_matrix):
         # D^(-0.5)

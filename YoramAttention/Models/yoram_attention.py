@@ -44,7 +44,7 @@ class YoramAttention(nn.Module):
         output = torch.transpose(frequencies, 1, 2) @ attention_vector
         x = self.classifier(output)
         x = self.fc3(x)
-        x = x.squeeze(1)
+        x = x.squeeze(1)  # TODO: Check this squeeze
         return x
 
     def get_attention_hist(self, tensor, name, calc):

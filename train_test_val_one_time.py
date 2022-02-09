@@ -80,7 +80,7 @@ class TrainTestValOneTime:
 
     def train(self):
         optimizer = self.get_optimizer()
-        epochs = int(self.RECEIVED_PARAMS['epochs'])
+        epochs = 200
         best_model = self.model.state_dict()
         max_val_auc = 0
         counter = 0
@@ -168,10 +168,10 @@ class TrainTestValOneTime:
         optimizer_name = self.RECEIVED_PARAMS['optimizer']
         learning_rate = self.RECEIVED_PARAMS['learning_rate']
         weight_decay = self.RECEIVED_PARAMS['regularization']
-        if optimizer_name == 'adam':
-            optimizer = optim.Adam(self.model.parameters(), lr=learning_rate, weight_decay=weight_decay)
-        elif optimizer_name == 'SGD':
-            optimizer = optim.SGD(self.model.parameters(), lr=learning_rate, weight_decay=weight_decay)
+        # if optimizer_name == 'adam':
+        optimizer = optim.Adam(self.model.parameters(), lr=learning_rate, weight_decay=weight_decay)
+        # elif optimizer_name == 'SGD':
+        #     optimizer = optim.SGD(self.model.parameters(), lr=learning_rate, weight_decay=weight_decay)
         # scheduler = ReduceLROnPlateau(optimizer, 'min', patience=SCHEDULER_PATIENCE, verbose=True, factor=SCHEDULER_FACTOR)
         return optimizer
 

@@ -1,5 +1,7 @@
 import os
 import csv
+from copy import deepcopy
+
 import networkx as nx
 import numpy as np
 import pandas as pd
@@ -28,12 +30,12 @@ class AbideDataset(Dataset):
         if self.mission == "just_values" or self.mission == "just_graph" or self.mission == "graph_and_values"\
                 or self.mission == "double_gcn_layer" or self.mission == "concat_graph_and_values":
             # values = self.dataset_dict[index]['adjacency_matrix']
-            values = index_value['values']
+            values = deepcopy(index_value['values'])
             # In GAT-Li paper they applied absolute value on adj matrix, and put 0 on the diagonal
-            adjacency_matrix = transform_adj_mat(index_value['adjacency_matrix'])
+            adjacency_matrix = deepcopy(transform_adj_mat(index_value['adjacency_matrix']))
         if self.mission == "yoram_attention":
-            values = index_value['values']
-            adjacency_matrix = index_value['graph_embed']  # TODO: it is not the actual adj mat - so Fix it
+            values = deepcopy(index_value['values'])
+            adjacency_matrix = deepcopy(index_value['graph_embed'])  # TODO: it is not the actual adj mat - so Fix it
 
         label = self.dataset_dict[index]['label']
         return Tensor(values), Tensor(adjacency_matrix), label
