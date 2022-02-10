@@ -129,7 +129,8 @@ class TrainTestValKTimes:
             # For Tcr dataset
             if "TCR" in str(self.train_val_dataset):
                 adj_mat_path = f"dist_mat_{i}.csv"
-                if not self.nni_flag or not os.path.isfile(adj_mat_path):
+                # if not self.nni_flag or not os.path.isfile(adj_mat_path):
+                if not os.path.isfile(adj_mat_path):
                     train = HistoMaker("train", len(train_idx))
                     file_directory_path = os.path.join("TCR_Dataset2", "Train")  # TCR_Dataset2 exists only in server
                     files = [Path(os.path.join(file_directory_path, self.train_val_dataset.subject_list[id] + ".csv"))

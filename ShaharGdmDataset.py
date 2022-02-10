@@ -84,7 +84,7 @@ class ShaharGdmDataset(Dataset):
         samples_df = load_dataset(samples_path)
         vals_df = samples_df.copy(deep=True).fillna(0)
         existence_df = samples_df.copy(deep=True).isnull().astype(int).apply(lambda x: 1 - x)
-        corr, corr_combined_df = find_corr(vals_df, existence_df)
+        corr, corr_combined_df = find_corr(vals_df, existence_df, corr_threshold=-1)
         networks_dict = df_to_graphs(samples_df, corr)
         return networks_dict
 

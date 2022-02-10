@@ -79,6 +79,7 @@ def find_embed(graphs_list, algorithm="node2vec"):
     else:
         # The default algorithm is node2vec
         _, X, _ = node2vec_embed(G)
+    print(X)
     return X
 
 

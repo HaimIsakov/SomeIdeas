@@ -111,6 +111,11 @@ class Main:
             trainer_and_tester = TrainTestValKTimes(self.RECEIVED_PARAMS, self.device, train_val_dataset, test_dataset,
                                                     result_directory_name, nni_flag=self.nni_mode,
                                                     geometric_or_not=self.geometric_mode, plot_figures=self.plot_figures)
+        # In GDM dataset we don't need 10-cv
+        if self.dataset_name == "gdm":
+            K = 1
+        else:
+            K = 10
         train_metric, val_metric, test_metric, min_train_val_metric = trainer_and_tester.train_group_k_cross_validation(k=K)
         return train_metric, val_metric, test_metric, min_train_val_metric
 
@@ -259,11 +264,20 @@ def run_all_dataset(mission_number, cuda_number, nni_flag, pytorch_geometric_mod
 
 
 def run_all_missions(dataset_name, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes):
-    for mission in [1, 2, 3, 4, 6, 7]:
+    missions = [1, 2, 3, 4, 6, 7]
+    # missions = [1, 2]
+    missions_results_dict = {}
+    for mission in missions:
         try:
-            runner(dataset_name, mission, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
+            train_metric, val_metric, test_metric = \
+                runner(dataset_name, mission, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
+            missions_results_dict[mission_dict[mission]] = {"train_auc": train_metric, "val_auc": val_metric,
+                                                   "test_auc": test_metric}
         except Exception as e:
             print(e)
+
+    all_missions_results_df = pd.DataFrame.from_dict(missions_results_dict, orient='index')
+    all_missions_results_df.to_csv(f"{dataset_name}_all_missions_results_train_val_test.csv")
 
 
 def run_all_datasets_missions(cuda_number, nni_flag, pytorch_geometric_mode, add_attributes):
@@ -340,22 +354,22 @@ if __name__ == '__main__':
         # run_all_datasets_missions(cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
         # run_all_missions(dataset_name, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
 
-        runner(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
+        # runner(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
         # run_all_dataset(7, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
 
-        # try:
-        #     print("tcr_just_graph_nni.csv")
-        #     reproduce_from_nni(os.path.join("tcr_just_graph_nni.csv"), "tcr", 2)
-        # except Exception as e:
-        #     print(e)
-        #     raise
-        #     # pass
-        # try:
-        #     print("tcr_graph_and_values_nni")
-        #     reproduce_from_nni(os.path.join("tcr_graph_and_values_nni.csv"), "tcr", 3)
-        # except Exception as e:
-        #     print(e)
-        #     pass
+        try:
+            print("nni_concat_graph_and_values_tcr.csv")
+            reproduce_from_nni(os.path.join("nni_concat_graph_and_values_tcr.csv"), "tcr", 7)
+        except Exception as e:
+            print(e)
+            raise
+            # pass
+        try:
+            print("nni_double_gdn_tcr")
+            reproduce_from_nni(os.path.join("nni_double_gdn_tcr.csv"), "tcr", 4)
+        except Exception as e:
+            print(e)
+            pass
         # try:
         #     print("tcr_just_values_nni")
         #     reproduce_from_nni(os.path.join("tcr_just_values_nni.csv"), "tcr", 1)

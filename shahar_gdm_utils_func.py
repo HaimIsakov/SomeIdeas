@@ -71,24 +71,19 @@ def find_corr(vals_df, existence_df, alpha=1, corr_threshold=-1):
 # the nodes attributes are their value in the sample (0 in the case of nan)
 def graph_from_sample(sample, edge_weights):
     feats = np.nan_to_num(sample)  # convert the nan to 0.0
-
     G = nx.Graph()
-
     G.add_nodes_from(range(len(feats)))
     nx.set_node_attributes(G, {i: {"value": v} for i, v in enumerate(feats)})
     G.add_weighted_edges_from([i, j, abs(w)] for (i, j), w in edge_weights.items() if not math.isnan(sample[i]) and
                               not math.isnan(sample[j]))
-
     return G
 
 
 # convert each sample in the dataset to a graph
 def df_to_graphs(samples_df, edge_weights):
     graphs = {}
-
     for idx, sample in samples_df.iterrows():
         graphs[idx] = graph_from_sample(sample.values, edge_weights)
-
     return graphs
 
 

@@ -344,21 +344,21 @@ if __name__ == '__main__':
         # run_all_dataset(7, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
 
         # try:
-        #     print("nni_tcr_dataset_just_graph.csv")
-        #     reproduce_from_nni(os.path.join("tcr_nni_just_graph.csv"), "tcr", 2)
+        #     print("tcr_just_graph_nni.csv")
+        #     reproduce_from_nni(os.path.join("tcr_just_graph_nni.csv"), "tcr", 2)
         # except Exception as e:
         #     print(e)
         #     raise
         #     # pass
         # try:
-        #     print("nni_tcr_dataset_values_and_graph")
-        #     reproduce_from_nni(os.path.join("nni_tcr_values_and_graph.csv"), "tcr", 3)
+        #     print("tcr_graph_and_values_nni")
+        #     reproduce_from_nni(os.path.join("tcr_graph_and_values_nni.csv"), "tcr", 3)
         # except Exception as e:
         #     print(e)
         #     pass
         # try:
-        #     print("nni_tcr_dataset_just_values")
-        #     reproduce_from_nni(os.path.join("nni_tcr_just_values.csv"), "tcr", 1)
+        #     print("tcr_just_values_nni")
+        #     reproduce_from_nni(os.path.join("tcr_just_values_nni.csv"), "tcr", 1)
         # except Exception as e:
         #     print(e)
         #     pass

@@ -165,13 +165,16 @@ class TrainTestValOneTime:
         return average_train_loss, train_auc, val_loss, val_auc
 
     def get_optimizer(self):
-        optimizer_name = self.RECEIVED_PARAMS['optimizer']
         learning_rate = self.RECEIVED_PARAMS['learning_rate']
         weight_decay = self.RECEIVED_PARAMS['regularization']
-        # if optimizer_name == 'adam':
-        optimizer = optim.Adam(self.model.parameters(), lr=learning_rate, weight_decay=weight_decay)
-        # elif optimizer_name == 'SGD':
-        #     optimizer = optim.SGD(self.model.parameters(), lr=learning_rate, weight_decay=weight_decay)
+        if 'optimizer' in self.RECEIVED_PARAMS:
+            optimizer_name = self.RECEIVED_PARAMS['optimizer']
+            if optimizer_name == 'adam':
+                optimizer = optim.Adam(self.model.parameters(), lr=learning_rate, weight_decay=weight_decay)
+            elif optimizer_name == 'SGD':
+                optimizer = optim.SGD(self.model.parameters(), lr=learning_rate, weight_decay=weight_decay)
+        else:
+            optimizer = optim.Adam(self.model.parameters(), lr=learning_rate, weight_decay=weight_decay)
         # scheduler = ReduceLROnPlateau(optimizer, 'min', patience=SCHEDULER_PATIENCE, verbose=True, factor=SCHEDULER_FACTOR)
         return optimizer
 
