@@ -5,10 +5,10 @@ import networkx as nx
 import numpy as np
 import pandas as pd
 import seaborn as sns
-from gem.embedding.lap import LaplacianEigenmaps
-from gem.embedding.gf import GraphFactorization
-from gem.embedding.lle import LocallyLinearEmbedding
-from gem.embedding.hope import HOPE
+# from gem.embedding.lap import LaplacianEigenmaps
+# from gem.embedding.gf import GraphFactorization
+# from gem.embedding.lle import LocallyLinearEmbedding
+# from gem.embedding.hope import HOPE
 from node2vec import Node2Vec
 from sklearn.manifold import TSNE
 from tqdm import tqdm

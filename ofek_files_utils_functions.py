@@ -40,6 +40,7 @@ class HistoMaker:
         else:
             samples = range(77)
         count = 0
+        print("len of files", len(files))
         for ind, item in tqdm(enumerate(files), total=self.size, desc="Maintain patient order",
                               bar_format="{l_bar}%s{bar}%s{r_bar}" % (Fore.LIGHTBLUE_EX, Fore.RESET)):
 

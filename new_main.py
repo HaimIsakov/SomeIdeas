@@ -314,7 +314,7 @@ def runner(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometri
     elif dataset_name == "tcr":
         my_tasks = MyTasks(tasks_dict, dataset_name)
         directory_name, mission, params_file_path = my_tasks.get_task_files(mission_number)
-        params_file_path = os.path.join(directory_name, 'Models', f"{mission}_params_file.json")
+        # params_file_path = os.path.join(directory_name, 'Models', f"{mission}_params_file.json")
         print(params_file_path)
         if nni_flag:
             RECEIVED_PARAMS = nni.get_next_parameter()
@@ -354,22 +354,22 @@ if __name__ == '__main__':
         # run_all_datasets_missions(cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
         # run_all_missions(dataset_name, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
 
-        # runner(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
+        runner(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
         # run_all_dataset(7, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
 
-        try:
-            print("nni_concat_graph_and_values_tcr.csv")
-            reproduce_from_nni(os.path.join("nni_concat_graph_and_values_tcr.csv"), "tcr", 7)
-        except Exception as e:
-            print(e)
-            raise
-            # pass
-        try:
-            print("nni_double_gdn_tcr")
-            reproduce_from_nni(os.path.join("nni_double_gdn_tcr.csv"), "tcr", 4)
-        except Exception as e:
-            print(e)
-            pass
+        # try:
+        #     print("nni_concat_graph_and_values_tcr.csv")
+        #     reproduce_from_nni(os.path.join("nni_concat_graph_and_values_tcr.csv"), "tcr", 7)
+        # except Exception as e:
+        #     print(e)
+        #     raise
+        #     # pass
+        # try:
+        #     print("nni_double_gdn_tcr")
+        #     reproduce_from_nni(os.path.join("nni_double_gdn_tcr.csv"), "tcr", 4)
+        # except Exception as e:
+        #     print(e)
+        #     pass
         # try:
         #     print("tcr_just_values_nni")
         #     reproduce_from_nni(os.path.join("tcr_just_values_nni.csv"), "tcr", 1)

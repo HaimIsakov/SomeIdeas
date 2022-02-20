@@ -5,6 +5,7 @@
 import json
 import os
 import pickle
+import random
 from datetime import datetime
 from pathlib import Path
 
@@ -58,13 +59,21 @@ class TrainTestValKTimes:
         run = 0
         for i in range(k):
             indexes_array = np.array(range(dataset_len))
+
+            # val_idx = random.sample(list(indexes_array), 77)
+            # # delete the chosen indexes from val_idx so they won't be chosen in the train_idx
+            # indexes_array = np.delete(indexes_array, val_idx)
+            # train_idx = random.sample(list(indexes_array), 100)
+
             # Add seed for tcr dataset hyper-parameters tuning
-            if self.nni_flag and "TCR" in str(self.train_val_dataset):
-                # TODO : Remove random state
+            # if self.nni_flag and "TCR" in str(self.train_val_dataset):
+            if "TCR" in str(self.train_val_dataset):
+            # TODO : Remove random state
                 print("Random state", i)
                 train_idx, val_idx = train_test_split(indexes_array, test_size=0.2, shuffle=True, random_state=i)
             else:
                 train_idx, val_idx = train_test_split(indexes_array, test_size=0.2, shuffle=True)
+            # print(train_idx)
             print(f"Run {run}")
             # print("len of train set:", len(train_idx))
             # print("len of val set:", len(val_idx))
@@ -135,6 +144,7 @@ class TrainTestValKTimes:
                     file_directory_path = os.path.join("TCR_Dataset2", "Train")  # TCR_Dataset2 exists only in server
                     files = [Path(os.path.join(file_directory_path, self.train_val_dataset.subject_list[id] + ".csv"))
                              for id in train_idx]
+                    print("len of files", len(files))
                     numrec = 125
                     cutoff = 7.0
                     print("Here, we do calculate again the golden-tcrs")
@@ -157,9 +167,14 @@ class TrainTestValKTimes:
                 #
                 # with open(f"dataset_dict_test_{i}.pkl", "wb") as f:
                 #     pickle.dump(self.test_dataset.dataset_dict, f)
+            random_sample_from_train = len(train_idx)
+            print(f"\nTake only {random_sample_from_train} from the training set\n")
+            train_idx = random.sample(list(train_idx), random_sample_from_train)
             # Datasets
             train_data = torch.utils.data.Subset(self.train_val_dataset, train_idx)
+            print("len of train data", len(train_data))
             val_data = torch.utils.data.Subset(self.train_val_dataset, val_idx)
+            print("len of val data", len(val_data))
             # Get and set train_graphs_list
             train_graphs_list = get_train_graphs_list(train_data)
             self.train_val_dataset.set_train_graphs_list(train_graphs_list)
