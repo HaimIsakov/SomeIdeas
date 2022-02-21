@@ -152,22 +152,37 @@ class HistoMaker:
             if abs(self.score[element]) > 50:
                 del self.score[element]
 
-    def outlier_finder(self, run_number, cutoff=8.0, numrec=None):
-        # if len(self.outlier) != 0:
-        #    return
-        # if os.path.isfile(f"outliers_{run_number}.pkl"):
-        #     print(f"outliers_{run_number}.pkl is found")
-        #     return
+    # def outlier_finder(self, run_number, cutoff=8.0, numrec=None):
+    #     # if len(self.outlier) != 0:
+    #     #    return
+    #     # if os.path.isfile(f"outliers_{run_number}.pkl"):
+    #     #     print(f"outliers_{run_number}.pkl is found")
+    #     #     return
+    #     self.scatter_score()
+    #     for element, score in self.score.items():
+    #         if abs(score) > cutoff:
+    #             self.outlier[element] = self.combinations[element]
+    #     if numrec is not None and len(self.outlier) < numrec:
+    #         self.outlier_finder(run_number, cutoff=cutoff - 0.1, numrec=numrec)
+    #     with open(f"outliers_{run_number}.pkl", "wb") as f:
+    #         pickle.dump(self.outlier, f)
+    #     # print(self.outlier)
+    #     print(cutoff)
+    #     print("Number of outliers", len(self.outlier))
+    #     return len(self.outlier)
+
+    def new_outlier_finder(self, numrec, pickle_name="outliers"):
         self.scatter_score()
         for element, score in self.score.items():
-            if abs(score) > cutoff:
+            self.score[element] = abs(score)
+        self.score = dict(sorted(self.score.items(), key=lambda item: item[1], reverse=True))
+        element, min_score = list(self.score.items())[numrec]
+        for element, score in list(self.score.items()):
+            if score >= min_score:
+                print(f'element: {element}, score: {score}')
                 self.outlier[element] = self.combinations[element]
-        if numrec is not None and len(self.outlier) < numrec:
-            self.outlier_finder(run_number, cutoff=cutoff - 0.1, numrec=numrec)
-        with open(f"outliers_{run_number}.pkl", "wb") as f:
+        with open(f"{pickle_name}.pkl", "wb") as f:
             pickle.dump(self.outlier, f)
-        # print(self.outlier)
-        print(cutoff)
         print("Number of outliers", len(self.outlier))
         return len(self.outlier)
 

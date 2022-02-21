@@ -37,7 +37,7 @@ TEST_JOB = 'test'
 
 class TrainTestValKTimes:
     def __init__(self, RECEIVED_PARAMS, device, train_val_dataset, test_dataset,
-                 result_directory_name, nni_flag=False, geometric_or_not=False, plot_figures=False):
+                 result_directory_name, nni_flag=False, geometric_or_not=False, plot_figures=False, **kwargs):
         # self.mission = mission
         self.RECEIVED_PARAMS = RECEIVED_PARAMS
         self.device = device
@@ -47,6 +47,7 @@ class TrainTestValKTimes:
         self.nni_flag = nni_flag
         self.geometric_or_not = geometric_or_not
         self.plot_figures = plot_figures
+        self.kwargs = kwargs
         # self.node_order = self.dataset.node_order
 
     def train_group_k_cross_validation(self, k=5):
@@ -59,21 +60,14 @@ class TrainTestValKTimes:
         run = 0
         for i in range(k):
             indexes_array = np.array(range(dataset_len))
-
-            # val_idx = random.sample(list(indexes_array), 77)
-            # # delete the chosen indexes from val_idx so they won't be chosen in the train_idx
-            # indexes_array = np.delete(indexes_array, val_idx)
-            # train_idx = random.sample(list(indexes_array), 100)
-
             # Add seed for tcr dataset hyper-parameters tuning
-            # if self.nni_flag and "TCR" in str(self.train_val_dataset):
-            if "TCR" in str(self.train_val_dataset):
+            if self.nni_flag and "TCR" in str(self.train_val_dataset):
+            # if "TCR" in str(self.train_val_dataset):
             # TODO : Remove random state
                 print("Random state", i)
                 train_idx, val_idx = train_test_split(indexes_array, test_size=0.2, shuffle=True, random_state=i)
             else:
                 train_idx, val_idx = train_test_split(indexes_array, test_size=0.2, shuffle=True)
-            # print(train_idx)
             print(f"Run {run}")
             # print("len of train set:", len(train_idx))
             # print("len of val set:", len(val_idx))
@@ -132,44 +126,55 @@ class TrainTestValKTimes:
             rerun_counter += 1  # rerun_counter - the number of chances we give the model to converge again
         return early_stopping_results
 
+    def tcr_dataset_dealing(self, train_idx, i):
+        # adj_mat_path = f"dist_mat_{i}.csv"
+        # if not self.nni_flag or not os.path.isfile(adj_mat_path):
+        # if not os.path.isfile(adj_mat_path):
+        if not self.nni_flag:
+            print("Here, we ----do---- calculate again the golden-tcrs")
+            train = HistoMaker("train", len(train_idx))
+            file_directory_path = os.path.join("TCR_Dataset2", "Train")  # TCR_Dataset2 exists only in server
+            if "sample_size" not in self.kwargs:
+                random_sample_from_train = len(train_idx)
+            else:
+                random_sample_from_train = int(self.kwargs["sample_size"])
+            print(f"\nTake only {random_sample_from_train} from the training set\n")
+            # sample only some sample according to input sample size, and calc the golden tcrs only from them
+            train_idx = random.sample(list(train_idx), random_sample_from_train)
+            train_files = [Path(os.path.join(file_directory_path, self.train_val_dataset.subject_list[id] + ".csv"))
+                           for id in train_idx]
+            print("Length of chosen files", len(train_files))
+            numrec = 125
+            cutoff = 7.0
+            train.save_data(file_directory_path, files=train_files)
+            # train.outlier_finder(i, numrec=numrec, cutoff=cutoff)
+            outliers_pickle_name = f"outliers_with_sample_size_{len(train_files)}"
+            adj_mat_path = f"dist_mat_with_sample_size_{len(train_files)}"
+            train.new_outlier_finder(numrec, pickle_name=outliers_pickle_name)
+            create_distance_matrix(self.device, outliers_file=outliers_pickle_name, adj_mat=adj_mat_path)
+            self.train_val_dataset.run_number = i
+            self.test_dataset.run_number = i
+            self.train_val_dataset.calc_golden_tcrs(adj_mat_path=adj_mat_path)
+            self.train_val_dataset.update_graphs()
+            self.test_dataset.calc_golden_tcrs(adj_mat_path=adj_mat_path)
+            self.test_dataset.update_graphs()
+        else:
+            print("Here, we ----do not---- calculate again the golden-tcrs")
+            self.train_val_dataset.dataset_dict = pickle.load(open(f"dataset_dict_train_{i}.pkl", 'rb'))
+            self.test_dataset.dataset_dict = pickle.load(open(f"dataset_dict_test_{i}.pkl", 'rb'))
+        return train_idx
+        # with open(f"dataset_dict_train_{i}.pkl", "wb") as f:
+        #     pickle.dump(self.train_val_dataset.dataset_dict, f)
+        #
+        # with open(f"dataset_dict_test_{i}.pkl", "wb") as f:
+        #     pickle.dump(self.test_dataset.dataset_dict, f)
+
     def create_data_loaders(self, i, train_idx, val_idx):
         batch_size = int(self.RECEIVED_PARAMS['batch_size'])
         if not self.geometric_or_not:
             # For Tcr dataset
             if "TCR" in str(self.train_val_dataset):
-                adj_mat_path = f"dist_mat_{i}.csv"
-                # if not self.nni_flag or not os.path.isfile(adj_mat_path):
-                if not os.path.isfile(adj_mat_path):
-                    train = HistoMaker("train", len(train_idx))
-                    file_directory_path = os.path.join("TCR_Dataset2", "Train")  # TCR_Dataset2 exists only in server
-                    files = [Path(os.path.join(file_directory_path, self.train_val_dataset.subject_list[id] + ".csv"))
-                             for id in train_idx]
-                    print("len of files", len(files))
-                    numrec = 125
-                    cutoff = 7.0
-                    print("Here, we do calculate again the golden-tcrs")
-                    train.save_data(file_directory_path, files=files)
-                    train.outlier_finder(i, numrec=numrec, cutoff=cutoff)
-                    create_distance_matrix(i, self.device)
-                    self.train_val_dataset.run_number = i
-                    self.test_dataset.run_number = i
-                    self.train_val_dataset.calc_golden_tcrs()
-                    self.train_val_dataset.update_graphs()
-                    self.test_dataset.calc_golden_tcrs()
-                    self.test_dataset.update_graphs()
-                else:
-                    print("Here, we do not calculate again the golden-tcrs")
-                    self.train_val_dataset.dataset_dict = pickle.load(open(f"dataset_dict_train_{i}.pkl", 'rb'))
-                    self.test_dataset.dataset_dict = pickle.load(open(f"dataset_dict_test_{i}.pkl", 'rb'))
-
-                # with open(f"dataset_dict_train_{i}.pkl", "wb") as f:
-                #     pickle.dump(self.train_val_dataset.dataset_dict, f)
-                #
-                # with open(f"dataset_dict_test_{i}.pkl", "wb") as f:
-                #     pickle.dump(self.test_dataset.dataset_dict, f)
-            random_sample_from_train = len(train_idx)
-            print(f"\nTake only {random_sample_from_train} from the training set\n")
-            train_idx = random.sample(list(train_idx), random_sample_from_train)
+                train_idx = self.tcr_dataset_dealing(train_idx, i)
             # Datasets
             train_data = torch.utils.data.Subset(self.train_val_dataset, train_idx)
             print("len of train data", len(train_data))
@@ -184,8 +189,6 @@ class TrainTestValKTimes:
             train_loader = torch.utils.data.DataLoader(train_data, shuffle=True, batch_size=batch_size)
             val_loader = torch.utils.data.DataLoader(val_data, batch_size=batch_size, shuffle=False)
             test_loader = torch.utils.data.DataLoader(self.test_dataset, batch_size=batch_size, shuffle=False)
-            # print("train loader size:", len(train_loader))
-            # print("val loader size:", len(val_loader))
         else:
             # Datasets
             train_data = torch.utils.data.Subset(self.train_val_dataset, train_idx)

@@ -107,10 +107,11 @@ class Main:
 
             test_dataset = self.create_dataset(test_data_file_path, test_tag_file_path, test_subject_list, mission)
             train_val_dataset = self.create_dataset(train_data_file_path, train_tag_file_path, train_subject_list, mission)
-
+            kwargs = {"sample_size": 500}
             trainer_and_tester = TrainTestValKTimes(self.RECEIVED_PARAMS, self.device, train_val_dataset, test_dataset,
                                                     result_directory_name, nni_flag=self.nni_mode,
-                                                    geometric_or_not=self.geometric_mode, plot_figures=self.plot_figures)
+                                                    geometric_or_not=self.geometric_mode, plot_figures=self.plot_figures,
+                                                    **kwargs)
         # In GDM dataset we don't need 10-cv
         if self.dataset_name == "gdm":
             K = 1

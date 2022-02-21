@@ -25,11 +25,11 @@ def embed(tcr, v_gene, amino_pos_to_num, max_length, v_dict, device):
     return combined
 
 
-def create_distance_matrix(run_number, device):
+def create_distance_matrix(device, outliers_file="outliers", adj_mat="dist_mat"):
     # if os.path.isfile(f"dist_mat_{run_number}.csv"):
     #     print(f"dist_mat_{run_number}.csv is found")
     #     return
-    outliers = pickle.load(open(f"outliers_{run_number}.pkl", 'rb'))
+    outliers = pickle.load(open(f"{outliers_file}.pkl", 'rb'))
     print("start loading model")
     ae_dict = torch.load('vae_vgene_ae.pt', map_location=device)
     print("finish loading model")
@@ -58,7 +58,7 @@ def create_distance_matrix(run_number, device):
             line.append(dist.item())
         line = [tcrs[i]] + line
         matrix.append(line)
-    with open(f"dist_mat_{run_number}.csv", "w", newline="") as f:
+    with open(f"{adj_mat}.csv", "w", newline="") as f:
         writer = csv.writer(f)
         writer.writerows(matrix)
 

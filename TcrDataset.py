@@ -170,9 +170,10 @@ class TCRDataset(Dataset):
         label_dict = label_df.to_dict()['status']
         return label_dict
 
-    def calc_golden_tcrs(self):
-        adj_mat_path = f"dist_mat_{self.run_number}.csv"
-        self.adj_mat = self.from_distance_mat_to_adj_matrix(adj_mat_path)
+    def calc_golden_tcrs(self, adj_mat_path=None):
+        if adj_mat_path is None:
+            adj_mat_path = f"dist_mat_{self.run_number}.csv"
+        self.adj_mat = self.from_distance_mat_to_adj_matrix(adj_mat_path + ".csv")
         # self.values_df = self.load_or_create_values_dict()
         self.networks_dict, self.values_dict = self.load_or_create_tcr_network()
 
