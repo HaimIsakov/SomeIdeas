@@ -61,8 +61,8 @@ class TrainTestValKTimes:
         for i in range(k):
             indexes_array = np.array(range(dataset_len))
             # Add seed for tcr dataset hyper-parameters tuning
-            if self.nni_flag and "TCR" in str(self.train_val_dataset):
-            # if "TCR" in str(self.train_val_dataset):
+            # if self.nni_flag and "TCR" in str(self.train_val_dataset):
+            if "TCR" in str(self.train_val_dataset):
             # TODO : Remove random state
                 print("Random state", i)
                 train_idx, val_idx = train_test_split(indexes_array, test_size=0.2, shuffle=True, random_state=i)
@@ -148,8 +148,8 @@ class TrainTestValKTimes:
             cutoff = 7.0
             train.save_data(file_directory_path, files=train_files)
             # train.outlier_finder(i, numrec=numrec, cutoff=cutoff)
-            outliers_pickle_name = f"outliers_with_sample_size_{len(train_files)}"
-            adj_mat_path = f"dist_mat_with_sample_size_{len(train_files)}"
+            outliers_pickle_name = f"outliers_with_sample_size_{len(train_files)}_run_number_{i}"
+            adj_mat_path = f"dist_mat_with_sample_size_{len(train_files)}_run_number_{i}"
             train.new_outlier_finder(numrec, pickle_name=outliers_pickle_name)
             create_distance_matrix(self.device, outliers_file=outliers_pickle_name, adj_mat=adj_mat_path)
             self.train_val_dataset.run_number = i
@@ -163,11 +163,6 @@ class TrainTestValKTimes:
             self.train_val_dataset.dataset_dict = pickle.load(open(f"dataset_dict_train_{i}.pkl", 'rb'))
             self.test_dataset.dataset_dict = pickle.load(open(f"dataset_dict_test_{i}.pkl", 'rb'))
         return train_idx
-        # with open(f"dataset_dict_train_{i}.pkl", "wb") as f:
-        #     pickle.dump(self.train_val_dataset.dataset_dict, f)
-        #
-        # with open(f"dataset_dict_test_{i}.pkl", "wb") as f:
-        #     pickle.dump(self.test_dataset.dataset_dict, f)
 
     def create_data_loaders(self, i, train_idx, val_idx):
         batch_size = int(self.RECEIVED_PARAMS['batch_size'])
@@ -185,6 +180,15 @@ class TrainTestValKTimes:
             self.train_val_dataset.set_train_graphs_list(train_graphs_list)
             self.test_dataset.set_train_graphs_list(train_graphs_list)
             self.find_embed_for_attention()
+            random_sample_from_train = int(self.kwargs["sample_size"])
+
+            with open(f"tcr_dataset_dict_train_{i}_samples_{random_sample_from_train}.pkl", "wb") as f:
+                pickle.dump(self.train_val_dataset.dataset_dict, f)
+
+            with open(f"tcr_dataset_dict_test_{i}_samples_{random_sample_from_train}.pkl", "wb") as f:
+                pickle.dump(self.test_dataset.dataset_dict, f)
+
+
             # Dataloader
             train_loader = torch.utils.data.DataLoader(train_data, shuffle=True, batch_size=batch_size)
             val_loader = torch.utils.data.DataLoader(val_data, batch_size=batch_size, shuffle=False)
