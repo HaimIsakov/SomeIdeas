@@ -82,7 +82,7 @@ class Main:
         return cur_dataset
 
     def play(self, external_test=True):
-        kwargs = {}
+        # kwargs = {}
         my_tasks = MyTasks(tasks_dict, self.dataset_name)
         my_datasets = MyDatasets(datasets_dict)
 
@@ -107,7 +107,7 @@ class Main:
 
             test_dataset = self.create_dataset(test_data_file_path, test_tag_file_path, test_subject_list, mission)
             train_val_dataset = self.create_dataset(train_data_file_path, train_tag_file_path, train_subject_list, mission)
-            kwargs = {"sample_size": 500}
+            # kwargs = {"samples": 500}
             trainer_and_tester = TrainTestValKTimes(self.RECEIVED_PARAMS, self.device, train_val_dataset, test_dataset,
                                                     result_directory_name, nni_flag=self.nni_mode,
                                                     geometric_or_not=self.geometric_mode, plot_figures=self.plot_figures,
@@ -191,6 +191,7 @@ def set_arguments():
     parser.add_argument("--task_number", help="Task number", default=1, type=int)
     parser.add_argument("--device_num", help="Cuda Device Number", default=3, type=int)
     parser.add_argument("--nni", help="is nni mode", default=0, type=int)
+    parser.add_argument("--samples", help="sample in tcr dataset", default=-1, type=int)
     return parser
 
 
@@ -287,7 +288,7 @@ def run_all_datasets_missions(cuda_number, nni_flag, pytorch_geometric_mode, add
         run_all_dataset(mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
 
 
-def runner(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes):
+def runner(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes, **kwargs):
     device = f"cuda:{cuda_number}" if torch.cuda.is_available() else "cpu"
     print("Device", device)
     # mission_dict = {1: "just_values", 2: "just_graph", 3: "graph_and_values", 4: "double_gcn_layer",
@@ -334,7 +335,7 @@ def runner(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometri
 
     main_runner = Main(dataset_name, mission_number, RECEIVED_PARAMS, device, nni_mode=nni_flag,
                        geometric_mode=pytorch_geometric_mode, add_attributes=add_attributes, plot_figures=False)
-    train_metric, val_metric, test_metric, min_train_val_metric = main_runner.play()
+    train_metric, val_metric, test_metric, min_train_val_metric = main_runner.play(kwargs)
     result_file_name = f"{dataset_name}_{mission_dict[mission_number]}"
     results_dealing(train_metric, val_metric, test_metric, min_train_val_metric, nni_flag, RECEIVED_PARAMS, result_file_name)
     return train_metric, val_metric, test_metric
@@ -348,14 +349,15 @@ if __name__ == '__main__':
 
         mission_number = args.task_number
         cuda_number = args.device_num
+        samples = args.samples
         nni_flag = False if args.nni == 0 else True
         pytorch_geometric_mode = False
         add_attributes = False
-
+        kwargs = {"samples": samples}
         # run_all_datasets_missions(cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
         # run_all_missions(dataset_name, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
 
-        runner(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
+        runner(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes, **kwargs)
         # run_all_dataset(7, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
 
         # try:

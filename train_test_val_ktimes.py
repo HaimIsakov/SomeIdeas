@@ -130,15 +130,22 @@ class TrainTestValKTimes:
         # adj_mat_path = f"dist_mat_{i}.csv"
         # if not self.nni_flag or not os.path.isfile(adj_mat_path):
         # if not os.path.isfile(adj_mat_path):
+        print(self.kwargs)
+        if "samples" not in self.kwargs:
+            random_sample_from_train = len(train_idx)
+        elif self.kwargs["samples"] == "-1":
+            random_sample_from_train = len(train_idx)
+        else:
+            random_sample_from_train = int(self.kwargs["samples"])
+        print(f"\nTake only {random_sample_from_train} from the training set\n")
+        random.seed(i)
+        train_idx = random.sample(list(train_idx), random_sample_from_train)
+
         if not self.nni_flag:
+        # if False:
             print("Here, we ----do---- calculate again the golden-tcrs")
             train = HistoMaker("train", len(train_idx))
             file_directory_path = os.path.join("TCR_Dataset2", "Train")  # TCR_Dataset2 exists only in server
-            if "sample_size" not in self.kwargs:
-                random_sample_from_train = len(train_idx)
-            else:
-                random_sample_from_train = int(self.kwargs["sample_size"])
-            print(f"\nTake only {random_sample_from_train} from the training set\n")
             # sample only some sample according to input sample size, and calc the golden tcrs only from them
             train_idx = random.sample(list(train_idx), random_sample_from_train)
             train_files = [Path(os.path.join(file_directory_path, self.train_val_dataset.subject_list[id] + ".csv"))
@@ -148,9 +155,11 @@ class TrainTestValKTimes:
             cutoff = 7.0
             train.save_data(file_directory_path, files=train_files)
             # train.outlier_finder(i, numrec=numrec, cutoff=cutoff)
+            # save files' names
             outliers_pickle_name = f"outliers_with_sample_size_{len(train_files)}_run_number_{i}"
             adj_mat_path = f"dist_mat_with_sample_size_{len(train_files)}_run_number_{i}"
-            train.new_outlier_finder(numrec, pickle_name=outliers_pickle_name)
+            train.new_outlier_finder(numrec, pickle_name=outliers_pickle_name)  # find outliers and save to pickle
+            # create distance matrix between the projection of the found golden tcrs
             create_distance_matrix(self.device, outliers_file=outliers_pickle_name, adj_mat=adj_mat_path)
             self.train_val_dataset.run_number = i
             self.test_dataset.run_number = i
@@ -160,8 +169,12 @@ class TrainTestValKTimes:
             self.test_dataset.update_graphs()
         else:
             print("Here, we ----do not---- calculate again the golden-tcrs")
-            self.train_val_dataset.dataset_dict = pickle.load(open(f"dataset_dict_train_{i}.pkl", 'rb'))
-            self.test_dataset.dataset_dict = pickle.load(open(f"dataset_dict_test_{i}.pkl", 'rb'))
+            pkl_train_dataset = os.path.join("tcr_samples_pkl_files", f"tcr_dataset_dict_train_{i}_samples_{random_sample_from_train}.pkl")  # f"dataset_dict_train_{i}.pkl"
+            pkl_test_dataset = os.path.join("tcr_samples_pkl_files", f"tcr_dataset_dict_test_{i}_samples_{random_sample_from_train}.pkl") # f"dataset_dict_test_{i}.pkl"
+            print(f"Load train dataset pickle from {pkl_train_dataset}")
+            print(f"Load train dataset pickle from {pkl_test_dataset}")
+            self.train_val_dataset.dataset_dict = pickle.load(open(f"{pkl_train_dataset}", 'rb'))
+            self.test_dataset.dataset_dict = pickle.load(open(f"{pkl_test_dataset}", 'rb'))
         return train_idx
 
     def create_data_loaders(self, i, train_idx, val_idx):
@@ -180,14 +193,13 @@ class TrainTestValKTimes:
             self.train_val_dataset.set_train_graphs_list(train_graphs_list)
             self.test_dataset.set_train_graphs_list(train_graphs_list)
             self.find_embed_for_attention()
-            random_sample_from_train = int(self.kwargs["sample_size"])
 
-            with open(f"tcr_dataset_dict_train_{i}_samples_{random_sample_from_train}.pkl", "wb") as f:
-                pickle.dump(self.train_val_dataset.dataset_dict, f)
+            # random_sample_from_train = int(self.kwargs["samples"])
+            # with open(f"tcr_dataset_dict_train_{i}_samples_{random_sample_from_train}.pkl", "wb") as f:
+            #     pickle.dump(self.train_val_dataset.dataset_dict, f)
 
-            with open(f"tcr_dataset_dict_test_{i}_samples_{random_sample_from_train}.pkl", "wb") as f:
-                pickle.dump(self.test_dataset.dataset_dict, f)
-
+            # with open(f"tcr_dataset_dict_test_{i}_samples_{random_sample_from_train}.pkl", "wb") as f:
+            #     pickle.dump(self.test_dataset.dataset_dict, f)
 
             # Dataloader
             train_loader = torch.utils.data.DataLoader(train_data, shuffle=True, batch_size=batch_size)
