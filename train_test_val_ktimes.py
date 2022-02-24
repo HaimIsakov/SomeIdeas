@@ -138,43 +138,45 @@ class TrainTestValKTimes:
         else:
             random_sample_from_train = int(self.kwargs["samples"])
         print(f"\nTake only {random_sample_from_train} from the training set\n")
-        random.seed(i)
-        train_idx = random.sample(list(train_idx), random_sample_from_train)
 
-        if not self.nni_flag:
-        # if False:
-            print("Here, we ----do---- calculate again the golden-tcrs")
-            train = HistoMaker("train", len(train_idx))
-            file_directory_path = os.path.join("TCR_Dataset2", "Train")  # TCR_Dataset2 exists only in server
-            # sample only some sample according to input sample size, and calc the golden tcrs only from them
-            train_idx = random.sample(list(train_idx), random_sample_from_train)
-            train_files = [Path(os.path.join(file_directory_path, self.train_val_dataset.subject_list[id] + ".csv"))
-                           for id in train_idx]
-            print("Length of chosen files", len(train_files))
-            numrec = 125
-            cutoff = 7.0
-            train.save_data(file_directory_path, files=train_files)
-            # train.outlier_finder(i, numrec=numrec, cutoff=cutoff)
-            # save files' names
-            outliers_pickle_name = f"outliers_with_sample_size_{len(train_files)}_run_number_{i}"
-            adj_mat_path = f"dist_mat_with_sample_size_{len(train_files)}_run_number_{i}"
-            train.new_outlier_finder(numrec, pickle_name=outliers_pickle_name)  # find outliers and save to pickle
-            # create distance matrix between the projection of the found golden tcrs
-            create_distance_matrix(self.device, outliers_file=outliers_pickle_name, adj_mat=adj_mat_path)
-            self.train_val_dataset.run_number = i
-            self.test_dataset.run_number = i
-            self.train_val_dataset.calc_golden_tcrs(adj_mat_path=adj_mat_path)
-            self.train_val_dataset.update_graphs()
-            self.test_dataset.calc_golden_tcrs(adj_mat_path=adj_mat_path)
-            self.test_dataset.update_graphs()
-        else:
-            print("Here, we ----do not---- calculate again the golden-tcrs")
-            pkl_train_dataset = os.path.join("tcr_samples_pkl_files", f"tcr_dataset_dict_train_{i}_samples_{random_sample_from_train}.pkl")  # f"dataset_dict_train_{i}.pkl"
-            pkl_test_dataset = os.path.join("tcr_samples_pkl_files", f"tcr_dataset_dict_test_{i}_samples_{random_sample_from_train}.pkl") # f"dataset_dict_test_{i}.pkl"
-            print(f"Load train dataset pickle from {pkl_train_dataset}")
-            print(f"Load train dataset pickle from {pkl_test_dataset}")
-            self.train_val_dataset.dataset_dict = pickle.load(open(f"{pkl_train_dataset}", 'rb'))
-            self.test_dataset.dataset_dict = pickle.load(open(f"{pkl_test_dataset}", 'rb'))
+        # if not self.nni_flag:
+        print("Here, we ----do---- calculate again the golden-tcrs")
+        train = HistoMaker("train", random_sample_from_train)
+        file_directory_path = os.path.join("TCR_Dataset2", "Train")  # TCR_Dataset2 exists only in server
+        # sample only some sample according to input sample size, and calc the golden tcrs only from them
+        train_idx = random.sample(list(train_idx), random_sample_from_train)
+        train_files = [Path(os.path.join(file_directory_path, self.train_val_dataset.subject_list[id] + ".csv"))
+                       for id in train_idx]
+        print("Length of chosen files", len(train_files))
+        numrec = self.RECEIVED_PARAMS["numrec"]
+        cutoff = 7.0
+        train.save_data(file_directory_path, files=train_files)
+        # train.outlier_finder(i, numrec=numrec, cutoff=cutoff)
+        # save files' names
+        outliers_pickle_name = f"outliers_with_sample_size_{len(train_files)}_run_number_{i}"
+        adj_mat_path = f"dist_mat_with_sample_size_{len(train_files)}_run_number_{i}"
+        train.new_outlier_finder(numrec, pickle_name=outliers_pickle_name)  # find outliers and save to pickle
+        # create distance matrix between the projection of the found golden tcrs
+        create_distance_matrix(self.device, outliers_file=outliers_pickle_name, adj_mat=adj_mat_path)
+        self.train_val_dataset.run_number = i
+        self.test_dataset.run_number = i
+        self.train_val_dataset.calc_golden_tcrs(adj_mat_path=adj_mat_path)
+        self.train_val_dataset.update_graphs()
+        self.test_dataset.calc_golden_tcrs(adj_mat_path=adj_mat_path)
+        self.test_dataset.update_graphs()
+        # else:
+        #     print("Here, we ----do not---- calculate again the golden-tcrs")
+        #     pkl_train_dataset = os.path.join("tcr_samples_pkl_files", f"tcr_dataset_dict_train_{i}_samples_{random_sample_from_train}.pkl")  # f"dataset_dict_train_{i}.pkl"
+        #     pkl_test_dataset = os.path.join("tcr_samples_pkl_files", f"tcr_dataset_dict_test_{i}_samples_{random_sample_from_train}.pkl") # f"dataset_dict_test_{i}.pkl"
+        #     pkl_train_idx = os.path.join("tcr_samples_pkl_files", f"train_idx_{i}_samples_{random_sample_from_train}.pkl")
+        #     print(f"Load train dataset pickle from {pkl_train_dataset}")
+        #     print(f"Load train dataset pickle from {pkl_test_dataset}")
+        #     print(f"Load train idx pickle from {pkl_train_idx}")
+        #     self.train_val_dataset.dataset_dict = pickle.load(open(f"{pkl_train_dataset}", 'rb'))
+        #     self.test_dataset.dataset_dict = pickle.load(open(f"{pkl_test_dataset}", 'rb'))
+        #     train_files = pickle.load(open(f"{pkl_train_idx}", 'rb'))
+        #     train_idx = [self.train_val_dataset.subject_list.index(train_file.replace(".csv"))
+        #                    for train_file in train_files]
         return train_idx
 
     def create_data_loaders(self, i, train_idx, val_idx):
