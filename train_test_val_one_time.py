@@ -12,6 +12,8 @@ VAL_JOB = 'validation'
 EARLY_STOPPING_PATIENCE = 20
 SCHEDULER_PATIENCE = 7
 SCHEDULER_FACTOR = 0.75
+all_models_output = []
+all_real_tags = []
 
 
 class TrainTestValOneTime:
@@ -73,6 +75,10 @@ class TrainTestValOneTime:
                     _, y_pred_tags = torch.max(output, dim=1)
                     pred += y_pred_tags.tolist()
         if self.num_classes == 1:
+            # for the calculation of auc on all
+            if job == TEST_JOB:
+                all_models_output.append(pred)
+                all_real_tags.append(true_labels)
             metric_result = roc_auc_score(true_labels, pred)
         else:
             metric_result = f1_score(true_labels, pred, average='macro')
@@ -85,7 +91,7 @@ class TrainTestValOneTime:
         max_val_auc = 0
         counter = 0
         min_val_loss = float("inf")
-        early_training_results = {'val_auc': 0, 'train_auc': 0, 'test_auc': 0}
+        early_training_results = {'val_auc': 0, 'train_auc': 0, 'test_auc': 0, "all_test_together": 0}
         # run the main training loop
         for epoch in range(epochs):
             self.model.train()  # prep model for training
@@ -151,6 +157,9 @@ class TrainTestValOneTime:
             print(print_msg)
         self.model.load_state_dict(best_model)
         early_training_results['test_auc'] = self.calc_auc(self.test_loader, job=TEST_JOB)
+        test_auc_from_all = roc_auc_score(all_real_tags, all_models_output)
+        print(f"test auc from all comparisons {test_auc_from_all:.6f}")
+        early_training_results['all_test_together'] = test_auc_from_all
         return early_training_results
 
     def record_evaluations(self, batched_train_loss):

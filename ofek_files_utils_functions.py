@@ -171,13 +171,28 @@ class HistoMaker:
     #     print("Number of outliers", len(self.outlier))
     #     return len(self.outlier)
 
-    def new_outlier_finder(self, cutoff, pickle_name="outliers"):
+    # def new_outlier_finder(self, cutoff, pickle_name="outliers"):
+    #     self.scatter_score()
+    #     for element, score in self.score.items():
+    #         self.score[element] = abs(score)
+    #     self.score = dict(sorted(self.score.items(), key=lambda item: item[1], reverse=True))
+    #     for element, score in list(self.score.items()):
+    #         if score >= cutoff:
+    #             print(f'element: {element}, score: {score}')
+    #             self.outlier[element] = self.combinations[element]
+    #     with open(f"{pickle_name}.pkl", "wb") as f:
+    #         pickle.dump(self.outlier, f)
+    #     print("Number of outliers", len(self.outlier))
+    #     return len(self.outlier)
+
+    def new_outlier_finder(self, numrec, pickle_name="outliers"):
         self.scatter_score()
         for element, score in self.score.items():
             self.score[element] = abs(score)
         self.score = dict(sorted(self.score.items(), key=lambda item: item[1], reverse=True))
+        element, min_score = list(self.score.items())[numrec]
         for element, score in list(self.score.items()):
-            if score >= cutoff:
+            if score >= min_score:
                 print(f'element: {element}, score: {score}')
                 self.outlier[element] = self.combinations[element]
         with open(f"{pickle_name}.pkl", "wb") as f:

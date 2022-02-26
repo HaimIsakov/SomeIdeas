@@ -115,6 +115,8 @@ class Main:
         # In GDM dataset we don't need 10-cv
         if self.dataset_name == "gdm":
             K = 1
+        elif self.dataset_name == "tcr":
+            K = 5
         else:
             K = 10
         train_metric, val_metric, test_metric, min_train_val_metric = trainer_and_tester.train_group_k_cross_validation(k=K)
@@ -332,6 +334,7 @@ def runner(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometri
             RECEIVED_PARAMS = json.load(open(params_file_path, 'r'))
         print("Dataset", dataset_name)
         print("Task", mission)
+    print("Hyper-parameters", RECEIVED_PARAMS)
 
     main_runner = Main(dataset_name, mission_number, RECEIVED_PARAMS, device, nni_mode=nni_flag,
                        geometric_mode=pytorch_geometric_mode, add_attributes=add_attributes, plot_figures=False)

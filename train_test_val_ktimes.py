@@ -62,12 +62,12 @@ class TrainTestValKTimes:
             indexes_array = np.array(range(dataset_len))
             # Add seed for tcr dataset hyper-parameters tuning
             # if self.nni_flag and "TCR" in str(self.train_val_dataset):
-            if "TCR" in str(self.train_val_dataset):
-            # TODO : Remove random state
-                print("Random state", i)
-                train_idx, val_idx = train_test_split(indexes_array, test_size=0.2, shuffle=True, random_state=i)
-            else:
-                train_idx, val_idx = train_test_split(indexes_array, test_size=0.2, shuffle=True)
+            # if "TCR" in str(self.train_val_dataset):
+            # # TODO : Remove random state
+            #     print("Random state", i)
+            #     train_idx, val_idx = train_test_split(indexes_array, test_size=0.2, shuffle=True, random_state=i)
+            # else:
+            train_idx, val_idx = train_test_split(indexes_array, test_size=0.2, shuffle=True)
             print(f"Run {run}")
             # print("len of train set:", len(train_idx))
             # print("len of val set:", len(val_idx))
@@ -133,7 +133,7 @@ class TrainTestValKTimes:
         print(self.kwargs)
         if "samples" not in self.kwargs:
             random_sample_from_train = len(train_idx)
-        elif self.kwargs["samples"] == "-1":
+        elif self.kwargs["samples"] == -1:
             random_sample_from_train = len(train_idx)
         else:
             random_sample_from_train = int(self.kwargs["samples"])
@@ -148,13 +148,14 @@ class TrainTestValKTimes:
         train_files = [Path(os.path.join(file_directory_path, self.train_val_dataset.subject_list[id] + ".csv"))
                        for id in train_idx]
         print("Length of chosen files", len(train_files))
-        numrec = self.RECEIVED_PARAMS["numrec"]
-        cutoff = 7.0
+        numrec = int(self.RECEIVED_PARAMS["numrec"])  # cutoff is also a hyper-parameter
+        print("Number of golden-tcrs", numrec)
+        # cutoff = 7.0
         train.save_data(file_directory_path, files=train_files)
         # train.outlier_finder(i, numrec=numrec, cutoff=cutoff)
         # save files' names
-        outliers_pickle_name = f"outliers_with_sample_size_{len(train_files)}_run_number_{i}"
-        adj_mat_path = f"dist_mat_with_sample_size_{len(train_files)}_run_number_{i}"
+        outliers_pickle_name = f"nni_outliers_with_sample_size_{len(train_files)}_run_number_{i}"
+        adj_mat_path = f"nni_dist_mat_with_sample_size_{len(train_files)}_run_number_{i}"
         train.new_outlier_finder(numrec, pickle_name=outliers_pickle_name)  # find outliers and save to pickle
         # create distance matrix between the projection of the found golden tcrs
         create_distance_matrix(self.device, outliers_file=outliers_pickle_name, adj_mat=adj_mat_path)

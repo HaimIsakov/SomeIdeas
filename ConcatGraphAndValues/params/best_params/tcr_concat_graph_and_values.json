@@ -7,4 +7,5 @@
 "batch_size":5,
 "layer_2":23,
 "embedding_algorithm":"node2vec",
-  "dropout":0.0354117420779439}
+"dropout":0.0354117420779439,
+"numrec": 30}

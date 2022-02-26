@@ -1,12 +1,13 @@
 {
-    "learning_rate":{"_type":"loguniform","_value":[0.000001,0.5]},
-    "batch_size":{"_type":"choice","_value":[5, 10, 30, 50, 70, 100]},
-    "dropout":{"_type":"loguniform","_value":[10e-6,0.5]},
-    "activation":{"_type":"choice","_value":["relu", "elu", "tanh"]},
-    "regularization":{"_type":"loguniform","_value":[10e-6,1]},
-    "layer_1":{"_type":"quniform","_value":[10, 200, 1]},
-    "layer_2":{"_type":"quniform","_value":[10, 200, 1]},
-    "preweight":{"_type":"quniform","_value":[2, 30, 1]},
-    "preweight2":{"_type":"quniform","_value":[2, 30, 1]},
-    "embedding_algorithm":{"_type":"choice","_value":["HOPE", "node2vec"]}
+"learning_rate":{"_type":"loguniform","_value":[0.000001,0.5]},
+"batch_size":{"_type":"choice","_value":[5, 10, 30, 50, 70, 100]},
+"dropout":{"_type":"loguniform","_value":[10e-6,0.5]},
+"activation":{"_type":"choice","_value":["relu", "elu", "tanh"]},
+"regularization":{"_type":"loguniform","_value":[10e-6,1]},
+"layer_1":{"_type":"quniform","_value":[10, 200, 1]},
+"layer_2":{"_type":"quniform","_value":[10, 200, 1]},
+"preweight":{"_type":"quniform","_value":[2, 30, 1]},
+"preweight2":{"_type":"quniform","_value":[2, 30, 1]},
+"embedding_algorithm":{"_type":"choice","_value":["HOPE", "node2vec"]},
+"numrec":{"_type":"quniform","_value":[30, 500, 1]}
 }
