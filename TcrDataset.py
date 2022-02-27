@@ -13,10 +13,11 @@ from ofek_files_utils_functions import HistoMaker
 
 
 class TCRDataset(Dataset):
-    def __init__(self, adj_mat_path, data_path, label_path, subject_list, mission):
+    def __init__(self, dataset_name, data_path, label_path, subject_list, mission):
         self.data_path = data_path
         self.label_path = label_path
         self.subject_list = subject_list
+        self.dataset_name = dataset_name if dataset_name != "tcr" else "TCR"
         self.adj_mat = None
         self.values_dict = None
         self.networks_dict = None
@@ -57,7 +58,7 @@ class TCRDataset(Dataset):
         return len(self.subject_list)
 
     def __repr__(self):
-        return "TCR Dataset" + "_len" + str(len(self))
+        return f"{self.dataset_name} Dataset" + "_len" + str(len(self))
 
     def get_vector_size(self):
         return 1

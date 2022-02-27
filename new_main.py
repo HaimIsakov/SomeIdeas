@@ -69,15 +69,14 @@ class Main:
         elif self.dataset_name == "cancer":
             adj_mat_path = os.path.join("cancer_data", "new_cancer_adj_matrix.csv")
             cur_dataset = CancerDataset(adj_mat_path, data_path, label_path, subject_list, mission)
-        elif self.dataset_name == "tcr":
+        elif self.dataset_name == "tcr" or dataset_name == "ISB" or dataset_name == "NIH":
             # adj_mat_path = os.path.join("TCR_dataset", "distance_matrix.csv")
-            adj_mat_path = os.path.join("TCR_dataset", "distance_matrix2.csv")
-            cur_dataset = TCRDataset(adj_mat_path, data_path, label_path, subject_list, mission)
+            # adj_mat_path = os.path.join("TCR_dataset", "distance_matrix2.csv")
+            cur_dataset = TCRDataset(self.dataset_name, data_path, label_path, subject_list, mission)
         elif self.dataset_name == "gdm":
             cur_dataset = ShaharGdmDataset(data_path, label_path, subject_list, mission)
         else:
             cur_dataset = GraphDataset(data_path, label_path, mission, self.add_attributes, self.geometric_mode)
-
         cur_dataset.update_graphs()
         return cur_dataset
 
@@ -88,7 +87,8 @@ class Main:
 
         directory_name, mission, params_file_path = my_tasks.get_task_files(self.task_number)
         result_directory_name = os.path.join(directory_name, "Result_After_Proposal")
-
+        if self.dataset_name == "ISB" or self.dataset_name == "NIH":
+            external_test = False
         if not external_test:
             print("No external test set")
             train_val_test_data_file_path, train_val_test_label_file_path, subject_list\
@@ -99,7 +99,8 @@ class Main:
 
             trainer_and_tester = TrainTestValKTimesNoExternalTest(self.RECEIVED_PARAMS, self.device, train_val_test_dataset,
                                                     result_directory_name, nni_flag=self.nni_mode,
-                                                    geometric_or_not=self.geometric_mode, plot_figures=self.plot_figures)
+                                                    geometric_or_not=self.geometric_mode, plot_figures=self.plot_figures,
+                                                                  **kwargs)
         else:
             print("With external test set")
             train_data_file_path, train_tag_file_path, test_data_file_path, test_tag_file_path, train_subject_list, \
@@ -290,11 +291,7 @@ def run_all_datasets_missions(cuda_number, nni_flag, pytorch_geometric_mode, add
         run_all_dataset(mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
 
 
-def runner(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes, **kwargs):
-    device = f"cuda:{cuda_number}" if torch.cuda.is_available() else "cpu"
-    print("Device", device)
-    # mission_dict = {1: "just_values", 2: "just_graph", 3: "graph_and_values", 4: "double_gcn_layer",
-    #                 6: "yoram_attention", 7: "concat_graph_and_values"}
+def get_model_hyper_parameters(dataset_name, mission_number):
     if dataset_name == "abide" or dataset_name == "abide1":
         params_file_path = "abide_dataset_params.json"  # TODO: add best parameters from nni
         if nni_flag:
@@ -304,7 +301,6 @@ def runner(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometri
 
         print("Dataset", dataset_name)
         print("Mission", mission_number)
-
     elif dataset_name == "cancer":
         my_tasks = MyTasks(tasks_dict, dataset_name)
         directory_name, mission, params_file_path = my_tasks.get_task_files(mission_number)
@@ -314,8 +310,7 @@ def runner(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometri
             RECEIVED_PARAMS = nni.get_next_parameter()
         else:
             RECEIVED_PARAMS = json.load(open(params_file_path, 'r'))
-
-    elif dataset_name == "tcr":
+    elif dataset_name == "tcr" or dataset_name == "ISB" or dataset_name == "NIH":
         my_tasks = MyTasks(tasks_dict, dataset_name)
         directory_name, mission, params_file_path = my_tasks.get_task_files(mission_number)
         # params_file_path = os.path.join(directory_name, 'Models', f"{mission}_params_file.json")
@@ -324,7 +319,6 @@ def runner(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometri
             RECEIVED_PARAMS = nni.get_next_parameter()
         else:
             RECEIVED_PARAMS = json.load(open(params_file_path, 'r'))
-
     else:
         my_tasks = MyTasks(tasks_dict, dataset_name)
         directory_name, mission, params_file_path = my_tasks.get_task_files(mission_number)
@@ -332,8 +326,13 @@ def runner(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometri
             RECEIVED_PARAMS = nni.get_next_parameter()
         else:
             RECEIVED_PARAMS = json.load(open(params_file_path, 'r'))
-        print("Dataset", dataset_name)
-        print("Task", mission)
+    return RECEIVED_PARAMS
+
+
+def runner(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes, **kwargs):
+    device = f"cuda:{cuda_number}" if torch.cuda.is_available() else "cpu"
+    print("Device", device)
+    RECEIVED_PARAMS = get_model_hyper_parameters(dataset_name, mission_number)
     print("Hyper-parameters", RECEIVED_PARAMS)
 
     main_runner = Main(dataset_name, mission_number, RECEIVED_PARAMS, device, nni_mode=nni_flag,

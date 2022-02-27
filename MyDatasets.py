@@ -26,6 +26,20 @@ class MyDatasets:
             train_val_test_label_file_path = os.path.join("cancer_data", "new_cancer_label.csv")  # It contains both train and test set
             adj_mat_path = "new_cancer_adj_matrix.csv"
             subject_list = range(11070)
+        elif dataset_name == "ISB":
+            train_val_test_data_file_path = os.path.join("covid", "new_ISB")
+            train_val_test_label_file_path = os.path.join("covid", "ISB_samples.csv")
+            label_df = pd.read_csv(train_val_test_label_file_path)
+            label_df["sample"] = label_df["sample"] + "_" + label_df['status']
+            label_df.set_index("sample", inplace=True)
+            subject_list = list(label_df.index)
+        elif dataset_name == "NIH":
+            train_val_test_data_file_path = os.path.join("covid", "new_NIH")
+            train_val_test_label_file_path = os.path.join("covid", "NIH_samples.csv")
+            label_df = pd.read_csv(train_val_test_label_file_path)
+            label_df["sample"] = label_df["sample"] + "_" + label_df['status']
+            label_df.set_index("sample", inplace=True)
+            subject_list = list(label_df.index)
         else:
             train_val_test_data_file_path = os.path.join("split_datasets_new", f"{dataset_name}_split_dataset",
                                                     f"OTU_merged_{dataset_name}"

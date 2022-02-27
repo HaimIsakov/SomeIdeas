@@ -131,6 +131,11 @@ class TrainTestValOneTime:
             else:
                 counter += 1
                 print(f'Early-Stopping counter: {counter} out of {EARLY_STOPPING_PATIENCE}')
+            real_tags = np.ravel(np.array(all_real_tags))
+            models_output = np.ravel(np.array(all_models_output))
+            print("all_real_tags", real_tags)
+            print("all_models_output", models_output)
+
             ########################
             # if val_loss <= min_val_loss:
             #     print(f"Validation loss decreased ({min_val_loss:.6f} --> {val_loss:.6f})")
@@ -157,7 +162,12 @@ class TrainTestValOneTime:
             print(print_msg)
         self.model.load_state_dict(best_model)
         early_training_results['test_auc'] = self.calc_auc(self.test_loader, job=TEST_JOB)
-        test_auc_from_all = roc_auc_score(all_real_tags, all_models_output)
+        real_tags = np.ravel(np.array(all_real_tags))
+        models_output = np.ravel(np.array(all_models_output))
+        print("all_real_tags", real_tags)
+        print("all_models_output", models_output)
+
+        test_auc_from_all = roc_auc_score(real_tags, models_output)
         print(f"test auc from all comparisons {test_auc_from_all:.6f}")
         early_training_results['all_test_together'] = test_auc_from_all
         return early_training_results
