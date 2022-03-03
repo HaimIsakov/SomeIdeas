@@ -101,7 +101,6 @@ class TrainTestValKTimesNoExternalTest:
         # create distance matrix between the projection of the found golden tcrs
         create_distance_matrix(self.device, outliers_file=outliers_pickle_name, adj_mat=adj_mat_path)
         self.train_val_test_dataset.run_number = i
-        self.train_val_test_dataset.run_number = i
         self.train_val_test_dataset.calc_golden_tcrs(adj_mat_path=adj_mat_path)
         self.train_val_test_dataset.update_graphs()
         return train_idx
@@ -141,9 +140,9 @@ class TrainTestValKTimesNoExternalTest:
         val_data = torch.utils.data.Subset(self.train_val_test_dataset, val_idx)
         test_data = torch.utils.data.Subset(self.train_val_test_dataset, test_idx)
         # Get and set train_graphs_list
-        # train_graphs_list = get_train_graphs_list(train_data)
-        # self.train_val_test_dataset.set_train_graphs_list(train_graphs_list)
-        # self.find_embed_for_attention()
+        train_graphs_list = get_train_graphs_list(train_data)
+        self.train_val_test_dataset.set_train_graphs_list(train_graphs_list)
+        self.find_embed_for_attention()
         # Dataloader
         train_loader = torch.utils.data.DataLoader(train_data, shuffle=True, batch_size=batch_size)
         val_loader = torch.utils.data.DataLoader(val_data, batch_size=batch_size, shuffle=False)

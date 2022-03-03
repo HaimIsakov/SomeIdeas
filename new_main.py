@@ -2,6 +2,7 @@ import os
 
 from ShaharGdmDataset import ShaharGdmDataset
 from TcrDataset import TCRDataset
+from train_test_no_val_ktimes import TrainTestValKTimesNoExternalTestNoVal
 
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
 os.environ["CUDA_VISIBLE_DEVICES"] = "0,1,2,3,4,5,6,7"
@@ -88,36 +89,46 @@ class Main:
         directory_name, mission, params_file_path = my_tasks.get_task_files(self.task_number)
         result_directory_name = os.path.join(directory_name, "Result_After_Proposal")
         if self.dataset_name == "ISB" or self.dataset_name == "NIH":
-            external_test = False
-        if not external_test:
-            print("No external test set")
-            train_val_test_data_file_path, train_val_test_label_file_path, subject_list\
+            train_test_data_file_path, train_test_label_file_path, subject_list\
                 = my_datasets.get_dataset_files_no_external_test(self.dataset_name)
-            train_val_test_dataset = self.create_dataset(train_val_test_data_file_path,
-                                                         train_val_test_label_file_path,
+            train_test_dataset = self.create_dataset(train_test_data_file_path,
+                                                         train_test_label_file_path,
                                                          subject_list, mission)
-
-            trainer_and_tester = TrainTestValKTimesNoExternalTest(self.RECEIVED_PARAMS, self.device, train_val_test_dataset,
+            # for ISB or NIH we do not want validation set
+            trainer_and_tester = TrainTestValKTimesNoExternalTestNoVal(self.RECEIVED_PARAMS, self.device, train_test_dataset,
                                                     result_directory_name, nni_flag=self.nni_mode,
                                                     geometric_or_not=self.geometric_mode, plot_figures=self.plot_figures,
                                                                   **kwargs)
         else:
-            print("With external test set")
-            train_data_file_path, train_tag_file_path, test_data_file_path, test_tag_file_path, train_subject_list, \
-            test_subject_list = my_datasets.get_dataset_files_yes_external_test(self.dataset_name)
+            if not external_test:
+                print("No external test set")
+                train_val_test_data_file_path, train_val_test_label_file_path, subject_list\
+                    = my_datasets.get_dataset_files_no_external_test(self.dataset_name)
+                train_val_test_dataset = self.create_dataset(train_val_test_data_file_path,
+                                                             train_val_test_label_file_path,
+                                                             subject_list, mission)
 
-            test_dataset = self.create_dataset(test_data_file_path, test_tag_file_path, test_subject_list, mission)
-            train_val_dataset = self.create_dataset(train_data_file_path, train_tag_file_path, train_subject_list, mission)
-            # kwargs = {"samples": 500}
-            trainer_and_tester = TrainTestValKTimes(self.RECEIVED_PARAMS, self.device, train_val_dataset, test_dataset,
-                                                    result_directory_name, nni_flag=self.nni_mode,
-                                                    geometric_or_not=self.geometric_mode, plot_figures=self.plot_figures,
-                                                    **kwargs)
+                trainer_and_tester = TrainTestValKTimesNoExternalTest(self.RECEIVED_PARAMS, self.device, train_val_test_dataset,
+                                                        result_directory_name, nni_flag=self.nni_mode,
+                                                        geometric_or_not=self.geometric_mode, plot_figures=self.plot_figures,
+                                                                      **kwargs)
+            else:
+                print("With external test set")
+                train_data_file_path, train_tag_file_path, test_data_file_path, test_tag_file_path, train_subject_list, \
+                test_subject_list = my_datasets.get_dataset_files_yes_external_test(self.dataset_name)
+
+                test_dataset = self.create_dataset(test_data_file_path, test_tag_file_path, test_subject_list, mission)
+                train_val_dataset = self.create_dataset(train_data_file_path, train_tag_file_path, train_subject_list, mission)
+                # kwargs = {"samples": 500}
+                trainer_and_tester = TrainTestValKTimes(self.RECEIVED_PARAMS, self.device, train_val_dataset, test_dataset,
+                                                        result_directory_name, nni_flag=self.nni_mode,
+                                                        geometric_or_not=self.geometric_mode, plot_figures=self.plot_figures,
+                                                        **kwargs)
         # In GDM dataset we don't need 10-cv
         if self.dataset_name == "gdm":
             K = 1
-        elif self.dataset_name == "tcr":
-            K = 5
+        elif self.dataset_name == "tcr" or self.dataset_name == "ISB" or self.dataset_name == "NIH":
+            K = 10
         else:
             K = 10
         train_metric, val_metric, test_metric, min_train_val_metric = trainer_and_tester.train_group_k_cross_validation(k=K)

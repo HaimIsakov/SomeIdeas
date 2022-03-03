@@ -14,6 +14,10 @@ all_models_output = []
 all_real_tags = []
 
 
+def get_global_var():
+    return {"all_models_output": all_models_output,
+            "all_real_tags": all_real_tags}
+
 class TrainTestValOneTimeNoValidation:
     def __init__(self, model, RECEIVED_PARAMS, train_loader, test_loader, device, num_classes=1, early_stopping=True):
         self.model = model
@@ -49,6 +53,9 @@ class TrainTestValOneTimeNoValidation:
         return average_loss
 
     def calc_auc(self, data_loader, job=VAL_JOB):
+        global all_models_output
+        global all_real_tags
+
         self.model.eval()
         true_labels = []
         pred = []
@@ -77,7 +84,7 @@ class TrainTestValOneTimeNoValidation:
 
     def train(self):
         optimizer = self.get_optimizer()
-        epochs = 200
+        epochs = 50
         counter = 0
         early_training_results = {'train_auc': 0, 'test_auc': 0, "all_test_together": 0}
         # run the main training loop
@@ -99,25 +106,14 @@ class TrainTestValOneTimeNoValidation:
             except:
                 pass
             average_train_loss, train_auc = self.record_evaluations(batched_train_loss)
+            early_training_results['train_auc'], early_training_results['train_loss'] = train_auc, average_train_loss
             print_msg = (f'[{epoch}/{epochs}] ' +
                          f'train_loss: {average_train_loss:.9f} train_auc: {train_auc:.9f}')
             print(print_msg)
         early_training_results['test_auc'] = self.calc_auc(self.test_loader, job=TEST_JOB)
-        early_training_results = self.calc_auc_from_all_comparison(early_training_results)
+        # early_training_results = self.calc_auc_from_all_comparison(early_training_results)
         return early_training_results
 
-    def calc_auc_from_all_comparison(self, early_training_results):
-        early_training_results['test_auc'] = self.calc_auc(self.test_loader, job=TEST_JOB)
-        real_tags = np.ravel(np.array(all_real_tags))
-        models_output = np.ravel(np.array(all_models_output))
-        print("all_real_tags", real_tags)
-        print("all_models_output", models_output)
-        test_auc_from_all = roc_auc_score(real_tags, models_output)
-        print("--------------------------------------------------------------------------")
-        print(f"test auc from all comparisons {test_auc_from_all:.6f}")
-        print("--------------------------------------------------------------------------")
-        early_training_results['all_test_together'] = test_auc_from_all
-        return early_training_results
 
     def record_evaluations(self, batched_train_loss):
         average_train_loss = np.average(batched_train_loss)
