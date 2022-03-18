@@ -6,19 +6,22 @@ import pandas as pd
 from matplotlib import pyplot as plt
 
 from GraphDataset import GraphDataset
-from graph_measures.features_algorithms.vertices.average_neighbor_degree import AverageNeighborDegreeCalculator
-from graph_measures.features_algorithms.vertices.betweenness_centrality import BetweennessCentralityCalculator
-from graph_measures.features_algorithms.vertices.closeness_centrality import ClosenessCentralityCalculator
-from graph_measures.features_algorithms.vertices.clustering_coefficient import ClusteringCoefficientCalculator
-from graph_measures.features_algorithms.vertices.general import GeneralCalculator
-from graph_measures.features_algorithms.vertices.load_centrality import LoadCentralityCalculator
-from graph_measures.features_algorithms.vertices.louvain import LouvainCalculator
-from graph_measures.features_algorithms.vertices.motifs import MotifsNodeCalculator
-from graph_measures.features_infra.feature_calculators import FeatureMeta
-from graph_measures.features_infra.graph_features import GraphFeatures
-from graph_measures.loggers import PrintLogger
+# from graph_measures.features_algorithms.vertices.average_neighbor_degree import AverageNeighborDegreeCalculator
+# from graph_measures.features_algorithms.vertices.betweenness_centrality import BetweennessCentralityCalculator
+# from graph_measures.features_algorithms.vertices.closeness_centrality import ClosenessCentralityCalculator
+# from graph_measures.features_algorithms.vertices.clustering_coefficient import ClusteringCoefficientCalculator
+# from graph_measures.features_algorithms.vertices.general import GeneralCalculator
+# from graph_measures.features_algorithms.vertices.load_centrality import LoadCentralityCalculator
+# from graph_measures.features_algorithms.vertices.louvain import LouvainCalculator
+# from graph_measures.features_algorithms.vertices.motifs import MotifsNodeCalculator
+# from graph_measures.features_infra.feature_calculators import FeatureMeta
+# from graph_measures.features_infra.graph_features import GraphFeatures
+# from graph_measures.loggers import PrintLogger
 import seaborn as sns
 from networkx import closeness_centrality, average_neighbor_degree, core_number, betweenness_centrality
+
+from TcrDataset import TCRDataset
+
 plt.rcParams["font.family"] = "Times New Roman"
 
 import networkx as nx
@@ -105,66 +108,100 @@ def seperate_graphs_list_according_to_its_label(dataset_dict):
 
 def plot_comparison_between_graph_and_labels(graphs_attributes_mean_df_0, graphs_attributes_mean_df_1, save_fig):
     a, b = graphs_attributes_mean_df_0.shape
-    fig, axs = plt.subplots(b, 2, figsize=(25,25))
-    ind = [(i, j) for i in range(b) for j in range(2)]
+    fig, axs = plt.subplots(b, 1, figsize=(25, 25))
+    ind = [(i, j) for i in range(b) for j in [0]]
     p = 0
     for col in list(graphs_attributes_mean_df_0.columns):
         # for ax1
-        ax1 = axs[ind[p]]
-        x = graphs_attributes_mean_df_0[col]
-        mu = x.mean()
-        median = np.median(x)
-        sigma = x.std()
+        ax1 = axs[p]
+        x_0 = graphs_attributes_mean_df_0[col]
+        mu_0 = x_0.mean()
+        median_0 = np.median(x_0)
+        sigma_0 = x_0.std()
+
+        x_1 = graphs_attributes_mean_df_1[col]
+        mu_1 = x_1.mean()
+        median_1 = np.median(x_1)
+        sigma_1 = x_1.std()
         textstr = '\n'.join((
-            r'$\mu=%.4f$' % (mu, ),
-            r'$\mathrm{median}=%.4f$' % (median, ),
-            r'$\sigma=%.4f$' % (sigma, )))
+            r'$\mu_0=%.4f$' % (mu_0, ),
+            r'$\mu_1=%.4f$' % (mu_1,),
+            r'$\sigma_0=%.4f$' % (sigma_0,),
+            r'$\sigma_1=%.4f$' % (sigma_1,),
+            r'$\mathrm{median}_0=%.4f$' % (median_0, ),
+            r'$\mathrm{median}_1=%.4f$' % (median_1,)))
+
         props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
-        ax1.text(0.70, 0.95, textstr, transform=ax1.transAxes, fontsize=15, verticalalignment='top', bbox=props)
-        sns.histplot(graphs_attributes_mean_df_0[col], stat='probability', ax=ax1)
-        ax1.set_title(col+"_0", size=18)
+        ax1.text(0.88, 0.95, textstr, transform=ax1.transAxes, fontsize=15, verticalalignment='top', bbox=props)
+        sns.histplot(x_0, stat='probability', ax=ax1, color="k")
+        sns.histplot(x_1, stat='probability', ax=ax1, color="y")
+
+        ax1.set_title(col, size=18)
         ax1.set(xlabel=None)
         # for ax2
-        ax2 = axs[ind[p + 1]]
-        x = graphs_attributes_mean_df_1[col]
-        mu = x.mean()
-        median = np.median(x)
-        sigma = x.std()
-
-        textstr = '\n'.join((
-            r'$\mu=%.4f$' % (mu, ),
-            r'$\mathrm{median}=%.4f$' % (median, ),
-            r'$\sigma=%.4f$' % (sigma, )))
-        props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
-        ax2.text(0.70, 0.95, textstr, transform=ax2.transAxes, fontsize=15, verticalalignment='top', bbox=props)
-        sns.histplot(graphs_attributes_mean_df_1[col], stat='probability', ax=ax2)
-        ax2.set_title(col+"_1", size=18)
-        ax2.set(xlabel=None)
-
-        p += 2
+        # ax2 = axs[ind[p + 1]]
+        # x = graphs_attributes_mean_df_1[col]
+        # mu = x.mean()
+        # median = np.median(x)
+        # sigma = x.std()
+        #
+        # textstr = '\n'.join((
+        #     r'$\mu=%.4f$' % (mu, ),
+        #     r'$\mathrm{median}=%.4f$' % (median, ),
+        #     r'$\sigma=%.4f$' % (sigma, )))
+        # props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
+        # ax2.text(0.70, 0.95, textstr, transform=ax2.transAxes, fontsize=15, verticalalignment='top', bbox=props)
+        # sns.histplot(graphs_attributes_mean_df_1[col], stat='probability', ax=ax2)
+        # ax2.set_title(col+"_1", size=18)
+        # ax2.set(xlabel=None)
+        p += 1
     plt.tight_layout()
-    plt.savefig(save_fig + ".pdf")
+    plt.savefig(save_fig + ".jpeg")
     plt.show()
 
 
+def get_tcr_files():
+    train_data_file_path = os.path.join("TCR_Dataset2", "Train")
+    train_tag_file_path = os.path.join("TCR_dataset", "samples.csv")
+    test_data_file_path = os.path.join("TCR_Dataset2", "Test")
+    test_tag_file_path = os.path.join("TCR_dataset", "samples.csv")
+    label_df = pd.read_csv(train_tag_file_path)
+    label_df["sample"] = label_df["sample"] + "_" + label_df['status']
+    label_df.set_index("sample", inplace=True)
+    train_subject_list = list(label_df[label_df["test/train"] == "train"].index)
+    test_subject_list = list(label_df[label_df["test/train"] == "test"].index)
+    return train_data_file_path, train_tag_file_path, train_subject_list
+
 if __name__ == "__main__":
-    dataset_name = "IBD"
-    origin_dir = "split_datasets_new"
-    train_data_file_path = os.path.join(origin_dir, f'{dataset_name}_split_dataset',
-                                        f'train_val_set_{dataset_name}_microbiome.csv')
-    train_tag_file_path = os.path.join(origin_dir, f'{dataset_name}_split_dataset',
-                                       f'train_val_set_{dataset_name}_tags.csv')
+    dataset_name = "TCR"
+    # origin_dir = "split_datasets_new"
+    # train_data_file_path = os.path.join(origin_dir, f'{dataset_name}_split_dataset',
+    #                                     f'train_val_set_{dataset_name}_microbiome.csv')
+    # train_tag_file_path = os.path.join(origin_dir, f'{dataset_name}_split_dataset',
+    #                                    f'train_val_set_{dataset_name}_tags.csv')
+    #
+    # test_data_file_path = os.path.join(origin_dir, f'{dataset_name}_split_dataset',
+    #                                    f'test_set_{dataset_name}_microbiome.csv')
+    # test_tag_file_path = os.path.join(origin_dir, f'{dataset_name}_split_dataset',
+    #                                   f'test_set_{dataset_name}_tags.csv')
 
-    test_data_file_path = os.path.join(origin_dir, f'{dataset_name}_split_dataset',
-                                       f'test_set_{dataset_name}_microbiome.csv')
-    test_tag_file_path = os.path.join(origin_dir, f'{dataset_name}_split_dataset',
-                                      f'test_set_{dataset_name}_tags.csv')
+    # train_data_file_path = os.path.join("covid", f"new_{dataset_name}")
+    # train_tag_file_path = os.path.join("covid", f"{dataset_name}_samples.csv")
 
+    # data_path = train_data_file_path
+    # label_path = train_tag_file_path
+    data_path, label_path, subject_list = get_tcr_files()
     add_attributes, geometric_mode = False, False
-    data_path = train_data_file_path
-    label_path = train_tag_file_path
     mission = "just_values"
-    cur_dataset = GraphDataset(data_path, label_path, mission, add_attributes, geometric_mode)
+    # cur_dataset = GraphDataset(data_path, label_path, mission, add_attributes, geometric_mode)
+    # label_df = pd.read_csv(train_tag_file_path)
+    # label_df["sample"] = label_df["sample"] + "_" + label_df['status']
+    # label_df.set_index("sample", inplace=True)
+    # subject_list = list(label_df.index)
+
+    cur_dataset = TCRDataset(dataset_name, data_path, label_path, subject_list, mission)
+    adj_mat_path = "nni__tcr_dist_mat_with_sample_size_547_run_number_0"
+    cur_dataset.calc_golden_tcrs(adj_mat_path=adj_mat_path)
     cur_dataset.update_graphs()
     graphs_list_0, graphs_list_1 = seperate_graphs_list_according_to_its_label(cur_dataset.dataset_dict)
     graphs_attributes_mean_df_0 = calc_attributes_by_myself(graphs_list_0)
@@ -174,7 +211,7 @@ if __name__ == "__main__":
 
     # graphs_attributes_mean_df_0 = pd.read_csv("graphs_attributes_mean_df_0.csv", index_col=0)
     # graphs_attributes_mean_df_1 = pd.read_csv("graphs_attributes_mean_df_1.csv", index_col=0)
-    save_fig = "merged"
+    save_fig = f"{dataset_name}_comparison_graphs_attributes"
     plot_comparison_between_graph_and_labels(graphs_attributes_mean_df_0, graphs_attributes_mean_df_1, save_fig)
     # add_nodes_attributes(graphs_list)
     x = 1

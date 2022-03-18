@@ -302,6 +302,22 @@ def run_all_datasets_missions(cuda_number, nni_flag, pytorch_geometric_mode, add
         run_all_dataset(mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
 
 
+def choose_hyperparameters(dataset_name):
+    if dataset_name == "ISB" or dataset_name == "NIH":
+        train_test_data_file_path, train_test_label_file_path, subject_list \
+            = my_datasets.get_dataset_files_no_external_test(dataset_name)
+        train_test_dataset = create_dataset(train_test_data_file_path,
+                                                 train_test_label_file_path,
+                                                 subject_list, mission)
+        # for ISB or NIH we do not want validation set
+        trainer_and_tester = TrainTestValKTimesNoExternalTestNoVal(self.RECEIVED_PARAMS, self.device,
+                                                                   train_test_dataset,
+                                                                   result_directory_name, nni_flag=self.nni_mode,
+                                                                   geometric_or_not=self.geometric_mode,
+                                                                   plot_figures=self.plot_figures,
+                                                                   **kwargs)
+
+
 def get_model_hyper_parameters(dataset_name, mission_number):
     if dataset_name == "abide" or dataset_name == "abide1":
         params_file_path = "abide_dataset_params.json"  # TODO: add best parameters from nni

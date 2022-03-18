@@ -154,8 +154,8 @@ class TrainTestValKTimes:
         train.save_data(file_directory_path, files=train_files)
         # train.outlier_finder(i, numrec=numrec, cutoff=cutoff)
         # save files' names
-        outliers_pickle_name = f"nni_outliers_with_sample_size_{len(train_files)}_run_number_{i}"
-        adj_mat_path = f"nni_dist_mat_with_sample_size_{len(train_files)}_run_number_{i}"
+        outliers_pickle_name = f"nni_tcr_outliers_with_sample_size_{len(train_files)}_run_number_{i}"
+        adj_mat_path = f"nni__tcr_dist_mat_with_sample_size_{len(train_files)}_run_number_{i}"
         train.new_outlier_finder(numrec, pickle_name=outliers_pickle_name)  # find outliers and save to pickle
         # create distance matrix between the projection of the found golden tcrs
         create_distance_matrix(self.device, outliers_file=outliers_pickle_name, adj_mat=adj_mat_path)
