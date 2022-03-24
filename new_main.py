@@ -1,4 +1,5 @@
 import os
+from datetime import date
 
 from ShaharGdmDataset import ShaharGdmDataset
 from TcrDataset import TCRDataset
@@ -44,13 +45,13 @@ datasets_dict = {"Cirrhosis": MyDatasets.cirrhosis_files, "IBD": MyDatasets.ibd_
                  "bw": MyDatasets.bw_files, "IBD_Chrone": MyDatasets.ibd_chrone_files,
                  "Male_vs_Female": MyDatasets.male_vs_female, "male_female": MyDatasets.male_vs_female,
                  "nugent": MyDatasets.nugent}
-
+datasets = ["Cirrhosis", "IBD", "bw", "IBD_Chrone", "male_female", "nugent", "milk"]
 tasks_dict = {1: MyTasks.just_values, 2: MyTasks.just_graph_structure, 3: MyTasks.values_and_graph_structure,
               4: MyTasks.double_gcn_layers, 5: MyTasks.one_head_attention, 6: MyTasks.yoram_attention,
-              7: MyTasks.concat_graph_and_values}
+              7: MyTasks.concat_graph_and_values, 8: MyTasks.fiedler_vector}
 
 mission_dict = {1: "just_values", 2: "just_graph", 3: "graph_and_values", 4: "double_gcn_layer",
-                6: "yoram_attention", 7: "concat_graph_and_values"}
+                6: "yoram_attention", 7: "concat_graph_and_values", 8: "fiedler_vector"}
 
 class Main:
     def __init__(self, dataset_name, task_number, RECEIVED_PARAMS, device, nni_mode=False, geometric_mode=False,
@@ -266,17 +267,22 @@ def reproduce_from_nni(nni_result_file, dataset_name, mission_number):
             print(type(v))
 
 
-def run_all_dataset(mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes):
-    datasets = ["milk", "nut", "peanut"]
+def run_all_dataset(mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes, datasets, **kwargs):
     datasets_results_dict = {}
     for dataset_name in datasets:
+        print(dataset_name)
         try:
             train_metric, val_metric, test_metric = \
-                runner(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
+                runner(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes, **kwargs)
             datasets_results_dict[dataset_name] = {"train_metric": train_metric, "val_metric": val_metric,
                                                    "test_metric": test_metric}
         except Exception as e:
+            raise
             print(e)
+    today = date.today()
+    d1 = today.strftime("%d_%m_%Y")
+    all_missions_results_df = pd.DataFrame.from_dict(datasets_results_dict, orient='index')
+    all_missions_results_df.to_csv(f"{mission_number}_all_datasets_results_train_val_test_{d1}.csv")
 
 
 def run_all_missions(dataset_name, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes):
@@ -386,9 +392,9 @@ if __name__ == '__main__':
         # run_all_datasets_missions(cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
         # run_all_missions(dataset_name, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
 
-        runner(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes, **kwargs)
-        # run_all_dataset(7, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
-
+        # runner(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes, **kwargs)
+        datasets = ["IBD", "Cirrhosis"]
+        run_all_dataset(8, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes, datasets, **kwargs)
         # try:
         #     print("nni_concat_graph_and_values_tcr.csv")
         #     reproduce_from_nni(os.path.join("nni_concat_graph_and_values_tcr.csv"), "tcr", 7)

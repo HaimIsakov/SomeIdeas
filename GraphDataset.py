@@ -3,9 +3,11 @@ from copy import copy, deepcopy
 import networkx as nx
 import numpy as np
 import torch
+import tqdm
 from torch.utils.data import Dataset
 from torch import Tensor, FloatTensor
 #from torch_geometric.utils import from_networkx
+from FiedlerVector.calc_fiedler_vector import return_k_first_eigen_vectors
 from MicrobiomeDataset import MicrobiomeDataset
 from create_microbiome_graphs import CreateMicrobiomeGraphs
 
@@ -56,6 +58,12 @@ class GraphDataset(Dataset):
             if not self.geometric_or_not:
                 self.dataset_dict[i]['graph_embed'] = embed_mat
 
+    def set_fiedler_vector(self):
+        for i in tqdm.tqdm(range(self.samples_len), total=self.samples_len, desc='Calculate fiedler vector'):
+            graph = self.dataset_dict[i]['graph']
+            fiedler_vectors = return_k_first_eigen_vectors(graph, k=1)
+            self.dataset_dict[i]['fiedler_vector'] = fiedler_vectors
+
     def update_graphs(self, **kwargs):
         # self.create_microbiome_graphs.create_graphs_with_common_nodes(union_train_and_test)
         self.dataset_dict = self.set_dataset_dict(**kwargs)  # create dataset dict only after we added the missing nodes to the graph
@@ -92,6 +100,9 @@ class GraphDataset(Dataset):
             elif self.mission == "yoram_attention":
                 values = deepcopy(index_value['values_on_nodes'])
                 adjacency_matrix = deepcopy(index_value['graph_embed'])  # TODO: it is not the actual adj mat - so Fix it
+            elif self.mission == "fiedler_vector":
+                values = deepcopy(index_value['values_on_nodes'])
+                adjacency_matrix = deepcopy(index_value['fiedler_vector'])
             else:
                 print("The task was not added here")
             return Tensor(values), Tensor(adjacency_matrix), label

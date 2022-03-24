@@ -1,0 +1,10 @@
+{"regularization":0.0492376929380746,
+"activation":"tanh",
+"fiedler_layer_1":64,
+"fiedler_layer_2":32,
+"learning_rate":0.0000125159591942502,
+"values_layer_1":64,
+"batch_size":5,
+"values_layer_2":32,
+"dropout":0.0354117420779439,
+"numrec": 30}

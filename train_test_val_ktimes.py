@@ -17,6 +17,7 @@ import torch
 
 from ConcatGraphAndValues.concat_graph_and_values import ConcatValuesAndGraphStructure
 from DoubleGcnLayers.Models.two_gcn_layers_graph_and_values import TwoLayersGCNValuesGraph
+from FiedlerVector.fiedler_vector import FielderVector
 from OneHeadAttention.Models.ofek_model import AttentionGCN
 from YoramAttention.Models.yoram_attention import YoramAttention
 from distance_matrix import create_distance_matrix
@@ -196,7 +197,7 @@ class TrainTestValKTimes:
             self.train_val_dataset.set_train_graphs_list(train_graphs_list)
             self.test_dataset.set_train_graphs_list(train_graphs_list)
             self.find_embed_for_attention()
-
+            self.calc_fiedler_vector()
             # random_sample_from_train = int(self.kwargs["samples"])
             # with open(f"tcr_dataset_dict_train_{i}_samples_{random_sample_from_train}.pkl", "wb") as f:
             #     pickle.dump(self.train_val_dataset.dataset_dict, f)
@@ -229,6 +230,13 @@ class TrainTestValKTimes:
         graph_embedding_matrix = find_embed(graphs_list, algorithm=algorithm)
         self.train_val_dataset.set_graph_embed_in_dataset_dict(graph_embedding_matrix)
         self.test_dataset.set_graph_embed_in_dataset_dict(graph_embedding_matrix)
+
+    def calc_fiedler_vector(self):
+        if self.train_val_dataset.mission != "fiedler_vector":
+            return
+        print("Calculate Fiedler vector")
+        self.train_val_dataset.set_fiedler_vector()
+        self.test_dataset.set_fiedler_vector()
 
     def get_model(self):
         if not self.geometric_or_not:
@@ -264,6 +272,12 @@ class TrainTestValKTimes:
                 # data_size = 128
                 nodes_number = self.train_val_dataset.nodes_number()
                 model = YoramAttention(nodes_number, data_size, self.RECEIVED_PARAMS, self.device)
+            elif mission == "fiedler_vector":
+                data_size = self.train_val_dataset.get_vector_size()
+                # data_size = 128
+                nodes_number = self.train_val_dataset.nodes_number()
+                model = FielderVector(nodes_number, data_size, self.RECEIVED_PARAMS, self.device)
+
         else:
             data_size = self.train_val_dataset.get_vector_size()
             model = GCN(1, self.RECEIVED_PARAMS, self.device)

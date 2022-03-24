@@ -84,6 +84,13 @@ class TrainTestValOneTime:
             metric_result = f1_score(true_labels, pred, average='macro')
         return metric_result
 
+    # def print_sizes(self, model, input_tensor1, input_tensor2):
+    #     output = input_tensor
+    #     for m in model.children():
+    #         output = m(output)
+    #         print(m, output.shape)
+    #     return output
+
     def train(self):
         optimizer = self.get_optimizer()
         epochs = 200
@@ -99,6 +106,7 @@ class TrainTestValOneTime:
             for data, adjacency_matrix, target in self.train_loader:
                 data, adjacency_matrix, target = data.to(self.device), adjacency_matrix.to(self.device), target.to(self.device)
                 optimizer.zero_grad()  # clear the gradients of all optimized variables
+                # self.print_sizes(self, self.model, input_tensor)
                 net_out = self.model(data, adjacency_matrix)  # forward pass: compute predicted outputs by passing inputs to the model
                 # loss = F.binary_cross_entropy_with_logits(net_out, target.unsqueeze(dim=1).float())
                 loss = self.loss(net_out, target)
@@ -154,7 +162,7 @@ class TrainTestValOneTime:
                          f'valid_loss: {val_loss:.6f} valid_auc: {val_auc:.6f}')
             print(print_msg)
         self.model.load_state_dict(best_model)
-        early_training_results = self.calc_auc_from_all_comparison(early_training_results)
+        # early_training_results = self.calc_auc_from_all_comparison(early_training_results)
         return early_training_results
 
     def calc_auc_from_all_comparison(self, early_training_results):

@@ -64,7 +64,6 @@ class MyTasks:
             params_file_path = os.path.join("ValuesAndGraphStructure", 'Models', f"graph_and_values_params_file.json")
         return directory_name, mission, params_file_path
 
-
     # @staticmethod
     def pytorch_geometric(self):
         directory_name = "PytorchGeometric"
@@ -81,6 +80,15 @@ class MyTasks:
     def yoram_attention(self):
         directory_name = "YoramAttention"
         mission = 'yoram_attention'
+        params_file_path = os.path.join(directory_name, 'params', "best_params", f"{self.dataset}_{mission}.json")
+        if not os.path.isfile(params_file_path):
+            print("Use default params file")
+            params_file_path = os.path.join(directory_name, 'Models', f"{mission}_params_file.json")
+        return directory_name, mission, params_file_path
+
+    def fiedler_vector(self):
+        directory_name = "FiedlerVector"
+        mission = 'fiedler_vector'
         params_file_path = os.path.join(directory_name, 'params', "best_params", f"{self.dataset}_{mission}.json")
         if not os.path.isfile(params_file_path):
             print("Use default params file")
