@@ -18,7 +18,6 @@ import torch
 from ConcatGraphAndValues.concat_graph_and_values import ConcatValuesAndGraphStructure
 from DoubleGcnLayers.Models.two_gcn_layers_graph_and_values import TwoLayersGCNValuesGraph
 from FiedlerVector.fiedler_vector import FielderVector
-from OneHeadAttention.Models.ofek_model import AttentionGCN
 from YoramAttention.Models.yoram_attention import YoramAttention
 from distance_matrix import create_distance_matrix
 from node2vec_embed import find_embed
@@ -155,8 +154,8 @@ class TrainTestValKTimes:
         train.save_data(file_directory_path, files=train_files)
         # train.outlier_finder(i, numrec=numrec, cutoff=cutoff)
         # save files' names
-        outliers_pickle_name = f"nni_tcr_outliers_with_sample_size_{len(train_files)}_run_number_{i}"
-        adj_mat_path = f"nni__tcr_dist_mat_with_sample_size_{len(train_files)}_run_number_{i}"
+        outliers_pickle_name = f"tcr_outliers_{numrec}_with_sample_size_{len(train_files)}_run_number_{i}"
+        adj_mat_path = f"tcr_dist_mat_{numrec}_with_sample_size_{len(train_files)}_run_number_{i}"
         train.new_outlier_finder(numrec, pickle_name=outliers_pickle_name)  # find outliers and save to pickle
         # create distance matrix between the projection of the found golden tcrs
         create_distance_matrix(self.device, outliers_file=outliers_pickle_name, adj_mat=adj_mat_path)

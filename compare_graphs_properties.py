@@ -172,8 +172,27 @@ def get_tcr_files():
     test_subject_list = list(label_df[label_df["test/train"] == "test"].index)
     return train_data_file_path, train_tag_file_path, train_subject_list
 
+def get_ISB_files():
+    train_val_test_data_file_path = os.path.join("covid", "new_ISB")
+    train_val_test_label_file_path = os.path.join("covid", "ISB_samples.csv")
+    label_df = pd.read_csv(train_val_test_label_file_path)
+    label_df["sample"] = label_df["sample"] + "_" + label_df['status']
+    label_df.set_index("sample", inplace=True)
+    subject_list = list(label_df.index)
+    return train_val_test_data_file_path, train_val_test_label_file_path, subject_list
+
+def get_NIH_files():
+    train_val_test_data_file_path = os.path.join("covid", "new_NIH")
+    train_val_test_label_file_path = os.path.join("covid", "NIH_samples.csv")
+    label_df = pd.read_csv(train_val_test_label_file_path)
+    label_df["sample"] = label_df["sample"] + "_" + label_df['status']
+    label_df.set_index("sample", inplace=True)
+    subject_list = list(label_df.index)
+    return train_val_test_data_file_path, train_val_test_label_file_path, subject_list
+
+
 if __name__ == "__main__":
-    dataset_name = "TCR"
+    dataset_name = "NIH"
     # origin_dir = "split_datasets_new"
     # train_data_file_path = os.path.join(origin_dir, f'{dataset_name}_split_dataset',
     #                                     f'train_val_set_{dataset_name}_microbiome.csv')
@@ -190,7 +209,10 @@ if __name__ == "__main__":
 
     # data_path = train_data_file_path
     # label_path = train_tag_file_path
-    data_path, label_path, subject_list = get_tcr_files()
+    # data_path, label_path, subject_list = get_tcr_files()
+    # data_path, label_path, subject_list = get_ISB_files()
+    data_path, label_path, subject_list = get_NIH_files()
+
     add_attributes, geometric_mode = False, False
     mission = "just_values"
     # cur_dataset = GraphDataset(data_path, label_path, mission, add_attributes, geometric_mode)
@@ -200,7 +222,7 @@ if __name__ == "__main__":
     # subject_list = list(label_df.index)
 
     cur_dataset = TCRDataset(dataset_name, data_path, label_path, subject_list, mission)
-    adj_mat_path = "nni__tcr_dist_mat_with_sample_size_547_run_number_0"
+    adj_mat_path = "dist_mat_with_sample_size_135_run_number_0"
     cur_dataset.calc_golden_tcrs(adj_mat_path=adj_mat_path)
     cur_dataset.update_graphs()
     graphs_list_0, graphs_list_1 = seperate_graphs_list_according_to_its_label(cur_dataset.dataset_dict)

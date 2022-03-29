@@ -13,7 +13,6 @@ from ofek_files_utils_functions import HistoMaker
 from train_test_val_ktimes_utils import *
 from ConcatGraphAndValues.concat_graph_and_values import ConcatValuesAndGraphStructure
 from DoubleGcnLayers.Models.two_gcn_layers_graph_and_values import TwoLayersGCNValuesGraph
-from OneHeadAttention.Models.ofek_model import AttentionGCN
 from YoramAttention.Models.yoram_attention import YoramAttention
 from train_test_val_one_time import TrainTestValOneTime
 from JustGraphStructure.Models.just_graph_structure import JustGraphStructure

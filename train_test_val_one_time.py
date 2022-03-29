@@ -161,6 +161,9 @@ class TrainTestValOneTime:
                          f'train_loss: {average_train_loss:.9f} train_auc: {train_auc:.9f} ' +
                          f'valid_loss: {val_loss:.6f} valid_auc: {val_auc:.6f}')
             print(print_msg)
+            # calculate test_auc if the model run for all epochs (i.e.: early stopping did not occur)
+            early_training_results['test_auc'] = self.calc_auc(self.test_loader, job=TEST_JOB)
+
         self.model.load_state_dict(best_model)
         # early_training_results = self.calc_auc_from_all_comparison(early_training_results)
         return early_training_results

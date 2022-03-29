@@ -1,0 +1,1 @@
+{"learning_rate": 2.74640812118588e-05, "batch_size": 2, "dropout": 0.0009203890868579, "optimizer": "adam", "activation": "relu", "regularization": 0.0144472642082984, "layer_1": 70, "layer_2": 142, "train_frac": 0.7, "test_frac": 0.15, "epochs": 200, "preweight": 10}

@@ -1,9 +1,7 @@
 import os
-
 import pandas as pd
-from sklearn.model_selection import train_test_split
 
-origin_dir = "split_datasets_new"
+origin_dir = os.path.join("Data", "split_datasets_new")
 
 
 class MyDatasets:

@@ -1,32 +1,32 @@
 import os
-from datetime import date
+import sys
+os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0,1,2,3,4,5,6,7"
+for path_name in [os.path.join(os.path.dirname(__file__)),
+                  os.path.join(os.path.dirname(__file__), 'Data'),
+                  os.path.join(os.path.dirname(__file__), 'Missions')]:
+    sys.path.append(path_name)
+
+# sys.path.insert(1, 'Data')
 
 from ShaharGdmDataset import ShaharGdmDataset
 from TcrDataset import TCRDataset
-from train_test_no_val_ktimes import TrainTestValKTimesNoExternalTestNoVal
-
-os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"] = "0,1,2,3,4,5,6,7"
-
-from sklearn.model_selection import train_test_split
+from GraphDataset import GraphDataset
 from BrainNetwork import AbideDataset
 # from cancer_data.CancerDataset import CancerDataset
 from nni_functions_utils import run_again_from_nni_results_csv
-from node2vec_embed import find_embed
 from train_test_val_ktimes_no_external_test import TrainTestValKTimesNoExternalTest
+from train_test_no_val_ktimes import TrainTestValKTimesNoExternalTestNoVal
+from train_test_val_ktimes import TrainTestValKTimes
 
-import pandas as pd
-import numpy
 import argparse
 import json
 import logging
 import csv
-
+from datetime import date
 import nni
 import numpy as np
 import torch
-from GraphDataset import GraphDataset
-from train_test_val_ktimes import TrainTestValKTimes
 from MyTasks import *
 from MyDatasets import *
 # import warnings
@@ -210,15 +210,17 @@ def set_arguments():
     return parser
 
 
+def calc_mean_and_std(dataset_metric_list):
+    mean_dataset_metric = np.average(dataset_metric_list)
+    std_dataset_metric = np.std(dataset_metric_list)
+    return mean_dataset_metric, std_dataset_metric
+
+
 def results_dealing(train_metric, val_metric, test_metric, min_train_val_metric, nni_flag, RECEIVED_PARAMS, result_file_name):
-    mean_train_metric = np.average(train_metric)
-    std_train_metric = np.std(train_metric)
-    mean_min_train_val_metric = np.average(min_train_val_metric)
-    std_min_train_val_metric = np.std(min_train_val_metric)
-    mean_val_metric = np.average(val_metric)
-    std_val_metric = np.std(val_metric)
-    mean_test_metric = np.average(test_metric)
-    std_test_metric = np.std(test_metric)
+    mean_train_metric, std_train_metric = calc_mean_and_std(train_metric)
+    mean_min_train_val_metric, std_min_train_val_metric = calc_mean_and_std(min_train_val_metric)
+    mean_val_metric, std_val_metric = calc_mean_and_std(val_metric)
+    mean_test_metric, std_test_metric = calc_mean_and_std(test_metric)
 
     if nni_flag:
         LOG.debug("\n \nMean Validation Set metric: ", mean_min_train_val_metric, " +- ", std_min_train_val_metric)
@@ -274,15 +276,23 @@ def run_all_dataset(mission_number, cuda_number, nni_flag, pytorch_geometric_mod
         try:
             train_metric, val_metric, test_metric = \
                 runner(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes, **kwargs)
-            datasets_results_dict[dataset_name] = {"train_metric": train_metric, "val_metric": val_metric,
-                                                   "test_metric": test_metric}
+            mean_train_metric, std_train_metric = calc_mean_and_std(train_metric)
+            mean_val_metric, std_val_metric = calc_mean_and_std(val_metric)
+            mean_test_metric, std_test_metric = calc_mean_and_std(test_metric)
+
+            datasets_results_dict[dataset_name] = {"train_metric_mean": mean_train_metric,
+                                                   "val_metric_mean": mean_val_metric,
+                                                   "test_metric_mean": mean_test_metric,
+                                                   "train_metric_std": std_train_metric,
+                                                   "val_metric_std": std_val_metric,
+                                                   "test_metric_std": std_test_metric}
         except Exception as e:
             raise
-            print(e)
+            # print(e)
     today = date.today()
     d1 = today.strftime("%d_%m_%Y")
     all_missions_results_df = pd.DataFrame.from_dict(datasets_results_dict, orient='index')
-    all_missions_results_df.to_csv(f"{mission_number}_all_datasets_results_train_val_test_{d1}.csv")
+    all_missions_results_df.to_csv(f"{mission_dict[mission_number]}_all_datasets_results_train_val_test_{d1}.csv")
 
 
 def run_all_missions(dataset_name, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes):
@@ -394,7 +404,7 @@ if __name__ == '__main__':
 
         # runner(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes, **kwargs)
         datasets = ["IBD", "Cirrhosis"]
-        run_all_dataset(8, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes, datasets, **kwargs)
+        run_all_dataset(2, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes, datasets, **kwargs)
         # try:
         #     print("nni_concat_graph_and_values_tcr.csv")
         #     reproduce_from_nni(os.path.join("nni_concat_graph_and_values_tcr.csv"), "tcr", 7)
