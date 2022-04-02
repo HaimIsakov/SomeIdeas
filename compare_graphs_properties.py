@@ -1,9 +1,12 @@
 import os
-from functools import reduce
-
+import sys
 import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
+for path_name in [os.path.join(os.path.dirname(__file__)),
+                  os.path.join(os.path.dirname(__file__), 'Data'),
+                  os.path.join(os.path.dirname(__file__), 'Missions')]:
+    sys.path.append(path_name)
 
 from GraphDataset import GraphDataset
 # from graph_measures.features_algorithms.vertices.average_neighbor_degree import AverageNeighborDegreeCalculator

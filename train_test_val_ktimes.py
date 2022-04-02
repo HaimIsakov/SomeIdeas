@@ -54,7 +54,8 @@ class TrainTestValKTimes:
         # train_frac = float(self.RECEIVED_PARAMS['train_frac'])
         # val_frac = float(self.RECEIVED_PARAMS['test_frac'])
         dataset_len = len(self.train_val_dataset)
-        train_metric, val_metric, test_metric, min_train_val_metric = [], [], [], []
+        train_metric, val_metric, test_metric, min_train_val_metric, alpha_list = [], [], [], [], []
+        return_lists = [train_metric, val_metric, test_metric, min_train_val_metric, alpha_list]
         # gss_train_val = GroupShuffleSplit(n_splits=k, train_size=0.75)
         # gss_train_val = GroupKFold(n_splits=k)
         run = 0
@@ -63,7 +64,7 @@ class TrainTestValKTimes:
             # Add seed for tcr dataset hyper-parameters tuning
             # if self.nni_flag and "TCR" in str(self.train_val_dataset):
             # if "TCR" in str(self.train_val_dataset):
-            # # TODO : Remove random state
+            # TODO : Remove random state
             #     print("Random state", i)
             #     train_idx, val_idx = train_test_split(indexes_array, test_size=0.2, shuffle=True, random_state=i)
             # else:
@@ -83,15 +84,16 @@ class TrainTestValKTimes:
                                                      self.device)
 
             early_stopping_results = self.start_training_process(trainer_and_tester, train_loader, val_loader, test_loader)
-            if len(trainer_and_tester.alpha_list) > 0:
-                print(trainer_and_tester.alpha_list)
             min_val_train_auc = min(early_stopping_results['val_auc'], early_stopping_results['train_auc'])
             print("Minimum Validation and Train Auc", min_val_train_auc)
             min_train_val_metric.append(min_val_train_auc)  # the minimum between the aucs between train set and validation set
             train_metric.append(early_stopping_results['train_auc'])
             val_metric.append(early_stopping_results['val_auc'])
             test_metric.append(early_stopping_results['test_auc'])
-
+            try:
+                alpha_list.append(early_stopping_results['last_alpha_value'])
+            except:
+                pass
             # if not self.nni_flag and self.plot_figures:
             #     os.mkdir(os.path.join(directory_root, f"Run{run}"))
             #     root = os.path.join(directory_root, f"Run{run}")
@@ -99,7 +101,7 @@ class TrainTestValKTimes:
             #     f.close()
             #     self.plot_acc_loss_auc(root, date, trainer_and_tester)
             run += 1
-        return train_metric, val_metric, test_metric, min_train_val_metric
+        return return_lists
 
     def start_training_process(self, trainer_and_tester, train_loader, val_loader, test_loader):
         rerun_counter = 0

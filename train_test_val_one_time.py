@@ -119,6 +119,7 @@ class TrainTestValOneTime:
             except:
                 pass
             average_train_loss, train_auc, val_loss, val_auc = self.record_evaluations(batched_train_loss)
+            test_auc = self.calc_auc(self.test_loader, job=TEST_JOB)
 
             if val_auc > max_val_auc:
                 print(f"Validation AUC increased ({max_val_auc:.6f} --> {val_auc:.6f})")
@@ -133,7 +134,9 @@ class TrainTestValOneTime:
                 self.model.load_state_dict(best_model)
                 # self.model.get_attention_hist(self.model.attention,  f"epoch{epoch}_dataset_cirrhosis", calc=True)
                 early_training_results['test_auc'] = self.calc_auc(self.test_loader, job=TEST_JOB)
-                break
+                early_training_results['last_alpha_value'] = self.get_alpha_value()
+                # break
+                return early_training_results
             else:
                 counter += 1
                 print(f'Early-Stopping counter: {counter} out of {EARLY_STOPPING_PATIENCE}')
@@ -159,14 +162,23 @@ class TrainTestValOneTime:
 
             print_msg = (f'[{epoch}/{epochs}] ' +
                          f'train_loss: {average_train_loss:.9f} train_auc: {train_auc:.9f} ' +
-                         f'valid_loss: {val_loss:.6f} valid_auc: {val_auc:.6f}')
+                         f'valid_loss: {val_loss:.6f} valid_auc: {val_auc:.6f} ' +
+                         f'test_auc: {test_auc:.6f}')
             print(print_msg)
-            # calculate test_auc if the model run for all epochs (i.e.: early stopping did not occur)
-            early_training_results['test_auc'] = self.calc_auc(self.test_loader, job=TEST_JOB)
-
+        # calculate test_auc if the model run for all epochs (i.e.: early stopping did not occur)
         self.model.load_state_dict(best_model)
+        early_training_results['test_auc'] = self.calc_auc(self.test_loader, job=TEST_JOB)
+        early_training_results['last_alpha_value'] = self.get_alpha_value()
         # early_training_results = self.calc_auc_from_all_comparison(early_training_results)
         return early_training_results
+
+    def get_alpha_value(self):
+        try:
+            alpha_value = self.model.alpha.item()
+            print("Alpha_value in get_alpha_value function", alpha_value)
+            return alpha_value
+        except:
+            pass
 
     def calc_auc_from_all_comparison(self, early_training_results):
         early_training_results['test_auc'] = self.calc_auc(self.test_loader, job=TEST_JOB)

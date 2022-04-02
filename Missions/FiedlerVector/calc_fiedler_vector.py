@@ -44,7 +44,7 @@ def check_fiedler_vector():
     fiedler_vector = return_k_first_eigen_vectors(random_graph, k=1)
     fiedler_vectors_matrix.append(fiedler_vector)
     num_experiments = 50
-    p_remove = 0.4
+    p_remove = 0.1
     for i in range(num_experiments):
         print(i)
         cur_random_graph = deepcopy(random_graph)
@@ -59,8 +59,10 @@ def check_fiedler_vector():
         cur_fiedler_vector = return_k_first_eigen_vectors(cur_random_graph, k=1)
         fiedler_vectors_matrix.append(cur_fiedler_vector)
     fiedler_vectors_df = pd.DataFrame(data=np.squeeze(fiedler_vectors_matrix))
-    fiedler_vectors_corr_mat = fiedler_vectors_df.corr()
+    fiedler_vectors_corr_mat = fiedler_vectors_df.T.corr()
     print(fiedler_vectors_corr_mat)
+    save_file_name = f"fiedler_vector_mirror_experiment_{n}_nodes_{num_experiments}_experiments_{p_remove}_removeProb.csv"
+    fiedler_vectors_corr_mat.to_csv(save_file_name)
     return fiedler_vectors_corr_mat
 
 

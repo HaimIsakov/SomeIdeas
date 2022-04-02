@@ -131,9 +131,10 @@ class Main:
         elif self.dataset_name == "tcr" or self.dataset_name == "ISB" or self.dataset_name == "NIH":
             K = 10
         else:
-            K = 10
-        train_metric, val_metric, test_metric, min_train_val_metric = trainer_and_tester.train_group_k_cross_validation(k=K)
-        return train_metric, val_metric, test_metric, min_train_val_metric
+            K = 2
+        train_metric, val_metric, test_metric, min_train_val_metric, alpha_list = \
+            trainer_and_tester.train_group_k_cross_validation(k=K)
+        return train_metric, val_metric, test_metric, min_train_val_metric, alpha_list
 
     # def turn_on_train(self):
     #     kwargs = {}
@@ -216,7 +217,8 @@ def calc_mean_and_std(dataset_metric_list):
     return mean_dataset_metric, std_dataset_metric
 
 
-def results_dealing(train_metric, val_metric, test_metric, min_train_val_metric, nni_flag, RECEIVED_PARAMS, result_file_name):
+def results_dealing(return_lists, nni_flag, RECEIVED_PARAMS, result_file_name):
+    train_metric, val_metric, test_metric, min_train_val_metric, alpha_list = return_lists
     mean_train_metric, std_train_metric = calc_mean_and_std(train_metric)
     mean_min_train_val_metric, std_min_train_val_metric = calc_mean_and_std(min_train_val_metric)
     mean_val_metric, std_val_metric = calc_mean_and_std(val_metric)
@@ -274,8 +276,9 @@ def run_all_dataset(mission_number, cuda_number, nni_flag, pytorch_geometric_mod
     for dataset_name in datasets:
         print(dataset_name)
         try:
-            train_metric, val_metric, test_metric = \
-                runner(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes, **kwargs)
+            return_lists = runner(dataset_name, mission_number, cuda_number, nni_flag,
+                                  pytorch_geometric_mode, add_attributes, **kwargs)
+            train_metric, val_metric, test_metric, _, alpha_list = return_lists
             mean_train_metric, std_train_metric = calc_mean_and_std(train_metric)
             mean_val_metric, std_val_metric = calc_mean_and_std(val_metric)
             mean_test_metric, std_test_metric = calc_mean_and_std(test_metric)
@@ -286,9 +289,16 @@ def run_all_dataset(mission_number, cuda_number, nni_flag, pytorch_geometric_mod
                                                    "train_metric_std": std_train_metric,
                                                    "val_metric_std": std_val_metric,
                                                    "test_metric_std": std_test_metric}
+            print("Test list", test_metric)
+            if len(alpha_list) > 0:
+                print("Alpha_list", alpha_list)
+                mean_alpha_value, std_alpha_value = calc_mean_and_std(alpha_list)
+                datasets_results_dict[dataset_name]["alpha_value_mean"] = mean_alpha_value
+                datasets_results_dict[dataset_name]["alpha_value_std"] = std_alpha_value
+
         except Exception as e:
-            raise
-            # print(e)
+            # raise
+            print(e)
     today = date.today()
     d1 = today.strftime("%d_%m_%Y")
     all_missions_results_df = pd.DataFrame.from_dict(datasets_results_dict, orient='index')
@@ -377,13 +387,13 @@ def runner(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometri
     print("Device", device)
     RECEIVED_PARAMS = get_model_hyper_parameters(dataset_name, mission_number)
     print("Hyper-parameters", RECEIVED_PARAMS)
-
+    print("Mission", mission_dict[mission_number])
     main_runner = Main(dataset_name, mission_number, RECEIVED_PARAMS, device, nni_mode=nni_flag,
                        geometric_mode=pytorch_geometric_mode, add_attributes=add_attributes, plot_figures=False)
-    train_metric, val_metric, test_metric, min_train_val_metric = main_runner.play(kwargs)
+    return_lists = main_runner.play(kwargs)
     result_file_name = f"{dataset_name}_{mission_dict[mission_number]}"
-    results_dealing(train_metric, val_metric, test_metric, min_train_val_metric, nni_flag, RECEIVED_PARAMS, result_file_name)
-    return train_metric, val_metric, test_metric
+    results_dealing(return_lists, nni_flag, RECEIVED_PARAMS, result_file_name)
+    return return_lists
 
 
 if __name__ == '__main__':
@@ -403,7 +413,7 @@ if __name__ == '__main__':
         # run_all_missions(dataset_name, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
 
         # runner(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes, **kwargs)
-        datasets = ["IBD", "Cirrhosis"]
+        datasets = ["bw"]
         run_all_dataset(2, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes, datasets, **kwargs)
         # try:
         #     print("nni_concat_graph_and_values_tcr.csv")
