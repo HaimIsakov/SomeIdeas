@@ -14,6 +14,8 @@ from sklearn.model_selection import GroupShuffleSplit, GroupKFold, train_test_sp
 from torch.utils.data import DataLoader
 import matplotlib.pyplot as plt
 import torch
+from tqdm import tqdm
+import pandas as pd
 
 from ConcatGraphAndValues.concat_graph_and_values import ConcatValuesAndGraphStructure
 from DoubleGcnLayers.Models.two_gcn_layers_graph_and_values import TwoLayersGCNValuesGraph
@@ -48,6 +50,7 @@ class TrainTestValKTimes:
         self.geometric_or_not = geometric_or_not
         self.plot_figures = plot_figures
         self.kwargs = kwargs
+        self.train_loader = None
         # self.node_order = self.dataset.node_order
 
     def train_group_k_cross_validation(self, k=5):
@@ -158,9 +161,11 @@ class TrainTestValKTimes:
         # save files' names
         outliers_pickle_name = f"tcr_outliers_{numrec}_with_sample_size_{len(train_files)}_run_number_{i}"
         adj_mat_path = f"tcr_dist_mat_{numrec}_with_sample_size_{len(train_files)}_run_number_{i}"
-        train.new_outlier_finder(numrec, pickle_name=outliers_pickle_name)  # find outliers and save to pickle
+        outlier = train.new_outlier_finder(numrec, pickle_name=outliers_pickle_name)  # find outliers and save to pickle
         # create distance matrix between the projection of the found golden tcrs
-        create_distance_matrix(self.device, outliers_file=outliers_pickle_name, adj_mat=adj_mat_path)
+        # create_distance_matrix(self.device, outliers_file=outliers_pickle_name, adj_mat=adj_mat_path)
+
+        self.create_corr_tcr_network(train_idx, file_directory_path, outlier)
         self.train_val_dataset.run_number = i
         self.test_dataset.run_number = i
         self.train_val_dataset.calc_golden_tcrs(adj_mat_path=adj_mat_path)
@@ -181,6 +186,35 @@ class TrainTestValKTimes:
         #     train_idx = [self.train_val_dataset.subject_list.index(train_file.replace(".csv"))
         #                    for train_file in train_files]
         return train_idx
+
+    def create_corr_tcr_network(self, train_idx, file_directory_path, outlier):
+        # train_indices = train_idx
+        # dataset_dict = self.train_val_dataset.dataset_dict
+        # train_subject_list = []
+        train_samples_golden_tcrs_existence_mat = []
+        # for i in train_indices:
+        #     subject = dataset_dict[i]["subject"]
+        #     train_subject_list.append(subject)
+        golden_tcrs = [i for i, j in list(outlier.keys())]
+        train_subject_list = [self.train_val_dataset.subject_list[id] for id in train_idx]
+        for i, subject in tqdm(enumerate(train_subject_list), desc='Create TCR Networks', total=len(train_subject_list)):
+            file_path = os.path.join(file_directory_path, subject + ".csv")
+            samples_df = pd.read_csv(file_path, usecols=["combined", "frequency"])
+            no_rep_sample_df = samples_df.groupby("combined").sum()  # sum the repetitions
+            # adj_mat = pd.read_csv(adj_mat_path, index_col=0)
+            # golden_tcrs_set = set(golden_tcrs)
+            # golden_tcrs = set(list(adj_mat.index))
+            golden_tcr_existence_vector = [0] * len(golden_tcrs)
+            cur_sample_tcrs = set(list(no_rep_sample_df.index))
+            for inx, golden_tcr in enumerate(golden_tcrs):
+                if golden_tcr in cur_sample_tcrs:
+                    golden_tcr_existence_vector[inx] = 1
+            train_samples_golden_tcrs_existence_mat.append(golden_tcr_existence_vector)
+        df = pd.DataFrame(data=train_samples_golden_tcrs_existence_mat, index=golden_tcrs).T
+        df_corr = df.corr()
+        df_corr.to_csv("corr_mat_tcr.csv")
+        print(df_corr)
+        return df_corr
 
     def create_data_loaders(self, i, train_idx, val_idx):
         batch_size = int(self.RECEIVED_PARAMS['batch_size'])
@@ -208,6 +242,7 @@ class TrainTestValKTimes:
 
             # Dataloader
             train_loader = torch.utils.data.DataLoader(train_data, shuffle=True, batch_size=batch_size)
+            self.train_loader = train_loader
             val_loader = torch.utils.data.DataLoader(val_data, batch_size=batch_size, shuffle=False)
             test_loader = torch.utils.data.DataLoader(self.test_dataset, batch_size=batch_size, shuffle=False)
         else:

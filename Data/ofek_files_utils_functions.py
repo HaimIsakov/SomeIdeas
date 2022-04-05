@@ -1,4 +1,10 @@
 import os
+import sys
+for path_name in [os.path.join(os.path.dirname(__file__)),
+                  os.path.join(os.path.dirname(__file__), 'Data'),
+                  os.path.join(os.path.dirname(__file__), 'Missions')]:
+    sys.path.append(path_name)
+
 import pickle
 import time
 import numpy as np
@@ -198,7 +204,7 @@ class HistoMaker:
         with open(f"{pickle_name}.pkl", "wb") as f:
             pickle.dump(self.outlier, f)
         print("Number of outliers", len(self.outlier))
-        return len(self.outlier)
+        return self.outlier
 
     def get_cutoff(self, numrec, thresholds):
         for cutoff, num in thresholds.items():

@@ -1,3 +1,5 @@
+import copy
+
 import torch
 import torch.nn.functional as F
 from sklearn.metrics import roc_auc_score, f1_score
@@ -94,7 +96,8 @@ class TrainTestValOneTime:
     def train(self):
         optimizer = self.get_optimizer()
         epochs = 200
-        best_model = self.model.state_dict()
+        # best_model = self.model.state_dict()
+        best_model = copy.deepcopy(self.model)
         max_val_auc = 0
         counter = 0
         min_val_loss = float("inf")
@@ -121,18 +124,20 @@ class TrainTestValOneTime:
             average_train_loss, train_auc, val_loss, val_auc = self.record_evaluations(batched_train_loss)
             test_auc = self.calc_auc(self.test_loader, job=TEST_JOB)
 
+            print("Early-stopping according to validation auc")
             if val_auc > max_val_auc:
                 print(f"Validation AUC increased ({max_val_auc:.6f} --> {val_auc:.6f})")
                 max_val_auc = val_auc
                 counter = 0
                 early_training_results['val_auc'], early_training_results['val_loss'] = val_auc, val_loss
                 early_training_results['train_auc'], early_training_results['train_loss'] = train_auc, average_train_loss
-                best_model = self.model.state_dict()
-
+                # best_model = self.model.state_dict()
+                best_model = copy.deepcopy(self.model)
             elif self.early_stopping and counter == EARLY_STOPPING_PATIENCE:
                 print("Early stopping")
-                self.model.load_state_dict(best_model)
+                # self.model.load_state_dict(best_model)
                 # self.model.get_attention_hist(self.model.attention,  f"epoch{epoch}_dataset_cirrhosis", calc=True)
+                self.model = best_model
                 early_training_results['test_auc'] = self.calc_auc(self.test_loader, job=TEST_JOB)
                 early_training_results['last_alpha_value'] = self.get_alpha_value()
                 # break
@@ -141,21 +146,23 @@ class TrainTestValOneTime:
                 counter += 1
                 print(f'Early-Stopping counter: {counter} out of {EARLY_STOPPING_PATIENCE}')
             ########################
+            # print("Early-stopping according to loss")
             # if val_loss <= min_val_loss:
             #     print(f"Validation loss decreased ({min_val_loss:.6f} --> {val_loss:.6f})")
             #     min_val_loss = val_loss
             #     counter = 0
-            #     early_training_results['val_auc'] = val_auc
-            #     early_training_results['val_loss'] = val_loss
-            #     early_training_results['train_auc'] = train_auc
-            #     # best_model = copy.deepcopy(self.model)
-            #     best_model = self.model.state_dict()
+            #     early_training_results['val_auc'], early_training_results['val_loss'] = val_auc, val_loss
+            #     early_training_results['train_auc'], early_training_results['train_loss'] = train_auc, average_train_loss
+            #     best_model = copy.deepcopy(self.model)
+            #     # best_model = self.model.state_dict()
             #
             # elif self.early_stopping and counter == EARLY_STOPPING_PATIENCE:
             #     print("Early stopping")
-            #     self.model.load_state_dict(best_model)
+            #     self.model = best_model
             #     early_training_results['test_auc'] = self.calc_auc(self.test_loader, job=TEST_JOB)
-            #     break
+            #     early_training_results['last_alpha_value'] = self.get_alpha_value()
+            #     # break
+            #     return early_training_results
             # else:
             #     counter += 1
             #     print(f'Early-Stopping counter: {counter} out of {EARLY_STOPPING_PATIENCE}')
@@ -166,7 +173,8 @@ class TrainTestValOneTime:
                          f'test_auc: {test_auc:.6f}')
             print(print_msg)
         # calculate test_auc if the model run for all epochs (i.e.: early stopping did not occur)
-        self.model.load_state_dict(best_model)
+        # self.model.load_state_dict(best_model)
+        self.model = best_model
         early_training_results['test_auc'] = self.calc_auc(self.test_loader, job=TEST_JOB)
         early_training_results['last_alpha_value'] = self.get_alpha_value()
         # early_training_results = self.calc_auc_from_all_comparison(early_training_results)
