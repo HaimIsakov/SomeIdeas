@@ -2,7 +2,10 @@ import os
 import sys
 import numpy as np
 import pandas as pd
+from colorama import Fore
 from matplotlib import pyplot as plt
+from tqdm import tqdm
+
 for path_name in [os.path.join(os.path.dirname(__file__)),
                   os.path.join(os.path.dirname(__file__), 'Data'),
                   os.path.join(os.path.dirname(__file__), 'Missions')]:
@@ -110,6 +113,55 @@ def seperate_graphs_list_according_to_its_label(dataset_dict):
             graphs_list_1.append(graph)
     return graphs_list_0, graphs_list_1
 
+
+
+def arrange_new_tcr_dataset():
+    def load_or_create_tcr_network(subject_list, adj_mat):
+        networks_dict = {}
+        values_dict = {}
+        for i, subject in tqdm(enumerate(subject_list), desc='Create TCR Networks', total=len(subject_list),
+                               bar_format="{l_bar}%s{bar}%s{r_bar}" % (Fore.LIGHTGREEN_EX, Fore.RESET)):
+            # file_path = os.path.join(self.data_path, f"final_{subject}.csv")
+            # tcr_sample_df = pd.read_csv(file_path, index_col=0)
+            file_path = os.path.join("TCR_Dataset2", "Train", subject + ".csv")
+            samples_df = pd.read_csv(file_path, usecols=["combined", "frequency"])
+            no_rep_sample_df = samples_df.groupby("combined").sum()  # sum the repetitions
+            golden_tcrs = set(list(adj_mat.index))
+            cur_sample_tcrs = set(list(no_rep_sample_df.index))
+            intersec_golden_and_sample_tcrs = list(golden_tcrs & cur_sample_tcrs)
+            network = adj_mat.copy(deep=True)
+            for tcr in list(golden_tcrs):
+                if tcr not in intersec_golden_and_sample_tcrs:
+                    network[tcr] = np.zeros(network.shape[1])
+            for tcr in intersec_golden_and_sample_tcrs:
+                network.loc[tcr] = network[tcr]
+            networks_dict[subject] = network
+            no_rep_sample_df['frequency'] = np.log(no_rep_sample_df['frequency'] + 1e-300)
+            tcr_sample_dict = {}
+            for tcr in golden_tcrs:
+                if tcr in intersec_golden_and_sample_tcrs:
+                    tcr_sample_dict[tcr] = no_rep_sample_df.loc[tcr]['frequency']
+                else:
+                    tcr_sample_dict[tcr] = 0
+            values_list = []
+            # To make all values among all samples the same order
+            for tcr in golden_tcrs:
+                values_list.append(tcr_sample_dict[tcr])
+            values_dict[subject] = values_list
+        return networks_dict, values_dict
+
+    train_data_file_path = os.path.join("TCR_Dataset2", "Train")
+    train_tag_file_path = os.path.join("TCR_dataset", "samples.csv")
+
+    label_df = pd.read_csv(train_tag_file_path, usecols=["sample", 'status'])
+    label_df["sample"] = label_df["sample"] + "_" + label_df['status']
+    label_df.set_index("sample", inplace=True)
+    label_df["status"] = label_df["status"].map({"negative": 0, "positive": 1})
+    label_dict = label_df.to_dict()['status']
+
+
+
+
 def plot_comparison_between_graph_and_labels(graphs_attributes_mean_df_0, graphs_attributes_mean_df_1, save_fig):
     a, b = graphs_attributes_mean_df_0.shape
     fig, axs = plt.subplots(b, 1, figsize=(25, 25))
@@ -196,7 +248,7 @@ def get_NIH_files():
 
 
 if __name__ == "__main__":
-    dataset_name = "NIH"
+    dataset_name = "tcr"
     # origin_dir = "split_datasets_new"
     # train_data_file_path = os.path.join(origin_dir, f'{dataset_name}_split_dataset',
     #                                     f'train_val_set_{dataset_name}_microbiome.csv')
@@ -213,9 +265,9 @@ if __name__ == "__main__":
 
     # data_path = train_data_file_path
     # label_path = train_tag_file_path
-    # data_path, label_path, subject_list = get_tcr_files()
+    data_path, label_path, subject_list = get_tcr_files()
     # data_path, label_path, subject_list = get_ISB_files()
-    data_path, label_path, subject_list = get_NIH_files()
+    # data_path, label_path, subject_list = get_NIH_files()
 
     add_attributes, geometric_mode = False, False
     mission = "just_values"

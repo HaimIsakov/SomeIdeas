@@ -9,7 +9,7 @@ from graph_measures.features_algorithms.vertices.general import GeneralCalculato
 from graph_measures.features_algorithms.vertices.load_centrality import LoadCentralityCalculator
 from graph_measures.features_infra.feature_calculators import FeatureMeta
 # from graph_measures.features_infra.graph_features import GraphFeatures
-from graph_measures.features_algorithms.vertices.louvain import LouvainCalculator
+# from graph_measures.features_algorithms.vertices.louvain import LouvainCalculator
 from graph_measures.features_algorithms.vertices.betweenness_centrality import BetweennessCentralityCalculator
 
 from tqdm import tqdm

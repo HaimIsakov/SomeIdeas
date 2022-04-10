@@ -80,7 +80,7 @@ class TCRDataset(Dataset):
         distance_mat_df = pd.read_csv(adj_mat_path, index_col=0)
         network_values = distance_mat_df.values
         np.fill_diagonal(network_values, 1)
-        network_values = 1 / network_values
+        # network_values = 1 / network_values
         np.fill_diagonal(network_values, 0)
         adj_mat_df = pd.DataFrame(network_values, index=distance_mat_df.index, columns=distance_mat_df.index)
         return adj_mat_df
@@ -147,6 +147,7 @@ class TCRDataset(Dataset):
                     network[tcr] = np.zeros(network.shape[1])
             for tcr in intersec_golden_and_sample_tcrs:
                 network.loc[tcr] = network[tcr]
+            network.to_csv(f"tcr_new_graph_{subject}.csv")
             networks_dict[subject] = network
             no_rep_sample_df['frequency'] = np.log(no_rep_sample_df['frequency'] + 1e-300)
             tcr_sample_dict = {}

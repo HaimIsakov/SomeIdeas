@@ -412,9 +412,9 @@ if __name__ == '__main__':
         # run_all_datasets_missions(cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
         # run_all_missions(dataset_name, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
 
-        # runner(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes, **kwargs)
-        datasets = ["bw"]
-        run_all_dataset(3, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes, datasets, **kwargs)
+        runner(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes, **kwargs)
+        # datasets = ["bw"]
+        # run_all_dataset(4, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes, datasets, **kwargs)
         # try:
         #     print("nni_concat_graph_and_values_tcr.csv")
         #     reproduce_from_nni(os.path.join("nni_concat_graph_and_values_tcr.csv"), "tcr", 7)

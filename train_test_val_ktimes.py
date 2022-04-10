@@ -165,9 +165,11 @@ class TrainTestValKTimes:
         # create distance matrix between the projection of the found golden tcrs
         # create_distance_matrix(self.device, outliers_file=outliers_pickle_name, adj_mat=adj_mat_path)
 
-        self.create_corr_tcr_network(train_idx, file_directory_path, outlier)
+        adj_mat_path = self.create_corr_tcr_network(train_idx, file_directory_path, outlier)
         self.train_val_dataset.run_number = i
         self.test_dataset.run_number = i
+        # train_subject_list = [self.train_val_dataset.subject_list[id] for id in train_idx]
+        # self.train_val_dataset.subject_list = train_subject_list
         self.train_val_dataset.calc_golden_tcrs(adj_mat_path=adj_mat_path)
         self.train_val_dataset.update_graphs()
         self.test_dataset.calc_golden_tcrs(adj_mat_path=adj_mat_path)
@@ -188,6 +190,11 @@ class TrainTestValKTimes:
         return train_idx
 
     def create_corr_tcr_network(self, train_idx, file_directory_path, outlier):
+        def arrange_corr_between_golden_tcr_mat(corr_df_between_golden_tcrs, Threshold=0.2):
+            corr_df_between_golden_tcrs.values[[np.arange(corr_df_between_golden_tcrs.shape[0])]*2] = 0
+            # new_corr_df_between_golden_tcrs = (np.abs(corr_df_between_golden_tcrs) > Threshold).astype(int)
+            new_corr_df_between_golden_tcrs = np.abs(corr_df_between_golden_tcrs)
+            return new_corr_df_between_golden_tcrs
         # train_indices = train_idx
         # dataset_dict = self.train_val_dataset.dataset_dict
         # train_subject_list = []
@@ -197,7 +204,7 @@ class TrainTestValKTimes:
         #     train_subject_list.append(subject)
         golden_tcrs = [i for i, j in list(outlier.keys())]
         train_subject_list = [self.train_val_dataset.subject_list[id] for id in train_idx]
-        for i, subject in tqdm(enumerate(train_subject_list), desc='Create TCR Networks', total=len(train_subject_list)):
+        for i, subject in tqdm(enumerate(train_subject_list), desc='Create corr matrix tcrs', total=len(train_subject_list)):
             file_path = os.path.join(file_directory_path, subject + ".csv")
             samples_df = pd.read_csv(file_path, usecols=["combined", "frequency"])
             no_rep_sample_df = samples_df.groupby("combined").sum()  # sum the repetitions
@@ -210,11 +217,14 @@ class TrainTestValKTimes:
                 if golden_tcr in cur_sample_tcrs:
                     golden_tcr_existence_vector[inx] = 1
             train_samples_golden_tcrs_existence_mat.append(golden_tcr_existence_vector)
-        df = pd.DataFrame(data=train_samples_golden_tcrs_existence_mat, index=golden_tcrs).T
-        df_corr = df.corr()
-        df_corr.to_csv("corr_mat_tcr.csv")
-        print(df_corr)
-        return df_corr
+        df = pd.DataFrame(data=train_samples_golden_tcrs_existence_mat, columns=golden_tcrs)
+        corr_df_between_golden_tcrs = df.corr()
+        # print(df_corr)
+        corr_df_between_golden_tcrs = arrange_corr_between_golden_tcr_mat(corr_df_between_golden_tcrs, Threshold=0.2)
+        corr_file_name = "corr_mat_tcr_new"
+        corr_df_between_golden_tcrs.to_csv(f"{corr_file_name}.csv")
+        return corr_file_name
+
 
     def create_data_loaders(self, i, train_idx, val_idx):
         batch_size = int(self.RECEIVED_PARAMS['batch_size'])
@@ -227,6 +237,7 @@ class TrainTestValKTimes:
             print("len of train data", len(train_data))
             val_data = torch.utils.data.Subset(self.train_val_dataset, val_idx)
             print("len of val data", len(val_data))
+
             # Get and set train_graphs_list
             train_graphs_list = get_train_graphs_list(train_data)
             self.train_val_dataset.set_train_graphs_list(train_graphs_list)
