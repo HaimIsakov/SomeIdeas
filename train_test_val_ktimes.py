@@ -218,7 +218,7 @@ class TrainTestValKTimes:
                     golden_tcr_existence_vector[inx] = 1
             train_samples_golden_tcrs_existence_mat.append(golden_tcr_existence_vector)
         df = pd.DataFrame(data=train_samples_golden_tcrs_existence_mat, columns=golden_tcrs)
-        corr_df_between_golden_tcrs = df.corr()
+        corr_df_between_golden_tcrs = df.corr(method="spearman")
         # print(df_corr)
         corr_df_between_golden_tcrs = arrange_corr_between_golden_tcr_mat(corr_df_between_golden_tcrs, Threshold=0.2)
         corr_file_name = "corr_mat_tcr_new"

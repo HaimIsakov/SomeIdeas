@@ -19,7 +19,9 @@ class ValuesAndGraphStructure(nn.Module):
         self.activation_func = self.RECEIVED_PARAMS['activation']
         self.dropout = nn.Dropout(p=self.RECEIVED_PARAMS["dropout"])
 
-        self.alpha = nn.Parameter(torch.rand(1, requires_grad=True, device=self.device))
+        # self.alpha = nn.Parameter(torch.rand(1, requires_grad=True, device=self.device))
+        self.alpha = torch.tensor([1], device=self.device)
+
         self.activation_func_dict = {'relu': nn.ReLU(), 'elu': nn.ELU(), 'tanh': nn.Tanh()}
         if self.feature_size > 1:
             self.transform_mat_to_vec = nn.Linear(self.feature_size, 1)
@@ -37,12 +39,8 @@ class ValuesAndGraphStructure(nn.Module):
         )
 
     def forward(self, x, adjacency_matrix):
-        # normalize_adj_mat = True
-        normalize_adj_mat = False
-
-
-
-
+        normalize_adj_mat = True
+        # normalize_adj_mat = False
         # multiply the matrix adjacency_matrix by (learnt scalar) self.alpha
         # alpha_A = torch.mul(adjacency_matrix, self.alpha)  # 𝛼A  - this function does not forward gradients
         a, b, c = adjacency_matrix.shape
