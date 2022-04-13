@@ -21,3 +21,8 @@
 /covid/
 /covid/new_ISB/
 /covid/new_NIH/
+concat_graph_and_values_all_datasets_results_train_val_test_09_04_2022.csv
+corr_mat_tcr_new.csv
+double_gcn_layer_all_datasets_results_train_val_test_09_04_2022.csv
+graph_and_values_all_datasets_results_train_val_test_09_04_2022.csv
+just_graph_all_datasets_results_train_val_test_09_04_2022.csv
