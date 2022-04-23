@@ -13,6 +13,10 @@ def heat_map(corr_mat):
     plt.savefig("corr_mat_tcr.png")
     plt.show()
 
+def histogram(corr_mat):
+    corr_mat.stack().hist(grid=False, bins=300)
+    plt.show()
+
 
 def create_bar_plot(df, title):
     columns = list(df.columns)
@@ -36,6 +40,6 @@ if __name__ == "__main__":
     #     df = pd.read_csv(f"{mission}_all_datasets_results_train_val_test_09_04_2022.csv", index_col=0)
     #     create_bar_plot(df, f"{mission}")
 
-    corr_mat_df = pd.read_csv("corr_mat_tcr_new.csv", index_col=0)
-
-    heat_map(corr_mat_df)
+    corr_mat_df = pd.read_csv("tcr_corr_mat_125_with_sample_size_547_run_number_0.csv", index_col=0)
+    histogram(corr_mat_df)
+    # heat_map(corr_mat_df)

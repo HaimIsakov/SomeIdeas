@@ -10,7 +10,7 @@ import torch.nn as nn
 # from graph_measures.features_infra.feature_calculators import FeatureMeta
 # from graph_measures.loggers import PrintLogger
 
-from taxonomy_tree_for_pytorch_geometric import create_tax_tree
+# from taxonomy_tree_for_pytorch_geometric import create_tax_tree
 import os
 import pandas as pd
 # from torch_geometric.data import DataLoader

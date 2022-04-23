@@ -80,6 +80,7 @@ class TCRDataset(Dataset):
         distance_mat_df = pd.read_csv(adj_mat_path, index_col=0)
         network_values = distance_mat_df.values
         np.fill_diagonal(network_values, 1)
+        # TODO: Make the comment to real code when running the first version of tcrs' graphs creation
         # network_values = 1 / network_values
         np.fill_diagonal(network_values, 0)
         adj_mat_df = pd.DataFrame(network_values, index=distance_mat_df.index, columns=distance_mat_df.index)
@@ -130,6 +131,7 @@ class TCRDataset(Dataset):
     def load_or_create_tcr_network(self):
         networks_dict = {}
         values_dict = {}
+        golden_tcrs = set(list(self.adj_mat.index))
 
         for i, subject in tqdm(enumerate(self.subject_list), desc='Create TCR Networks', total=len(self.subject_list),
                                bar_format="{l_bar}%s{bar}%s{r_bar}" % (Fore.LIGHTGREEN_EX, Fore.RESET)):
@@ -138,7 +140,6 @@ class TCRDataset(Dataset):
             file_path = os.path.join(self.data_path, subject + ".csv")
             samples_df = pd.read_csv(file_path, usecols=["combined", "frequency"])
             no_rep_sample_df = samples_df.groupby("combined").sum()  # sum the repetitions
-            golden_tcrs = set(list(self.adj_mat.index))
             cur_sample_tcrs = set(list(no_rep_sample_df.index))
             intersec_golden_and_sample_tcrs = list(golden_tcrs & cur_sample_tcrs)
             network = self.adj_mat.copy(deep=True)
@@ -147,7 +148,7 @@ class TCRDataset(Dataset):
                     network[tcr] = np.zeros(network.shape[1])
             for tcr in intersec_golden_and_sample_tcrs:
                 network.loc[tcr] = network[tcr]
-            network.to_csv(f"tcr_new_graph_{subject}.csv")
+            # network.to_csv(f"tcr_new_graph_{subject}.csv")
             networks_dict[subject] = network
             no_rep_sample_df['frequency'] = np.log(no_rep_sample_df['frequency'] + 1e-300)
             tcr_sample_dict = {}

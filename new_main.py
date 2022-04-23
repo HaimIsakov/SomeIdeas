@@ -129,7 +129,7 @@ class Main:
         if self.dataset_name == "gdm":
             K = 1
         elif self.dataset_name == "tcr" or self.dataset_name == "ISB" or self.dataset_name == "NIH":
-            K = 10
+            K = 10 # TODO: Change it back to k=10
         else:
             K = 10
         train_metric, val_metric, test_metric, min_train_val_metric, alpha_list = \
@@ -208,6 +208,7 @@ def set_arguments():
     parser.add_argument("--device_num", help="Cuda Device Number", default=3, type=int)
     parser.add_argument("--nni", help="is nni mode", default=0, type=int)
     parser.add_argument("--samples", help="sample in tcr dataset", default=-1, type=int)
+    parser.add_argument("--thresh", help="tcr correlation matrix threshold", default=0.05,  type=float)
     return parser
 
 
@@ -305,21 +306,38 @@ def run_all_dataset(mission_number, cuda_number, nni_flag, pytorch_geometric_mod
     all_missions_results_df.to_csv(f"{mission_dict[mission_number]}_all_datasets_results_train_val_test_{d1}.csv")
 
 
-def run_all_missions(dataset_name, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes):
+def run_all_missions(dataset_name, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes, missions, **kwargs):
     missions = [1, 2, 3, 4, 6, 7]
-    # missions = [1, 2]
     missions_results_dict = {}
     for mission in missions:
+        print("Mission", mission_dict[mission])
         try:
-            train_metric, val_metric, test_metric = \
-                runner(dataset_name, mission, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
-            missions_results_dict[mission_dict[mission]] = {"train_auc": train_metric, "val_auc": val_metric,
-                                                   "test_auc": test_metric}
+            return_lists = runner(dataset_name, mission, cuda_number, nni_flag,
+                                  pytorch_geometric_mode, add_attributes, **kwargs)
+            train_metric, val_metric, test_metric, _, alpha_list = return_lists
+            mean_train_metric, std_train_metric = calc_mean_and_std(train_metric)
+            mean_val_metric, std_val_metric = calc_mean_and_std(val_metric)
+            mean_test_metric, std_test_metric = calc_mean_and_std(test_metric)
+
+            missions_results_dict[mission] = {"train_metric_mean": mean_train_metric,
+                                                   "val_metric_mean": mean_val_metric,
+                                                   "test_metric_mean": mean_test_metric,
+                                                   "train_metric_std": std_train_metric,
+                                                   "val_metric_std": std_val_metric,
+                                                   "test_metric_std": std_test_metric}
+            print("Test list", test_metric)
+            if len(alpha_list) > 0:
+                print("Alpha_list", alpha_list)
+                mean_alpha_value, std_alpha_value = calc_mean_and_std(alpha_list)
+                missions_results_dict[mission]["alpha_value_mean"] = mean_alpha_value
+                missions_results_dict[mission]["alpha_value_std"] = std_alpha_value
         except Exception as e:
             print(e)
 
+    today = date.today()
+    d1 = today.strftime("%d_%m_%Y")
     all_missions_results_df = pd.DataFrame.from_dict(missions_results_dict, orient='index')
-    all_missions_results_df.to_csv(f"{dataset_name}_all_missions_results_train_val_test.csv")
+    all_missions_results_df.to_csv(f"{dataset_name}_all_missions_results_train_val_test_{d1}.csv")
 
 
 def run_all_datasets_missions(cuda_number, nni_flag, pytorch_geometric_mode, add_attributes):
@@ -328,25 +346,9 @@ def run_all_datasets_missions(cuda_number, nni_flag, pytorch_geometric_mode, add
         run_all_dataset(mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
 
 
-def choose_hyperparameters(dataset_name):
-    if dataset_name == "ISB" or dataset_name == "NIH":
-        train_test_data_file_path, train_test_label_file_path, subject_list \
-            = my_datasets.get_dataset_files_no_external_test(dataset_name)
-        train_test_dataset = create_dataset(train_test_data_file_path,
-                                                 train_test_label_file_path,
-                                                 subject_list, mission)
-        # for ISB or NIH we do not want validation set
-        trainer_and_tester = TrainTestValKTimesNoExternalTestNoVal(self.RECEIVED_PARAMS, self.device,
-                                                                   train_test_dataset,
-                                                                   result_directory_name, nni_flag=self.nni_mode,
-                                                                   geometric_or_not=self.geometric_mode,
-                                                                   plot_figures=self.plot_figures,
-                                                                   **kwargs)
-
-
 def get_model_hyper_parameters(dataset_name, mission_number):
     if dataset_name == "abide" or dataset_name == "abide1":
-        params_file_path = "abide_dataset_params.json"  # TODO: add best parameters from nni
+        params_file_path = os.path.join("Data", "abide_dataset_params.json")  # TODO: add best parameters from nni
         if nni_flag:
             RECEIVED_PARAMS = nni.get_next_parameter()
         else:
@@ -395,6 +397,49 @@ def runner(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometri
     results_dealing(return_lists, nni_flag, RECEIVED_PARAMS, result_file_name)
     return return_lists
 
+def runner_hyper_parameters(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes,
+                            **kwargs):
+    device = f"cuda:{cuda_number}" if torch.cuda.is_available() else "cpu"
+    print("Device", device)
+    RECEIVED_PARAMS = get_model_hyper_parameters(dataset_name, mission_number)
+    print("Mission", mission_dict[mission_number])
+    print("Hyper-parameters", RECEIVED_PARAMS)
+
+    results_dict = {}
+    for thresh in np.linspace(0, 0.1, num=10):
+        try:
+            print("Thresold", thresh)
+            RECEIVED_PARAMS["thresh"] = thresh
+            main_runner = Main(dataset_name, mission_number, RECEIVED_PARAMS, device, nni_mode=nni_flag,
+                               geometric_mode=pytorch_geometric_mode, add_attributes=add_attributes, plot_figures=False)
+            return_lists = main_runner.play(kwargs)
+            result_file_name = f"{dataset_name}_{mission_dict[mission_number]}"
+            results_dealing(return_lists, nni_flag, RECEIVED_PARAMS, result_file_name)
+            train_metric, val_metric, test_metric, _, alpha_list = return_lists
+            mean_train_metric, std_train_metric = calc_mean_and_std(train_metric)
+            mean_val_metric, std_val_metric = calc_mean_and_std(val_metric)
+            mean_test_metric, std_test_metric = calc_mean_and_std(test_metric)
+
+            results_dict[thresh] = {"train_metric_mean": mean_train_metric,
+                                                   "val_metric_mean": mean_val_metric,
+                                                   "test_metric_mean": mean_test_metric,
+                                                   "train_metric_std": std_train_metric,
+                                                   "val_metric_std": std_val_metric,
+                                                   "test_metric_std": std_test_metric}
+            print("Test list", test_metric)
+            if len(alpha_list) > 0:
+                print("Alpha_list", alpha_list)
+                mean_alpha_value, std_alpha_value = calc_mean_and_std(alpha_list)
+                results_dict[thresh]["alpha_value_mean"] = mean_alpha_value
+                results_dict[thresh]["alpha_value_std"] = std_alpha_value
+        except Exception as e:
+            # raise
+            print(e)
+    today = date.today()
+    d1 = today.strftime("%d_%m_%Y")
+    all_missions_results_df = pd.DataFrame.from_dict(results_dict, orient='index')
+    all_missions_results_df.to_csv(f"{mission_dict[mission_number]}_hyper_parameters_results_train_val_test_{d1}.csv")
+
 
 if __name__ == '__main__':
     try:
@@ -410,11 +455,16 @@ if __name__ == '__main__':
         add_attributes = False
         kwargs = {"samples": samples}
         # run_all_datasets_missions(cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
-        # run_all_missions(dataset_name, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
+        dataset_name = "abide"
+        missions = [1,2,3,4,7,8]
+        run_all_missions(dataset_name, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes, missions, **kwargs)
+        # runner(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes, **kwargs)
 
-        runner(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes, **kwargs)
-        # datasets = ["bw"]
-        # run_all_dataset(4, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes, datasets, **kwargs)
+        # runner_hyper_parameters(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes,
+        #                         **kwargs)
+
+        # datasets = ["nut", "peanut"]
+        # run_all_dataset(6, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes, datasets, **kwargs)
         # try:
         #     print("nni_concat_graph_and_values_tcr.csv")
         #     reproduce_from_nni(os.path.join("nni_concat_graph_and_values_tcr.csv"), "tcr", 7)

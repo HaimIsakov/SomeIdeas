@@ -1,2 +1,2 @@
 {"activation": "relu", "batch_size": 50.0, "dropout": 0.1925024508963057, "epochs": 200.0, "layer_1": 91.0, "layer_2": 32.0, "learning_rate": 0.000251581596581, "optimizer": "adam", "preweight": 10.0, "regularization": 0.0002401925989353, "test_frac": 0.15, "train_frac": 0.7,
-"embedding_algorithm": "LaplacianEigenmaps", "embedding_size": 128}
+"embedding_algorithm": "node2vec", "embedding_size": 128}

@@ -5,10 +5,12 @@ import networkx as nx
 import numpy as np
 import pandas as pd
 import seaborn as sns
-# from gem.embedding.lap import LaplacianEigenmaps
-# from gem.embedding.gf import GraphFactorization
-# from gem.embedding.lle import LocallyLinearEmbedding
-# from gem.embedding.hope import HOPE
+from gem.embedding.lap import LaplacianEigenmaps
+from gem.embedding.gf import GraphFactorization
+from gem.embedding.lle import LocallyLinearEmbedding
+from gem.embedding.hope import HOPE
+from gem.embedding.node2vec import node2vec
+
 from node2vec import Node2Vec
 from sklearn.manifold import TSNE
 from tqdm import tqdm
@@ -45,6 +47,10 @@ def check_multi_graph(graphs_list):
 
 
 def node2vec_embed(graph):
+    # node2vec_model = node2vec(d=128, walk_len=80, num_walks=16, con_size=10, ret_p=1, inout_p=1, max_iter=1)
+    # node2vec_model.learn_embedding(graph=graph, edge_f=None, is_weighted=True, no_python=True)
+    # X = node2vec_model.get_embedding()
+
     node2vec = Node2Vec(graph, dimensions=128, walk_length=80, num_walks=16, weight_key='weight')
     model = node2vec.fit()
     nodes = list(graph.nodes())
@@ -60,8 +66,9 @@ def node2vec_embed(graph):
             X[i, :] = np.asarray(model.wv.get_vector(nodes[i]))
         except KeyError:
             X[i, :] = np.asarray(model.wv.get_vector(str(nodes[i])))
-    # X is the embedding matrix and projections are the embedding dictionary
+    #X is the embedding matrix and projections are the embedding dictionary
     return my_dict, X, graph
+    # return X
 
 
 def find_embed(graphs_list, algorithm="node2vec"):
@@ -72,7 +79,7 @@ def find_embed(graphs_list, algorithm="node2vec"):
         embedding = HOPE(d=128, beta=0.01)
         embedding.learn_embedding(graph=G, edge_f=None, is_weighted=True, no_python=True)
         X = embedding.get_embedding()
-    if algorithm == "LaplacianEigenmaps":
+    elif algorithm == "LaplacianEigenmaps":
         embedding = LaplacianEigenmaps(d=128)
         embedding.learn_embedding(graph=G, edge_f=None, is_weighted=True, no_python=True)
         X = embedding.get_embedding()

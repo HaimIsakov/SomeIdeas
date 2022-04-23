@@ -64,13 +64,6 @@ class TrainTestValKTimes:
         run = 0
         for i in range(k):
             indexes_array = np.array(range(dataset_len))
-            # Add seed for tcr dataset hyper-parameters tuning
-            # if self.nni_flag and "TCR" in str(self.train_val_dataset):
-            # if "TCR" in str(self.train_val_dataset):
-            # TODO : Remove random state
-            #     print("Random state", i)
-            #     train_idx, val_idx = train_test_split(indexes_array, test_size=0.2, shuffle=True, random_state=i)
-            # else:
             train_idx, val_idx = train_test_split(indexes_array, test_size=0.2, shuffle=True)
             print(f"Run {run}")
             # print("len of train set:", len(train_idx))
@@ -155,17 +148,16 @@ class TrainTestValKTimes:
         print("Length of chosen files", len(train_files))
         numrec = int(self.RECEIVED_PARAMS["numrec"])  # cutoff is also a hyper-parameter
         print("Number of golden-tcrs", numrec)
-        # cutoff = 7.0
         train.save_data(file_directory_path, files=train_files)
         # train.outlier_finder(i, numrec=numrec, cutoff=cutoff)
         # save files' names
         outliers_pickle_name = f"tcr_outliers_{numrec}_with_sample_size_{len(train_files)}_run_number_{i}"
-        adj_mat_path = f"tcr_dist_mat_{numrec}_with_sample_size_{len(train_files)}_run_number_{i}"
+        adj_mat_path = f"tcr_corr_mat_{numrec}_with_sample_size_{len(train_files)}_run_number_{i}"
         outlier = train.new_outlier_finder(numrec, pickle_name=outliers_pickle_name)  # find outliers and save to pickle
         # create distance matrix between the projection of the found golden tcrs
         # create_distance_matrix(self.device, outliers_file=outliers_pickle_name, adj_mat=adj_mat_path)
 
-        adj_mat_path = self.create_corr_tcr_network(train_idx, file_directory_path, outlier)
+        corr_df_between_golden_tcrs = self.create_corr_tcr_network(train_idx, file_directory_path, outlier, adj_mat_path)
         self.train_val_dataset.run_number = i
         self.test_dataset.run_number = i
         # train_subject_list = [self.train_val_dataset.subject_list[id] for id in train_idx]
@@ -189,42 +181,33 @@ class TrainTestValKTimes:
         #                    for train_file in train_files]
         return train_idx
 
-    def create_corr_tcr_network(self, train_idx, file_directory_path, outlier):
+    def create_corr_tcr_network(self, train_idx, file_directory_path, outlier, corr_file_name):
+        # Here, the graph is created with correlation between the existence of golden tcrs on training set only
         def arrange_corr_between_golden_tcr_mat(corr_df_between_golden_tcrs, Threshold=0.2):
             corr_df_between_golden_tcrs.values[[np.arange(corr_df_between_golden_tcrs.shape[0])]*2] = 0
-            # new_corr_df_between_golden_tcrs = (np.abs(corr_df_between_golden_tcrs) > Threshold).astype(int)
-            new_corr_df_between_golden_tcrs = np.abs(corr_df_between_golden_tcrs)
+            new_corr_df_between_golden_tcrs = (np.abs(corr_df_between_golden_tcrs) >= Threshold).astype(int)
+            # new_corr_df_between_golden_tcrs = np.abs(corr_df_between_golden_tcrs)
             return new_corr_df_between_golden_tcrs
-        # train_indices = train_idx
-        # dataset_dict = self.train_val_dataset.dataset_dict
-        # train_subject_list = []
         train_samples_golden_tcrs_existence_mat = []
-        # for i in train_indices:
-        #     subject = dataset_dict[i]["subject"]
-        #     train_subject_list.append(subject)
         golden_tcrs = [i for i, j in list(outlier.keys())]
         train_subject_list = [self.train_val_dataset.subject_list[id] for id in train_idx]
         for i, subject in tqdm(enumerate(train_subject_list), desc='Create corr matrix tcrs', total=len(train_subject_list)):
             file_path = os.path.join(file_directory_path, subject + ".csv")
             samples_df = pd.read_csv(file_path, usecols=["combined", "frequency"])
             no_rep_sample_df = samples_df.groupby("combined").sum()  # sum the repetitions
-            # adj_mat = pd.read_csv(adj_mat_path, index_col=0)
-            # golden_tcrs_set = set(golden_tcrs)
-            # golden_tcrs = set(list(adj_mat.index))
             golden_tcr_existence_vector = [0] * len(golden_tcrs)
             cur_sample_tcrs = set(list(no_rep_sample_df.index))
+            # Create existence vector of golden tcrs for each training sample
             for inx, golden_tcr in enumerate(golden_tcrs):
                 if golden_tcr in cur_sample_tcrs:
                     golden_tcr_existence_vector[inx] = 1
             train_samples_golden_tcrs_existence_mat.append(golden_tcr_existence_vector)
         df = pd.DataFrame(data=train_samples_golden_tcrs_existence_mat, columns=golden_tcrs)
         corr_df_between_golden_tcrs = df.corr(method="spearman")
-        # print(df_corr)
-        corr_df_between_golden_tcrs = arrange_corr_between_golden_tcr_mat(corr_df_between_golden_tcrs, Threshold=0.2)
-        corr_file_name = "corr_mat_tcr_new"
+        threshold = float(self.RECEIVED_PARAMS['thresh'])
+        corr_df_between_golden_tcrs = arrange_corr_between_golden_tcr_mat(corr_df_between_golden_tcrs, Threshold=threshold)
         corr_df_between_golden_tcrs.to_csv(f"{corr_file_name}.csv")
-        return corr_file_name
-
+        return corr_df_between_golden_tcrs
 
     def create_data_loaders(self, i, train_idx, val_idx):
         batch_size = int(self.RECEIVED_PARAMS['batch_size'])

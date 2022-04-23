@@ -10,4 +10,4 @@
   "test_frac": 0.15,
   "epochs": 200,
   "preweight": 10,
-"embedding_algorithm": "LaplacianEigenmaps", "embedding_size": 128}
+"embedding_algorithm": "node2vec", "embedding_size": 128}
