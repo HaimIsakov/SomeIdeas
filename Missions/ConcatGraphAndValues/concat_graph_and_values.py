@@ -44,10 +44,11 @@ class ConcatValuesAndGraphStructure(nn.Module):
             x = self.transform_mat_to_vec(x)
         I = torch.eye(b).to(self.device)
         alpha_I = I * self.alpha.expand_as(I)  # 𝛼I
-        normalized_adjacency_matrix = self.calculate_adjacency_matrix(adjacency_matrix)  # Ã
-        alpha_I_plus_A = alpha_I + normalized_adjacency_matrix  # 𝛼I + Ã
+        alpha_I_plus_A = alpha_I + adjacency_matrix  # 𝛼I + Ã
+
+        normalized_adjacency_matrix = self.calculate_adjacency_matrix(alpha_I_plus_A)  # Ã
         ones_vector = torch.ones(x.shape).to(self.device)
-        gcn_output = torch.matmul(alpha_I_plus_A, ones_vector)  # (𝛼I + Ã)·1
+        gcn_output = torch.matmul(normalized_adjacency_matrix, ones_vector)  # (𝛼I + Ã)·1
 
         gcn_output = self.gcn_layer(gcn_output)
         gcn_output = torch.flatten(gcn_output, start_dim=1)  # flatten the tensor
@@ -59,19 +60,40 @@ class ConcatValuesAndGraphStructure(nn.Module):
         return final_output
 
     def calculate_adjacency_matrix(self, batched_adjacency_matrix):
+        # Here we normalize (𝛼I + A)
         # D^(-0.5)
         def calc_d_minus_root_sqr(batched_adjacency_matrix):
             r = []
             for adjacency_matrix in batched_adjacency_matrix:
                 sum_of_each_row = adjacency_matrix.sum(1)
-                sum_of_each_row_plus_one = torch.where(sum_of_each_row != 0, sum_of_each_row, torch.tensor(1.0, device=self.device))
-                r.append(torch.diag(torch.pow(sum_of_each_row_plus_one, -0.5)))
+                # sum_of_each_row_plus_one = torch.where(sum_of_each_row != 0, sum_of_each_row, torch.tensor(1.0))
+                try:
+                    r.append(torch.diag(torch.pow(sum_of_each_row, -0.5)))
+                except Exception as e:
+                    print(e)
+                    raise
             s = torch.stack(r)
-            if torch.isnan(s).any():
-                print("Alpha when stuck", self.alpha.item())
-                print("batched_adjacency_matrix", torch.isnan(batched_adjacency_matrix).any())
-                print("The model is stuck", torch.isnan(s).any())
             return s
+
         D__minus_sqrt = calc_d_minus_root_sqr(batched_adjacency_matrix)
         normalized_adjacency = torch.matmul(torch.matmul(D__minus_sqrt, batched_adjacency_matrix), D__minus_sqrt)
         return normalized_adjacency
+
+
+    # def calculate_adjacency_matrix(self, batched_adjacency_matrix):
+    #     # D^(-0.5)
+    #     def calc_d_minus_root_sqr(batched_adjacency_matrix):
+    #         r = []
+    #         for adjacency_matrix in batched_adjacency_matrix:
+    #             sum_of_each_row = adjacency_matrix.sum(1)
+    #             sum_of_each_row_plus_one = torch.where(sum_of_each_row != 0, sum_of_each_row, torch.tensor(1.0, device=self.device))
+    #             r.append(torch.diag(torch.pow(sum_of_each_row_plus_one, -0.5)))
+    #         s = torch.stack(r)
+    #         if torch.isnan(s).any():
+    #             print("Alpha when stuck", self.alpha.item())
+    #             print("batched_adjacency_matrix", torch.isnan(batched_adjacency_matrix).any())
+    #             print("The model is stuck", torch.isnan(s).any())
+    #         return s
+    #     D__minus_sqrt = calc_d_minus_root_sqr(batched_adjacency_matrix)
+    #     normalized_adjacency = torch.matmul(torch.matmul(D__minus_sqrt, batched_adjacency_matrix), D__minus_sqrt)
+    #     return normalized_adjacency

@@ -8,13 +8,13 @@ from torch import Tensor, FloatTensor
 #from torch_geometric.utils import from_networkx
 # sys.path.insert(2, 'Missions')
 
-from FiedlerVector.calc_fiedler_vector import return_k_first_eigen_vectors
+from Missions.FiedlerVector.calc_fiedler_vector import return_k_first_eigen_vectors
 from MicrobiomeDataset import MicrobiomeDataset
 from create_microbiome_graphs import CreateMicrobiomeGraphs
 
 
 class GraphDataset(Dataset):
-    def __init__(self, data_file_path, tag_file_path, mission, add_attributes, geometric_or_not=False):
+    def __init__(self, data_file_path, tag_file_path, mission, add_attributes=False, geometric_or_not=False):
         super(GraphDataset, self).__init__()
         # for dataset handling
         self.microbiome_dataset = MicrobiomeDataset(data_file_path, tag_file_path)

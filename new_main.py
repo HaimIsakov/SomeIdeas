@@ -129,7 +129,7 @@ class Main:
         if self.dataset_name == "gdm":
             K = 1
         elif self.dataset_name == "tcr" or self.dataset_name == "ISB" or self.dataset_name == "NIH":
-            K = 10 # TODO: Change it back to k=10
+            K = 20
         else:
             K = 10
         train_metric, val_metric, test_metric, min_train_val_metric, alpha_list = \
@@ -455,15 +455,15 @@ if __name__ == '__main__':
         add_attributes = False
         kwargs = {"samples": samples}
         # run_all_datasets_missions(cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
-        dataset_name = "abide"
-        missions = [1,2,3,4,7,8]
-        run_all_missions(dataset_name, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes, missions, **kwargs)
+        # missions = [1,2,3,4,7,8]
+        # run_all_missions(dataset_name, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes, missions, **kwargs)
         # runner(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes, **kwargs)
 
-        # runner_hyper_parameters(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes,
-        #                         **kwargs)
+        runner_hyper_parameters(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes,
+                                **kwargs)
 
         # datasets = ["nut", "peanut"]
+        # run_all_dataset(6, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes, datasets, **kwargs)
         # run_all_dataset(6, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes, datasets, **kwargs)
         # try:
         #     print("nni_concat_graph_and_values_tcr.csv")
