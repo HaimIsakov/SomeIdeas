@@ -459,11 +459,11 @@ if __name__ == '__main__':
         # run_all_missions(dataset_name, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes, missions, **kwargs)
         # runner(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes, **kwargs)
 
-        runner_hyper_parameters(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes,
-                                **kwargs)
+        # runner_hyper_parameters(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes,
+        #                         **kwargs)
 
         # datasets = ["nut", "peanut"]
-        # run_all_dataset(6, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes, datasets, **kwargs)
+        run_all_dataset(3, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes, datasets, **kwargs)
         # run_all_dataset(6, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes, datasets, **kwargs)
         # try:
         #     print("nni_concat_graph_and_values_tcr.csv")

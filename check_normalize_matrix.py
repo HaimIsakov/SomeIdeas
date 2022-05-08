@@ -24,14 +24,23 @@ def calculate_adjacency_matrix(batched_adjacency_matrix):
 
     D__minus_sqrt = calc_d_minus_root_sqr(batched_adjacency_matrix)
     normalized_adjacency = torch.matmul(torch.matmul(D__minus_sqrt, batched_adjacency_matrix), D__minus_sqrt)
+    print("normalized_adjacency")
+    print(normalized_adjacency)
     return normalized_adjacency
 
 
 if __name__ == "__main__":
+    tensor = torch.tensor([[[1,0,0], [1,0,0],[0,0,1]], [[0,1,0], [1,1,0],[0,0,1]]]).float()
+    I = torch.eye(3)
+    # tensor_plus_I = tensor + I
     # tensor = torch.ones([2,3,3])
-    # normalized_adjacency = calculate_adjacency_matrix(tensor)
+    normalized_adjacency = calculate_adjacency_matrix(tensor)
     # print(normalized_adjacency)
     alpha = torch.tensor([3])
     I = torch.eye(3).to()
     alpha_I = I * alpha.expand_as(I)  # 𝛼I
+    tensor_plus_I = tensor + alpha_I
+    print(tensor_plus_I)
+    normalized_adjacency = calculate_adjacency_matrix(tensor_plus_I)
+
     x=1

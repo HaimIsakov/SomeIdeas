@@ -8,7 +8,7 @@ class ConcatValuesAndGraphStructure(nn.Module):
         self.nodes_number = nodes_number
         self.device = device
         self.RECEIVED_PARAMS = RECEIVED_PARAMS
-
+        self.min_value = torch.tensor([1e-10], device=device).float()
         # self.pre_weighting = nn.Linear(self.feature_size, int(self.RECEIVED_PARAMS["preweight"]))
         self.pre_weighting = nn.Linear(1, int(self.RECEIVED_PARAMS["preweight"]))
         self.fc1 = nn.Linear(1, int(self.RECEIVED_PARAMS["layer_1"]))  # input layer
@@ -43,7 +43,14 @@ class ConcatValuesAndGraphStructure(nn.Module):
             # For abide dataset where the feature matrix is matrix. We want to transform the matrix into a vector.
             x = self.transform_mat_to_vec(x)
         I = torch.eye(b).to(self.device)
-        alpha_I = I * self.alpha.expand_as(I)  # 𝛼I
+        if self.alpha.item() < self.min_value.item():
+            print("In min_value")
+            print("alpha value", self.alpha.item(), "min_value", self.min_value.item())
+            alpha_I = I * self.min_value.expand_as(I)  # min_value * I
+        else:
+            alpha_I = I * self.alpha.expand_as(I)  # 𝛼I
+
+        # alpha_I = I * self.alpha.expand_as(I)  # 𝛼I
         alpha_I_plus_A = alpha_I + adjacency_matrix  # 𝛼I + Ã
 
         normalized_adjacency_matrix = self.calculate_adjacency_matrix(alpha_I_plus_A)  # Ã
