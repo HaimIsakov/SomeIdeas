@@ -55,13 +55,10 @@ class ValuesAndGraphStructure(nn.Module):
             alpha_I = I * self.min_value.expand_as(I)  # min_value * I
         else:
             alpha_I = I * self.alpha.expand_as(I)  # 𝛼I
-        alpha_I_plus_A = alpha_I + adjacency_matrix  # 𝛼I + A
-        if normalize_adj_mat:
-            normalized_adjacency_matrix = self.calculate_adjacency_matrix(alpha_I_plus_A)  # Ã
-        else:
-            normalized_adjacency_matrix = adjacency_matrix
-        # alpha_I_plus_normalized_A = alpha_I + normalized_adjacency_matrix  # 𝛼I + Ã̃
-        x = torch.matmul(normalized_adjacency_matrix, x)  # (𝛼I + A)·x
+        # alpha_I_plus_A = alpha_I + adjacency_matrix  # 𝛼I + A
+        normalized_adjacency_matrix = self.calculate_adjacency_matrix_old(adjacency_matrix)  # Ã
+        alpha_I_plus_normalized_A = alpha_I + normalized_adjacency_matrix  # 𝛼I + Ã̃
+        x = torch.matmul(alpha_I_plus_normalized_A, x)  # (𝛼I + Ã̃)·x
 
         x = self.gcn_layer(x)
         x = torch.flatten(x, start_dim=1)  # flatten the tensor
