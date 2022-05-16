@@ -81,7 +81,7 @@ class TCRDataset(Dataset):
         network_values = distance_mat_df.values
         np.fill_diagonal(network_values, 1)
         # TODO: Make the comment to real code when running the first version of tcrs' graphs creation
-        # network_values = 1 / network_values
+        network_values = 1 / network_values
         np.fill_diagonal(network_values, 0)
         adj_mat_df = pd.DataFrame(network_values, index=distance_mat_df.index, columns=distance_mat_df.index)
         return adj_mat_df
