@@ -38,6 +38,8 @@ class TrainTestValOneTime:
     def loss(self, output, target):
         if self.num_classes == 1:
             loss = F.binary_cross_entropy_with_logits(output, target.unsqueeze(dim=1).float())
+            # output = torch.sigmoid(output)
+            # loss = loss + 0.1*F.l1_loss(output, target.unsqueeze(dim=1).float())
         else:
             loss = F.cross_entropy(output, target.unsqueeze(dim=1).float())
         return loss

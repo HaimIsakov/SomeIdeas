@@ -1,5 +1,9 @@
 import os
+import random
 import sys
+
+from tqdm import tqdm
+
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
 os.environ["CUDA_VISIBLE_DEVICES"] = "0,1,2,3,4,5,6,7"
 for path_name in [os.path.join(os.path.dirname(__file__)),
@@ -27,6 +31,7 @@ from datetime import date
 import nni
 import numpy as np
 import torch
+import itertools
 from MyTasks import *
 from MyDatasets import *
 # import warnings
@@ -36,11 +41,6 @@ LOG = logging.getLogger('nni_logger')
 K = 10  # For k-cross-validation
 # # "gdm": MyDatasets.gdm_files,"male_vs_female_species": MyDatasets.male_vs_female_species,"allergy_or_not": MyDatasets.allergy_or_not_files,"allergy_milk_or_not": MyDatasets.allergy_milk_or_not_files
 
-# datasets_dict = {"Cirrhosis": MyDatasets.cirrhosis_files, "IBD": MyDatasets.ibd_files,
-#                  "bw": MyDatasets.bw_files, "IBD_Chrone": MyDatasets.ibd_chrone_files,
-#                  "Male_vs_Female": MyDatasets.male_vs_female, "male_female": MyDatasets.male_vs_female,
-#                  "nut": MyDatasets.nut, "peanut": MyDatasets.peanut, "nugent": MyDatasets.nugent,
-#                  "milk_no_controls": MyDatasets.allergy_milk_no_controls}
 datasets_dict = {"Cirrhosis": MyDatasets.cirrhosis_files, "IBD": MyDatasets.ibd_files,
                  "bw": MyDatasets.bw_files, "IBD_Chrone": MyDatasets.ibd_chrone_files,
                  "Male_vs_Female": MyDatasets.male_vs_female, "male_female": MyDatasets.male_vs_female,
@@ -131,74 +131,10 @@ class Main:
         elif self.dataset_name == "tcr" or self.dataset_name == "ISB" or self.dataset_name == "NIH":
             K = 20
         else:
-            K = 10
+            K = 3
         train_metric, val_metric, test_metric, min_train_val_metric, alpha_list = \
             trainer_and_tester.train_group_k_cross_validation(k=K)
         return train_metric, val_metric, test_metric, min_train_val_metric, alpha_list
-
-    # def turn_on_train(self):
-    #     kwargs = {}
-    #     my_tasks = MyTasks(tasks_dict, self.dataset_name)
-    #     my_datasets = MyDatasets(datasets_dict)
-    #
-    #     directory_name, mission, params_file_path = my_tasks.get_task_files(self.task_number)
-    #     result_directory_name = os.path.join(directory_name, "Result_After_Proposal")
-    #     # train_data_file_path, train_tag_file_path, test_data_file_path, test_tag_file_path = \
-    #     #     my_datasets.get_dataset_files(self.dataset_name)
-    #     train_data_file_path, train_tag_file_path, test_data_file_path, test_tag_file_path = \
-    #         my_datasets.microbiome_files(self.dataset_name)
-    #
-    #     print("Training-Validation Sets Graphs")
-    #     train_val_dataset = self.create_dataset(train_data_file_path, train_tag_file_path, mission)
-    #     print("Final_Test set Graphs")
-    #     test_dataset = self.create_dataset(test_data_file_path, test_tag_file_path, mission)
-    #
-    #     if mission == "yoram_attention":
-    #         algorithm = "node2vec"
-    #         print("Calculate embedding")
-    #         graphs_list = train_val_dataset.create_microbiome_graphs.graphs_list
-    #         X = find_embed(graphs_list, algorithm=algorithm)
-    #         kwargs = {'X': X}
-    #
-    #     train_val_dataset.update_graphs(**kwargs)
-    #     test_dataset.update_graphs(**kwargs)
-    #
-    #     trainer_and_tester = TrainTestValKTimes(self.RECEIVED_PARAMS, self.device, train_val_dataset, test_dataset,
-    #                                             result_directory_name, nni_flag=self.nni_mode,
-    #                                             geometric_or_not=self.geometric_mode, plot_figures=self.plot_figures)
-    #     train_metric, val_metric, test_metric, min_train_val_metric = trainer_and_tester.train_group_k_cross_validation(k=K)
-    #     return train_metric, val_metric, test_metric, min_train_val_metric
-
-    # def turn_on_train_abide_dataset(self, mission):
-    #     kwargs = {}
-    #     data_path = "rois_ho"
-    #     label_path = "Phenotypic_V1_0b_preprocessed1.csv"
-    #     phenotype_dataset = pd.read_csv("Phenotypic_V1_0b_preprocessed1.csv")
-    #     subject_list = [value for value in phenotype_dataset["FILE_ID"].tolist() if value != "no_filename"]
-    #     # The reason for random state is that the test dataset and train-validation dataset will always be the same
-    #     subject_list_train_val_index, subject_list_test_index = train_test_split(subject_list, test_size=0.3, random_state=0)
-    #
-    #     train_val_abide_dataset = AbideDataset(data_path, label_path, subject_list_train_val_index, mission)
-    #     test_abide_dataset = AbideDataset(data_path, label_path, subject_list_test_index, mission)
-    #
-    #     if mission == "yoram_attention":
-    #         algorithm = "node2vec"
-    #         print("Calculate embedding")
-    #         graphs_list = train_val_abide_dataset.graphs_list
-    #         X = find_embed(graphs_list, algorithm=algorithm)
-    #         kwargs = {'X': X}
-    #
-    #     print("ABIDE Dataset Training-Validation Sets Graphs")
-    #     train_val_abide_dataset.update_graphs(**kwargs)
-    #     print("ABIDE Dataset Final_Test set Graphs")
-    #     test_abide_dataset.update_graphs(**kwargs)
-    #     directory_name = ""
-    #     result_directory_name = os.path.join(directory_name, "Result_After_Proposal")
-    #     trainer_and_tester = TrainTestValKTimes(self.RECEIVED_PARAMS, self.device, train_val_abide_dataset, test_abide_dataset,
-    #                                             result_directory_name, nni_flag=self.nni_mode,
-    #                                             geometric_or_not=self.geometric_mode)
-    #     train_metric, val_metric, test_metric, min_train_val_metric = trainer_and_tester.train_group_k_cross_validation(k=K)
-    #     return train_metric, val_metric, test_metric, min_train_val_metric
 
 
 def set_arguments():
@@ -440,7 +376,95 @@ def tcr_runner_hyper_parameters(dataset_name, mission_number, cuda_number, nni_f
     all_missions_results_df = pd.DataFrame.from_dict(results_dict, orient='index')
     all_missions_results_df.to_csv(f"{mission_dict[mission_number]}_hyper_parameters_results_train_val_test_{d1}.csv")
 
+def run_grid_search(dataset_name, mission_number, cuda_number, hyper_parameters_dict):
+    device = f"cuda:{cuda_number}" if torch.cuda.is_available() else "cpu"
+    print("Device", device)
+    print("Mission", mission_dict[mission_number])
+    print("Dataset", dataset_name)
+    # RECEIVED_PARAMS = get_model_hyper_parameters(dataset_name, mission_number)
+    # print("Original Hyper-parameters", RECEIVED_PARAMS)
+    d1 = date.today().strftime("%d_%m_%Y")
+    results_file = open(f"{dataset_name}_{mission_dict[mission_number]}_hyper_parameters_results_train_val_test_{d1}.csv", "w")
+    headers = list(hyper_parameters_dict.keys()) + ["train_metric_mean", "val_metric_mean", "test_metric_mean",
+                                              "train_metric_std", "val_metric_std", "test_metric_std"]
+    headers_str = ",".join(headers)
+    results_file.write(f"{headers_str}\n")
+    hyper_parameters_names = list(hyper_parameters_dict.keys())
+    a = list(hyper_parameters_dict.values())
+    all_combination_hyper_parameters = list(itertools.product(*a))
+    random.shuffle(all_combination_hyper_parameters)
+    for hyper_parameters_set in tqdm(all_combination_hyper_parameters):
+        RECEIVED_PARAMS = {}
+        # create RECEIVED_PARAMS dict
+        for i, hyper_parameter in enumerate(hyper_parameters_set):
+            RECEIVED_PARAMS[hyper_parameters_names[i]] = hyper_parameter
+        print(RECEIVED_PARAMS)
+        try:
+            # run the model for mission and dataset and a set of hyper-parameters
+            main_runner = Main(dataset_name, mission_number, RECEIVED_PARAMS, device, nni_mode=False,
+                               geometric_mode=False, add_attributes=False, plot_figures=False)
+            return_lists = main_runner.play(kwargs)
+            result_file_name = f"{dataset_name}_{mission_dict[mission_number]}"
+            results_dealing(return_lists, nni_flag, RECEIVED_PARAMS, result_file_name)
+            # get models results
+            train_metric, val_metric, test_metric, _, alpha_list = return_lists
+            # calculate some statistics
+            mean_train_metric, std_train_metric = calc_mean_and_std(train_metric)
+            mean_val_metric, std_val_metric = calc_mean_and_std(val_metric)
+            mean_test_metric, std_test_metric = calc_mean_and_std(test_metric)
+            # result_str represents the line will be written to result file
+            result_str = ""
+            for i, (k, v) in enumerate(RECEIVED_PARAMS.items()):
+                result_str += str(v) + ","
+            result_str += str(mean_train_metric) + ","
+            result_str += str(mean_val_metric) + ","
+            result_str += str(mean_test_metric) + ","
+            result_str += str(std_train_metric) + ","
+            result_str += str(std_val_metric) + ","
+            result_str += str(std_test_metric)
+            result_str += "\n"
+            print("Test list", test_metric)
+            results_file.write(result_str)
+            # if len(alpha_list) > 0:
+            #     print("Alpha_list", alpha_list)
+            #     mean_alpha_value, std_alpha_value = calc_mean_and_std(alpha_list)
+            #     results_dict[thresh]["alpha_value_mean"] = mean_alpha_value
+            #     results_dict[thresh]["alpha_value_std"] = std_alpha_value
+        except Exception as e:
+            # raise
+            print(e)
+    results_file.close()
 
+def get_hyper_parameters_for_grid_search(mission):
+    hyper_parameters_dict = {}
+    if mission == 1:
+        hyper_parameters_dict = {"learning_rate": [1e-6, 16-5, 1e-4, 1e-3],
+                                 "batch_size": [8, 16, 32],
+                                 "dropout": [0.1, 0.2, 0.4, 0.5],
+                                 "activation": ["relu", "tanh"],
+                                 "regularization": [1e-6, 1e-4, 1e-3],
+                                 "layer_1": [16, 32, 128],
+                                 "layer_2": [16, 32, 128]}
+    elif mission in [2, 3, 7]:
+        hyper_parameters_dict = {"learning_rate": [1e-6, 16-5, 1e-4, 1e-3],
+                                 "batch_size": [8, 16, 32],
+                                 "dropout": [0.1, 0.2, 0.4, 0.5],
+                                 "activation": ["relu", "tanh"],
+                                 "regularization": [1e-6, 1e-4, 1e-3],
+                                 "layer_1": [16, 32, 128],
+                                 "layer_2": [16, 32, 128],
+                                 "preweight": [5, 8, 10, 12]}
+    elif mission == 4:
+        hyper_parameters_dict = {"learning_rate": [1e-6, 16-5, 1e-4, 1e-3],
+                                 "batch_size": [8, 16, 32],
+                                 "dropout": [0.1, 0.2, 0.4, 0.5],
+                                 "activation": ["relu", "tanh"],
+                                 "regularization": [1e-6, 1e-4, 1e-3],
+                                 "layer_1": [16, 32, 128],
+                                 "layer_2": [16, 32, 128],
+                                 "preweight": [5, 8, 10, 12],
+                                 "preweight2": [5, 8, 10, 12]}
+    return hyper_parameters_dict
 
 
 if __name__ == '__main__':
@@ -459,13 +483,16 @@ if __name__ == '__main__':
         # run_all_datasets_missions(cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
         # missions = [1,2,3,4,7,8]
         # run_all_missions(dataset_name, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes, missions, **kwargs)
-        runner(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes, **kwargs)
+        # runner(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes, **kwargs)
 
         # tcr_runner_hyper_parameters(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes,
         #                         **kwargs)
 
         # datasets = ["nut", "peanut"]
         # run_all_dataset(3, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes, datasets, **kwargs)
+        # # For grid search
+        hyper_parameters_dict = get_hyper_parameters_for_grid_search(mission_number)
+        run_grid_search(dataset_name, mission_number, cuda_number, hyper_parameters_dict)
     except Exception as e:
         LOG.exception(e)
         raise
