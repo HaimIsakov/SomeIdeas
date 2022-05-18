@@ -435,6 +435,7 @@ def run_grid_search(dataset_name, mission_number, cuda_number, hyper_parameters_
             print(e)
     results_file.close()
 
+
 def get_hyper_parameters_for_grid_search(mission):
     hyper_parameters_dict = {}
     if mission == 1:
@@ -483,7 +484,7 @@ if __name__ == '__main__':
         # run_all_datasets_missions(cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
         # missions = [1,2,3,4,7,8]
         # run_all_missions(dataset_name, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes, missions, **kwargs)
-        # runner(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes, **kwargs)
+        runner(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes, **kwargs)
 
         # tcr_runner_hyper_parameters(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes,
         #                         **kwargs)
@@ -491,8 +492,8 @@ if __name__ == '__main__':
         # datasets = ["nut", "peanut"]
         # run_all_dataset(3, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes, datasets, **kwargs)
         # # For grid search
-        hyper_parameters_dict = get_hyper_parameters_for_grid_search(mission_number)
-        run_grid_search(dataset_name, mission_number, cuda_number, hyper_parameters_dict)
+        # hyper_parameters_dict = get_hyper_parameters_for_grid_search(mission_number)
+        # run_grid_search(dataset_name, mission_number, cuda_number, hyper_parameters_dict)
     except Exception as e:
         LOG.exception(e)
         raise
