@@ -157,9 +157,9 @@ class TrainTestValKTimes:
         adj_mat_path = f"tcr_corr_mat_{numrec}_with_sample_size_{len(train_files)}_run_number_{i}"
         outlier = train.new_outlier_finder(numrec, pickle_name=outliers_pickle_name)  # find outliers and save to pickle
         # create distance matrix between the projection of the found golden tcrs
-        create_distance_matrix(self.device, outliers_file=outliers_pickle_name, adj_mat=adj_mat_path)
+        # create_distance_matrix(self.device, outliers_file=outliers_pickle_name, adj_mat=adj_mat_path)
 
-        # corr_df_between_golden_tcrs = self.create_corr_tcr_network(train_idx, file_directory_path, outlier, adj_mat_path)
+        corr_df_between_golden_tcrs = self.create_corr_tcr_network(train_idx, file_directory_path, outlier, adj_mat_path)
         self.train_val_dataset.run_number = i
         self.test_dataset.run_number = i
         # train_subject_list = [self.train_val_dataset.subject_list[id] for id in train_idx]
@@ -218,8 +218,8 @@ class TrainTestValKTimes:
             # For Tcr dataset
             if "TCR" in str(self.train_val_dataset):
                 train_idx = self.tcr_dataset_dealing(train_idx, i)
-                train_subject_list = [self.train_val_dataset.subject_list[id] for id in train_idx]
-                self.train_val_dataset.subject_list = train_subject_list
+                # train_subject_list = [self.train_val_dataset.subject_list[id] for id in train_idx]
+                # self.train_val_dataset.subject_list = train_subject_list
             # Datasets
             train_data = torch.utils.data.Subset(self.train_val_dataset, train_idx)
             print("len of train data", len(train_data))

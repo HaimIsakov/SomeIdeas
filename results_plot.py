@@ -34,12 +34,45 @@ def create_bar_plot(df, title):
     plt.savefig(f'{save_file}.png')
     plt.show()
 
+def create_bar_plot_new(df, rows2keep, cols2delete, title):
+    df.drop(cols2delete, axis=1, inplace=True)
+    df = df.loc[rows2keep]
+    columns = list(df.columns)
+    mean_cols = []
+    std_cols = []
+    for i, col in enumerate(columns):
+        if i % 2 == 0:
+            mean_cols.append(col)
+        else:
+            std_cols.append(col)
+    mean_df = df[mean_cols]
+    std_df = df[std_cols]
+    std_df.columns = mean_df.columns
+    fig, ax = plt.subplots()
+    b = mean_df.plot.bar(yerr=std_df, ax=ax, capsize=1)
+    plt.xlabel("Dataset")
+    plt.ylim((0.4, 1))
+    plt.ylabel("Auc")
+    save_file = f"summary_{title}"
+    plt.title(save_file)
+    ax.legend(loc='center left', bbox_to_anchor=(0.05, 1.2), ncol=3, fancybox=True, shadow=True)
+
+    plt.tight_layout(pad=1)
+    plt.savefig(f'{save_file}.png')
+    plt.show()
+
 
 if __name__ == "__main__":
     # for mission in ["just_graph", "graph_and_values", "double_gcn_layer", "concat_graph_and_values"]:
     #     df = pd.read_csv(f"{mission}_all_datasets_results_train_val_test_09_04_2022.csv", index_col=0)
     #     create_bar_plot(df, f"{mission}")
 
-    corr_mat_df = pd.read_csv("tcr_corr_mat_125_with_sample_size_547_run_number_0.csv", index_col=0)
-    histogram(corr_mat_df)
+    # corr_mat_df = pd.read_csv("tcr_corr_mat_125_with_sample_size_547_run_number_0.csv", index_col=0)
+    # histogram(corr_mat_df)
     # heat_map(corr_mat_df)
+
+    df = pd.read_csv("all_models_all_datasets_22_05_2022.csv", index_col=0)
+    rows2keep = ["IBD", "CD-IBD", "Nugent", "Cirrhosis", "BW", "Milk"]
+    cols2delete = []
+    title = "new"
+    create_bar_plot_new(df, rows2keep, cols2delete, title)
