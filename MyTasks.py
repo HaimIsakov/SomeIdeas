@@ -40,7 +40,7 @@ class MyTasks:
         params_file_path = os.path.join("Missions", directory_name, 'params', "best_params", f"{self.dataset}_{mission}.json")
         if not os.path.isfile(params_file_path):
             print("Use default params file")
-            params_file_path = os.path.join("Missions", directory_name, 'Models', f"{mission}_params_file.json")
+            params_file_path = os.path.join("Missions", "ValuesAndGraphStructure", 'Models', f"graph_and_values_params_file.json")
         return directory_name, mission, params_file_path
 
     # @staticmethod

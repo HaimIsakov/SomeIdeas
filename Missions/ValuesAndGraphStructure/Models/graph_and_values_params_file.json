@@ -8,4 +8,5 @@
 "layer_2":23,
 "embedding_algorithm":"node2vec",
 "dropout":0.45,
-"numrec": 30}
+  "numrec":125,
+  "thresh":0.2}

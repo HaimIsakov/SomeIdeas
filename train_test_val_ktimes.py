@@ -138,7 +138,7 @@ class TrainTestValKTimes:
         else:
             random_sample_from_train = int(self.kwargs["samples"])
         print(f"\nTake only {random_sample_from_train} from the training set\n")
-
+        mission = self.train_val_dataset.mission
         # if not self.nni_flag:
         print("Here, we ----do---- calculate again the golden-tcrs")
         train = HistoMaker("train", random_sample_from_train)
@@ -153,8 +153,8 @@ class TrainTestValKTimes:
         train.save_data(file_directory_path, files=train_files)
         # train.outlier_finder(i, numrec=numrec, cutoff=cutoff)
         # save files' names
-        outliers_pickle_name = f"tcr_outliers_{numrec}_with_sample_size_{len(train_files)}_run_number_{i}"
-        adj_mat_path = f"tcr_corr_mat_{numrec}_with_sample_size_{len(train_files)}_run_number_{i}"
+        outliers_pickle_name = f"tcr_outliers_{numrec}_with_sample_size_{len(train_files)}_run_number_{i}_mission_{mission}"
+        adj_mat_path = f"tcr_corr_mat_{numrec}_with_sample_size_{len(train_files)}_run_number_{i}_mission_{mission}"
         outlier = train.new_outlier_finder(numrec, pickle_name=outliers_pickle_name)  # find outliers and save to pickle
         # create distance matrix between the projection of the found golden tcrs
         # create_distance_matrix(self.device, outliers_file=outliers_pickle_name, adj_mat=adj_mat_path)

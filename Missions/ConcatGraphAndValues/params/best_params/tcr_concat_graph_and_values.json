@@ -9,4 +9,4 @@
 "embedding_algorithm":"node2vec",
 "dropout":0.0354117420779439,
 "numrec": 125,
-"thresh": 0.1}
+"thresh": 0.2}

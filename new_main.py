@@ -445,7 +445,9 @@ def get_hyper_parameters_for_grid_search(mission):
                                  "activation": ["relu", "tanh"],
                                  "regularization": [1e-6, 1e-4, 1e-3],
                                  "layer_1": [16, 32, 128],
-                                 "layer_2": [16, 32, 128]}
+                                 "layer_2": [16, 32, 128],
+                                 "numrec": [125],
+                                 "thresh": [0.2]}
     elif mission in [2, 3, 7]:
         hyper_parameters_dict = {"learning_rate": [1e-6, 16-5, 1e-4, 1e-3],
                                  "batch_size": [8, 16, 32],
@@ -454,7 +456,9 @@ def get_hyper_parameters_for_grid_search(mission):
                                  "regularization": [1e-6, 1e-4, 1e-3],
                                  "layer_1": [16, 32, 128],
                                  "layer_2": [16, 32, 128],
-                                 "preweight": [5, 8, 10, 12]}
+                                 "preweight": [5, 8, 10, 12],
+                                 "numrec": [125],
+                                 "thresh": [0.2]}
     elif mission == 4:
         hyper_parameters_dict = {"learning_rate": [1e-6, 16-5, 1e-4, 1e-3],
                                  "batch_size": [8, 16, 32],
@@ -464,7 +468,22 @@ def get_hyper_parameters_for_grid_search(mission):
                                  "layer_1": [16, 32, 128],
                                  "layer_2": [16, 32, 128],
                                  "preweight": [5, 8, 10, 12],
-                                 "preweight2": [5, 8, 10, 12]}
+                                 "preweight2": [5, 8, 10, 12],
+                                 "numrec": [125],
+                                 "thresh": [0.2]}
+    elif mission == 6:
+        hyper_parameters_dict = {"learning_rate": [1e-6, 16-5, 1e-4, 1e-3],
+                                 "batch_size": [8, 16, 32],
+                                 "dropout": [0.1, 0.2, 0.4, 0.5],
+                                 "activation": ["relu", "tanh"],
+                                 "regularization": [1e-6, 1e-4, 1e-3],
+                                 "layer_1": [16, 32, 128],
+                                 "layer_2": [16, 32, 128],
+                                 "numrec": [125],
+                                 "thresh": [0.2],
+                                 "embedding_algorithm": ["node2vec", "HOPE"],
+                                 "embedding_size": [128]}
+    # need to add for UGAN method hyper parameters, and embedding_algorithm option
     return hyper_parameters_dict
 
 
@@ -484,16 +503,16 @@ if __name__ == '__main__':
         # run_all_datasets_missions(cuda_number, nni_flag, pytorch_geometric_mode, add_attributes)
         # missions = [1,2,3,4,7,8]
         # run_all_missions(dataset_name, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes, missions, **kwargs)
-        runner(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes, **kwargs)
+        # runner(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes, **kwargs)
 
         # tcr_runner_hyper_parameters(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes,
         #                         **kwargs)
 
         # datasets = ["nut", "peanut"]
         # run_all_dataset(3, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes, datasets, **kwargs)
-        # # For grid search
-        # hyper_parameters_dict = get_hyper_parameters_for_grid_search(mission_number)
-        # run_grid_search(dataset_name, mission_number, cuda_number, hyper_parameters_dict)
+        # For grid search
+        hyper_parameters_dict = get_hyper_parameters_for_grid_search(mission_number)
+        run_grid_search(dataset_name, mission_number, cuda_number, hyper_parameters_dict)
     except Exception as e:
         LOG.exception(e)
         raise
