@@ -27,10 +27,12 @@ def get_hyper_parameters_as_dict(params_file):
 
 
 if __name__ == '__main__':
-    for dirpath, dirnames, filenames in os.walk(os.path.join("YoramAttention", "reported_results")):
-        for file in filenames:
-            params_dict = get_hyper_parameters_as_dict(os.path.join("YoramAttention","reported_results", file))
-            file_name = file.split("_val_")[0]
-            with open(file_name + ".json", 'w') as fp:
-                json.dump(dict(sorted(params_dict.items())), fp)
-
+    # for dirpath, dirnames, filenames in os.walk(os.path.join("YoramAttention", "reported_results")):
+    #     for file in filenames:
+    #         params_dict = get_hyper_parameters_as_dict(os.path.join("YoramAttention","reported_results", file))
+    #         file_name = file.split("_val_")[0]
+    #         with open(file_name + ".json", 'w') as fp:
+    #             json.dump(dict(sorted(params_dict.items())), fp)
+    params_file = "nugent_concat_graph_and_values_val_mean_0.982_test_mean_0.941.csv"
+    parames_dict = get_hyper_parameters_as_dict(params_file)
+    x=1

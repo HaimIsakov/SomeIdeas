@@ -89,9 +89,12 @@ class TrainTestValOneTime:
                 all_models_output.append(pred)
                 all_real_tags.append(true_labels)
             metric_result = roc_auc_score(true_labels, pred)
+            binary_pred = [1 if p>=0.5 else 0 for p in pred]
+            f1_micro_result = f1_score(true_labels, binary_pred, average='micro')
+            f1_macro_result = f1_score(true_labels, binary_pred, average='macro')
         else:
             metric_result = f1_score(true_labels, pred, average='macro')
-        return metric_result
+        return metric_result, f1_micro_result, f1_macro_result
 
     # def print_sizes(self, model, input_tensor1, input_tensor2):
     #     output = input_tensor
@@ -109,7 +112,10 @@ class TrainTestValOneTime:
         counter = 0
 
         min_val_loss = float("inf")
-        early_training_results = {'val_auc': 0, 'train_auc': 0, 'test_auc': 0, "all_test_together": 0}
+        early_training_results = {'val_auc': 0, 'train_auc': 0, 'test_auc': 0, "all_test_together": 0,
+                                  'test_f1_micro': 0, 'test_f1_macro': 0,
+                                  'val_f1_micro': 0, 'val_f1_macro': 0,
+                                  'train_f1_micro': 0, 'train_f1_macro': 0}
         # run the main training loop
         for epoch in range(epochs):
             running_loss = 0
@@ -132,11 +138,12 @@ class TrainTestValOneTime:
                 print("Alpha value:", self.model.alpha.item())
             except:
                 pass
-            average_train_loss, train_auc, val_loss, val_auc = self.record_evaluations(batched_train_loss)
+            average_train_loss, train_auc, val_loss, val_auc, train_f1_micro, train_f1_macro, val_f1_micro, val_f1_macro\
+                = self.record_evaluations(batched_train_loss)
             average_running_loss = running_loss / len(self.train_loader.dataset)
             # print("New train average Loss", average_running_loss)
 
-            test_auc = self.calc_auc(self.test_loader, job=TEST_JOB)
+            test_auc, test_f1_micro, test_f1_macro = self.calc_auc(self.test_loader, job=TEST_JOB)
 
             print("Early-stopping according to validation auc")
             if val_auc > max_val_auc:
@@ -145,6 +152,9 @@ class TrainTestValOneTime:
                 counter = 0
                 early_training_results['val_auc'], early_training_results['val_loss'] = val_auc, val_loss
                 early_training_results['train_auc'], early_training_results['train_loss'] = train_auc, average_running_loss
+                early_training_results['val_f1_micro'], early_training_results['val_f1_macro'] = val_f1_micro, val_f1_macro
+                early_training_results['train_f1_micro'], early_training_results['train_f1_macro'] = train_f1_micro, train_f1_macro
+
                 # best_model = self.model.state_dict()
                 best_model = copy.deepcopy(self.model)
             elif self.early_stopping and counter == EARLY_STOPPING_PATIENCE:
@@ -152,7 +162,8 @@ class TrainTestValOneTime:
                 # self.model.load_state_dict(best_model)
                 # self.model.get_attention_hist(self.model.attention,  f"epoch{epoch}_dataset_cirrhosis", calc=True)
                 self.model = best_model
-                early_training_results['test_auc'] = self.calc_auc(self.test_loader, job=TEST_JOB)
+                early_training_results['test_auc'], early_training_results['test_f1_micro'], \
+                early_training_results['test_f1_macro'] = self.calc_auc(self.test_loader, job=TEST_JOB)
                 early_training_results['last_alpha_value'] = self.get_alpha_value()
                 # break
                 return early_training_results
@@ -189,7 +200,8 @@ class TrainTestValOneTime:
         # calculate test_auc if the model run for all epochs (i.e.: early stopping did not occur)
         # self.model.load_state_dict(best_model)
         self.model = best_model
-        early_training_results['test_auc'] = self.calc_auc(self.test_loader, job=TEST_JOB)
+        early_training_results['test_auc'], early_training_results['test_f1_micro'], \
+        early_training_results['test_f1_macro'] = self.calc_auc(self.test_loader, job=TEST_JOB)
         early_training_results['last_alpha_value'] = self.get_alpha_value()
         # early_training_results = self.calc_auc_from_all_comparison(early_training_results)
         return early_training_results
@@ -203,7 +215,8 @@ class TrainTestValOneTime:
             pass
 
     def calc_auc_from_all_comparison(self, early_training_results):
-        early_training_results['test_auc'] = self.calc_auc(self.test_loader, job=TEST_JOB)
+        early_training_results['test_auc'], early_training_results['test_f1_micro'], \
+        early_training_results['test_f1_macro'] = self.calc_auc(self.test_loader, job=TEST_JOB)
         real_tags = np.ravel(np.array(all_real_tags))
         models_output = np.ravel(np.array(all_models_output))
         print("all_real_tags", real_tags)
@@ -218,13 +231,13 @@ class TrainTestValOneTime:
     def record_evaluations(self, batched_train_loss):
         average_train_loss = np.average(batched_train_loss)
         self.train_loss_vec.append(average_train_loss)  # record training loss
-        train_auc = self.calc_auc(self.train_loader, TRAIN_JOB)
-        val_auc = self.calc_auc(self.val_loader, VAL_JOB)
+        train_auc, train_f1_micro, train_f1_macro = self.calc_auc(self.train_loader, TRAIN_JOB)
+        val_auc, val_f1_micro, val_f1_macro = self.calc_auc(self.val_loader, VAL_JOB)
         self.train_auc_vec.append(train_auc)
         val_loss = self.calc_loss_test(self.val_loader, VAL_JOB)
         self.val_auc_vec.append(val_auc)
         self.val_loss_vec.append(val_loss)
-        return average_train_loss, train_auc, val_loss, val_auc
+        return average_train_loss, train_auc, val_loss, val_auc, train_f1_micro, train_f1_macro, val_f1_micro, val_f1_macro
 
     def get_optimizer(self):
         learning_rate = self.RECEIVED_PARAMS['learning_rate']

@@ -1,15 +1,18 @@
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
 
 class TwoLayersGCNValuesGraph(nn.Module):
-    def __init__(self, nodes_number, feature_size, RECEIVED_PARAMS, device):
+    def __init__(self, nodes_number, feature_size, RECEIVED_PARAMS, device, normalize_adj=False, num_classes=2):
         super(TwoLayersGCNValuesGraph, self).__init__()
         self.feature_size = feature_size
         self.nodes_number = nodes_number
         self.device = device
         self.RECEIVED_PARAMS = RECEIVED_PARAMS
+        self.normalize_adj = normalize_adj
+        self.minimum = 1e-10
 
         # self.pre_weighting = nn.Linear(self.feature_size, int(self.RECEIVED_PARAMS["preweight"]))
         self.pre_weighting = nn.Linear(self.feature_size, int(self.RECEIVED_PARAMS["preweight"]))
@@ -24,14 +27,13 @@ class TwoLayersGCNValuesGraph(nn.Module):
         self.fc1 = nn.Linear(gcn2_dim * self.nodes_number,
                              int(self.RECEIVED_PARAMS["layer_1"]))
         self.fc2 = nn.Linear(int(self.RECEIVED_PARAMS["layer_1"]), int(self.RECEIVED_PARAMS["layer_2"]))
-        self.fc3 = nn.Linear(int(self.RECEIVED_PARAMS["layer_2"]), 1)
+        self.fc3 = nn.Linear(int(self.RECEIVED_PARAMS["layer_2"]), num_classes)
         self.activation_func = self.RECEIVED_PARAMS['activation']
         self.dropout = nn.Dropout(p=self.RECEIVED_PARAMS["dropout"])
 
-        self.alpha = nn.Parameter(torch.rand(1, requires_grad=True, device=self.device))
+        noise = np.random.normal(0, 0.1)
+        self.alpha = nn.Parameter(torch.tensor([1+noise], requires_grad=True, device=self.device).float())
         self.activation_func_dict = {'relu': nn.ReLU(), 'elu': nn.ELU(), 'tanh': nn.Tanh()}
-        if self.feature_size > 1:
-            self.transform_mat_to_vec = nn.Linear(self.feature_size, 1)
 
         self.gcn_layer = nn.Sequential(
             self.pre_weighting,
@@ -52,19 +54,25 @@ class TwoLayersGCNValuesGraph(nn.Module):
     def forward(self, x, adjacency_matrix):
         a, b, c = adjacency_matrix.shape
         d, e, f = x.shape
+        if self.alpha.item() < self.minimum:
+            print("In min_value")
+            # print("alpha value", self.alpha.item(), "min_value", self.min_value.item())
+            # self.alpha = deepcopy(self.min_value)
+            self.alpha.data = torch.clamp(self.alpha, min=self.minimum)
+            print("new alpha", self.alpha.item())
+            # alpha_I = I * self.min_value.expand_as(I)  # min_value * I
 
         I = torch.eye(b).to(self.device)
         # multiply the matrix adjacency_matrix by (learnt scalar) self.alpha
         alpha_I = I * self.alpha.expand_as(I)  # 𝛼I
-        normalized_adjacency_matrix = self.calculate_adjacency_matrix(adjacency_matrix)  # Ã
+        if self.normalize_adj:
+            normalized_adjacency_matrix = self.calculate_adjacency_matrix(adjacency_matrix)  # Ã
+        else:
+            normalized_adjacency_matrix = adjacency_matrix
+
         alpha_I_plus_A = alpha_I + normalized_adjacency_matrix  # 𝛼I + Ã
 
-        if self.feature_size > 1:
-            # For abide dataset where the feature matrix is matrix. We want to transform the matrix into a vector.
-            x_input = self.transform_mat_to_vec(x)
-            x_input = torch.matmul(alpha_I_plus_A, x_input)  # (𝛼I + Ã)·x
-        else:
-            x_input = torch.matmul(alpha_I_plus_A, x)  # (𝛼I + Ã)·x
+        x_input = torch.matmul(alpha_I_plus_A, x)  # (𝛼I + Ã)·x
         # First GCN Layer
         x_input = self.gcn_layer(x_input)
         # Second GCN Layer

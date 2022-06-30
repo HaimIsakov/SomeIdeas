@@ -49,7 +49,7 @@ def create_bar_plot_new(df, rows2keep, cols2delete, title):
     std_df = df[std_cols]
     std_df.columns = mean_df.columns
     fig, ax = plt.subplots()
-    b = mean_df.plot.bar(yerr=std_df, ax=ax, capsize=1)
+    b = mean_df.plot.bar(yerr=std_df, ax=ax, capsize=0.5)
     plt.xlabel("Dataset")
     plt.ylim((0.4, 1))
     plt.ylabel("Auc")
@@ -62,6 +62,15 @@ def create_bar_plot_new(df, rows2keep, cols2delete, title):
     plt.show()
 
 
+def concat_mean_std(df):
+    for col in list(df.columns):
+        if "std" not in col:
+            print(col)
+            df[col] = df.apply(lambda x: str(x[col]) + "±" + str(x[col +" (std)"]), axis=1)
+    df.drop([col for col in df.columns if "std" in col], axis=1, inplace=True)
+    df.to_csv("all_models_results_06_06_concat.csv")
+    x=1
+
 if __name__ == "__main__":
     # for mission in ["just_graph", "graph_and_values", "double_gcn_layer", "concat_graph_and_values"]:
     #     df = pd.read_csv(f"{mission}_all_datasets_results_train_val_test_09_04_2022.csv", index_col=0)
@@ -71,8 +80,11 @@ if __name__ == "__main__":
     # histogram(corr_mat_df)
     # heat_map(corr_mat_df)
 
-    df = pd.read_csv("all_models_all_datasets_22_05_2022.csv", index_col=0)
-    rows2keep = ["IBD", "CD-IBD", "Nugent", "Cirrhosis", "BW", "Milk"]
-    cols2delete = []
-    title = "new"
-    create_bar_plot_new(df, rows2keep, cols2delete, title)
+    # df = pd.read_csv("all_models_06_06.csv", index_col=0)
+    # rows2keep = ["IBD", "CD-IBD", "Nugent", "Cirrhosis", "BW", "Milk", "Nut", "Peanut", "MF", "abide",
+    #              "TCRs"]
+    # cols2delete = []
+    # title = "all_models_06_06"
+    # create_bar_plot_new(df, rows2keep, cols2delete, title)
+    df = pd.read_csv("all_models_06_06.csv", index_col=0)
+    concat_mean_std(df)
