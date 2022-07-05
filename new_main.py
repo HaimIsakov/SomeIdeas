@@ -133,7 +133,7 @@ class Main:
         elif self.dataset_name == "tcr" or self.dataset_name == "ISB" or self.dataset_name == "NIH":
             K = 5
         else:
-            K = 2
+            K = 10
         return_lists = trainer_and_tester.train_group_k_cross_validation(k=K)
         return return_lists
 
@@ -244,10 +244,12 @@ def rerun_from_grid_search(directory, cuda_number, dataset_name, mission_number,
             RECEIVED_PARAMS = get_hyper_parameters_as_dict(path)
             return_lists = runner_backbone(RECEIVED_PARAMS, device, dataset_name, mission_number, nni_flag,
                                            pytorch_geometric_mode, add_attributes, **kwargs)
-            train_metric, val_metric, test_metric, _, alpha_list = return_lists
-            mean_val_metric, std_val_metric = calc_mean_and_std(val_metric)
+            train_auc, val_auc, test_auc, min_train_val_metric, alpha_list, \
+            train_f1_micro, val_f1_micro, test_f1_micro, \
+            train_f1_macro, val_f1_macro, test_f1_macro = return_lists
+            mean_val_metric, std_val_metric = calc_mean_and_std(val_auc)
             if mean_val_metric > max_mean_val_metric:
-                print("New max_mean_val_metric", max_mean_val_metric, "+-", std_val_metric)
+                print("New max_mean_val_metric", mean_val_metric, "+-", std_val_metric)
                 max_mean_val_metric = mean_val_metric
                 max_results_params = RECEIVED_PARAMS
                 print("New Hyper parameters", max_results_params)
@@ -305,7 +307,7 @@ def run_all_dataset(mission_number, cuda_number, nni_flag, pytorch_geometric_mod
                                                    "std_test_f1_macro": std_test_f1_macro,
                                                    }
             print("Test list", test_auc)
-            if len(alpha_list) > 0:
+            if len(alpha_list) > 0 and mission_number != 1:
                 print("Alpha_list", alpha_list)
                 mean_alpha_value, std_alpha_value = calc_mean_and_std(alpha_list)
                 datasets_results_dict[dataset_name]["alpha_value_mean"] = mean_alpha_value
@@ -577,17 +579,20 @@ if __name__ == '__main__':
         # tcr_runner_hyper_parameters(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes,
         #                         **kwargs)
 
-        # datasets = ["nut", "peanut"]
-        # datasets = ["IBD"]
-        run_all_dataset(3, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes, datasets, **kwargs)
+        # datasets = ["nut", "peanut", "male_female", "milk", "Cirrhosis"]
+        run_all_dataset(4, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes, datasets, **kwargs)
+        run_all_dataset(7, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes, datasets, **kwargs)
+
         # # For grid search
         # hyper_parameters_dict = get_hyper_parameters_for_grid_search(mission_number)
         # run_grid_search(dataset_name, mission_number, cuda_number, hyper_parameters_dict)
 
         # For rerun from grid search
-        # directory = os.path.join("Missions", "ConcatGraphAndValues", "params", "3best_from_grid_search", dataset_name)
-        # rerun_from_grid_search(directory, cuda_number, dataset_name, mission_number, nni_flag=False,
-        #                        pytorch_geometric_mode=False, add_attributes=False, **kwargs)
+        # datasets = ["Cirrhosis", "IBD", "bw", "nugent", "milk"]
+        # for dataset_name in datasets:
+        #     directory = os.path.join("Missions", "DoubleGcnLayers", "params", "3best_from_grid_search", dataset_name)
+        #     rerun_from_grid_search(directory, cuda_number, dataset_name, mission_number, nni_flag=False,
+        #                            pytorch_geometric_mode=False, add_attributes=False, **kwargs)
     except Exception as e:
         # LOG.exception(e)
         raise

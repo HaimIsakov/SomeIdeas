@@ -10,9 +10,11 @@ from torch import Tensor
 from tqdm import tqdm
 
 
-class TCRDataset(Dataset):
-    def __init__(self, dataset_name, data_path, label_path, subject_list, mission, graph_model):
-        self.data_path = data_path
+class HLA_TCR(Dataset):
+    def __init__(self, dataset_name, train_data_path, test_data_path, label_path, subject_list, mission, graph_model,
+                 allele, dall):
+        self.train_data_path = train_data_path
+        self.test_data_path = test_data_path
         self.label_path = label_path
         self.subject_list = subject_list
         self.dataset_name = dataset_name if dataset_name != "tcr" else "TCR"
@@ -20,6 +22,9 @@ class TCRDataset(Dataset):
         self.values_dict = None
         self.networks_dict = None
         self.graph_model = graph_model
+        self.allele = allele
+        self.dall = dall
+
         self.label_dict = self.load_or_create_label_dict()
         self.dataset_dict = {}
         self.mission = mission
@@ -75,8 +80,8 @@ class TCRDataset(Dataset):
         # if self.graph_model == "projection":
         #     np.fill_diagonal(network_values, 1)
         #     TODO: Make the comment to real code when running the first version of tcrs' graphs creation
-            # network_values = 1 / network_values
-            # np.fill_diagonal(network_values, 0)
+        # network_values = 1 / network_values
+        # np.fill_diagonal(network_values, 0)
         # else:
         #     np.fill_diagonal(network_values, 0)
         # adj_mat_df = pd.DataFrame(network_values, index=distance_mat_df.index, columns=distance_mat_df.index)
@@ -104,7 +109,13 @@ class TCRDataset(Dataset):
                                bar_format="{l_bar}%s{bar}%s{r_bar}" % (Fore.LIGHTGREEN_EX, Fore.RESET)):
             # file_path = os.path.join(self.data_path, f"final_{subject}.csv")
             # tcr_sample_df = pd.read_csv(file_path, index_col=0)
-            file_path = os.path.join(self.data_path, subject + ".csv")
+            # file_path = os.path.join(self.data_path, subject + ".csv")
+            if subject in self.dall:
+                file_path = os.path.join(self.dall[subject])
+            else:
+                continue
+
+            # file_path = self.dall[subject]
             samples_df = pd.read_csv(file_path, usecols=["combined", "frequency"])
             no_rep_sample_df = samples_df.groupby("combined").sum()  # sum the repetitions
             cur_sample_tcrs = set(list(no_rep_sample_df.index))
@@ -132,12 +143,8 @@ class TCRDataset(Dataset):
         return networks_dict, values_dict
 
     def load_or_create_label_dict(self):
-        label_df = pd.read_csv(self.label_path, usecols=["sample", 'status'])
-        label_df["sample"] = label_df["sample"] + "_" + label_df['status']
-        label_df.set_index("sample", inplace=True)
-        label_df = label_df.loc[self.subject_list]
-        label_df["status"] = label_df["status"].map({"negative": 0, "positive": 1})
-        label_dict = label_df.to_dict()['status']
+        label_df = pd.read_csv(self.label_path, index_col=0)
+        label_dict = label_df.to_dict()[self.allele]
         return label_dict
 
     def calc_golden_tcrs(self, adj_mat_path=None):

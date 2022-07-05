@@ -11,7 +11,10 @@ def get_train_graphs_list(train_data):
 
 
 def get_labels_distribution(data_loader):
-    dataset_dict = data_loader.dataset.dataset.dataset_dict
+    try:
+        dataset_dict = data_loader.dataset.dataset.dataset_dict
+    except:
+        dataset_dict = data_loader.dataset.dataset_dict
     indices = data_loader.dataset.indices
     label_dict = {}
     for index in indices:

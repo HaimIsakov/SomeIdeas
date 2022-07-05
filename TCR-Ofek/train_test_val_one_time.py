@@ -14,8 +14,8 @@ VAL_JOB = 'validation'
 EARLY_STOPPING_PATIENCE = 20
 SCHEDULER_PATIENCE = 7
 SCHEDULER_FACTOR = 0.75
-all_models_output = []
-all_real_tags = []
+# all_models_output = []
+# all_real_tags = []
 
 
 class TrainTestValOneTime:
@@ -68,10 +68,28 @@ class TrainTestValOneTime:
                     pred += output.squeeze(dim=1).tolist()
         if self.num_classes == 1:
             # for the calculation of auc on all
-            all_models_output.append(pred)
-            all_real_tags.append(true_labels)
+            # all_models_output.append(pred)
+            # all_real_tags.append(true_labels)
+            # For the regular auc calculation
             metric_result = roc_auc_score(true_labels, pred)
         return metric_result
+
+    def pred_for_all_auc(self, data_loader, all_models_output, all_real_tags, job=VAL_JOB):
+        self.model.eval()
+        true_labels = []
+        pred = []
+        with torch.no_grad():
+            for data, adjacency_matrix, target in data_loader:
+                data, adjacency_matrix, target = data.to(self.device), adjacency_matrix.to(self.device), \
+                                                 target.to(self.device)
+                output = self.model(data, adjacency_matrix)
+                true_labels += target.tolist()
+                output = torch.sigmoid(output)
+                pred += output.squeeze(dim=1).tolist()
+                # for the calculation of auc on all
+                all_models_output.append(pred)
+                all_real_tags.append(true_labels)
+
 
     def train(self):
         optimizer = self.get_optimizer()

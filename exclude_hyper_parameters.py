@@ -6,11 +6,15 @@ def get_hyper_parameters_as_dict(params_file):
     f = open(params_file, "r")
     parames_dict = {}
     c = 0
+    previous_line = ""
     for line in f:
-        if line == "\n":
-            c += 1
-        if c == 2:
+        # if line == "\n":
+        #     c += 1
+        # if c == 2:
+        #     break
+        if line == "\n" and previous_line == "\n":
             break
+        previous_line = line
 
     for line in f:
         x = line.split(",")
@@ -33,6 +37,8 @@ if __name__ == '__main__':
     #         file_name = file.split("_val_")[0]
     #         with open(file_name + ".json", 'w') as fp:
     #             json.dump(dict(sorted(params_dict.items())), fp)
-    params_file = "nugent_concat_graph_and_values_val_mean_0.982_test_mean_0.941.csv"
+    # params_file = "nugent_graph_and_values_val_mean_0.974_test_mean_0.971.csv"
+    params_file = "nugent_yoram_attention_val_mean_0.992_test_mean_0.961.csv"
+
     parames_dict = get_hyper_parameters_as_dict(params_file)
     x=1

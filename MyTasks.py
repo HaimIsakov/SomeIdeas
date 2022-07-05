@@ -47,21 +47,25 @@ class MyTasks:
     def double_gcn_layers(self):
         directory_name = "DoubleGcnLayers"
         mission = 'double_gcn_layer'
-        params_file_path = os.path.join("Missions", directory_name, 'params', "best_params", f"{self.dataset}_{mission}.json")
+        # params_file_path = os.path.join("Missions", directory_name, 'params', "best_params", f"{self.dataset}_{mission}.json")
+        params_file_path = os.path.join("Missions", directory_name, 'params', "best_params", f"params_{self.dataset}_{mission}.json")
         # params_file_path = os.path.join("ValuesAndGraphStructure", 'Models', f"{mission}_params_file.json")
         if not os.path.isfile(params_file_path):
             print("Use default params file")
             params_file_path = os.path.join("Missions", "ValuesAndGraphStructure", 'Models', f"graph_and_values_params_file.json")
+        print("params_file_path", params_file_path)
         return directory_name, mission, params_file_path
 
     # @staticmethod
     def concat_graph_and_values(self):
         directory_name = "ConcatGraphAndValues"
         mission = 'concat_graph_and_values'
-        params_file_path = os.path.join("Missions", directory_name, 'params', "best_params", f"{self.dataset}_{mission}.json")
+        # params_file_path = os.path.join("Missions", directory_name, 'params', "best_params", f"{self.dataset}_{mission}.json")
+        params_file_path = os.path.join("Missions", directory_name, 'params', "best_params", f"params_{self.dataset}_{mission}.json")
         if not os.path.isfile(params_file_path):
             print("Use default params file")
             params_file_path = os.path.join("Missions", "ValuesAndGraphStructure", 'Models', f"graph_and_values_params_file.json")
+        print("params_file_path", params_file_path)
         return directory_name, mission, params_file_path
 
     # @staticmethod

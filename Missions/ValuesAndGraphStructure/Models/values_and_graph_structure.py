@@ -1,3 +1,4 @@
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -19,7 +20,11 @@ class ValuesAndGraphStructure(nn.Module):
         self.activation_func = self.RECEIVED_PARAMS['activation']
         self.dropout = nn.Dropout(p=self.RECEIVED_PARAMS["dropout"])
 
-        self.alpha = nn.Parameter(torch.rand(1, requires_grad=True, device=self.device))
+        # self.alpha = nn.Parameter(torch.rand(1, requires_grad=True, device=self.device))
+        noise = np.random.normal(0, 0.1)
+        self.alpha = nn.Parameter(torch.tensor([1+noise], requires_grad=True, device=self.device).float())
+        self.minimum = 1e-10
+
         # self.alpha = torch.tensor([1], device=self.device)
 
         self.activation_func_dict = {'relu': nn.ReLU(), 'elu': nn.ELU(), 'tanh': nn.Tanh()}
@@ -49,12 +54,15 @@ class ValuesAndGraphStructure(nn.Module):
             # For abide dataset where the feature matrix is matrix. We want to transform the matrix into a vector.
             x = self.transform_mat_to_vec(x)
         I = torch.eye(b).to(self.device)
-        if self.alpha.item() < self.min_value.item():
+
+        if self.alpha.item() < self.minimum:
             print("In min_value")
-            print("alpha value", self.alpha.item(), "min_value", self.min_value.item())
-            alpha_I = I * self.min_value.expand_as(I)  # min_value * I
-        else:
-            alpha_I = I * self.alpha.expand_as(I)  # 𝛼I
+            # print("alpha value", self.alpha.item(), "min_value", self.min_value.item())
+            # self.alpha = deepcopy(self.min_value)
+            self.alpha.data = torch.clamp(self.alpha, min=self.minimum)
+            print("new alpha", self.alpha.item())
+            # alpha_I = I * self.min_value.expand_as(I)  # min_value * I
+        alpha_I = I * self.alpha.expand_as(I)  # 𝛼I
         # alpha_I_plus_A = alpha_I + adjacency_matrix  # 𝛼I + A
         normalized_adjacency_matrix = self.calculate_adjacency_matrix_old(adjacency_matrix)  # Ã
         alpha_I_plus_normalized_A = alpha_I + normalized_adjacency_matrix  # 𝛼I + Ã̃

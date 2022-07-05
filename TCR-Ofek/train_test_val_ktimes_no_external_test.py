@@ -1,48 +1,57 @@
+from sklearn.metrics import roc_auc_score
 from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader
-import torch
+from train_test_val_ktimes_utils import *
+from train_test_val_ktimes import get_model, start_training_process
+from train_test_val_one_time import TrainTestValOneTime
 from distance_matrix import *
 from ofek_files_utils_functions import *
-from train_test_val_one_time import TrainTestValOneTime
-from train_test_val_ktimes_utils import *
-from concat_graph_and_values import *
-LOSS_PLOT = 'loss'
-ACCURACY_PLOT = 'acc'
-AUC_PLOT = 'auc'
-TRAIN_JOB = 'train'
-TEST_JOB = 'test'
 
+all_models_output = []
+all_real_tags = []
 
-class TrainTestValKTimes:
-    def __init__(self, RECEIVED_PARAMS, device, train_val_dataset, test_dataset, **kwargs):
-        # self.mission = mission
+class TrainTestValKTimesNoExternalTest:
+    def __init__(self, RECEIVED_PARAMS, device, train_val_test_dataset, **kwargs):
         self.RECEIVED_PARAMS = RECEIVED_PARAMS
         self.device = device
-        self.train_val_dataset = train_val_dataset
-        self.test_dataset = test_dataset
+        self.train_val_test_dataset = train_val_test_dataset
         self.kwargs = kwargs
-        self.train_loader = None
 
     def train_group_k_cross_validation(self, k=5):
-        dataset_len = len(self.train_val_dataset)
+        global all_models_output
+        global all_real_tags
+        dataset_len = len(self.train_val_test_dataset)
         train_metric, val_metric, test_metric, min_train_val_metric, alpha_list = [], [], [], [], []
+        all_auc = 0
         return_lists = [train_metric, val_metric, test_metric, min_train_val_metric, alpha_list]
+
         run = 0
         for i in range(k):
             indexes_array = np.array(range(dataset_len))
-            train_idx, val_idx = train_test_split(indexes_array, test_size=0.2, shuffle=True)
+            train_idx, test_idx = train_test_split(indexes_array, test_size=0.2, shuffle=True)
+            train_idx, val_idx = train_test_split(train_idx, test_size=0.25, shuffle=True)
+            # print("Val indexes", val_idx)
             print(f"Run {run}")
+            # print("len of train set:", len(train_idx))
+            # print("len of val set:", len(val_idx))
 
-            train_loader, val_loader, test_loader = self.create_data_loaders(i, train_idx, val_idx)
-            # print("Train labels", get_labels_distribution(train_loader))
-            # print("val labels", get_labels_distribution(val_loader))
-            # print("test labels", get_labels_distribution(test_loader))
-            model = get_model(self.train_val_dataset, self.RECEIVED_PARAMS, self.device)
+            train_loader, val_loader, test_loader = self.create_data_loaders(i, train_idx, val_idx, test_idx)
+            print("Train labels", get_labels_distribution(train_loader))
+            print("val labels", get_labels_distribution(val_loader))
+            print("test labels", get_labels_distribution(test_loader))
+
+            model = get_model(self.train_val_test_dataset, self.RECEIVED_PARAMS, self.device)
             trainer_and_tester = TrainTestValOneTime(model, self.RECEIVED_PARAMS, train_loader, val_loader, test_loader,
                                                      self.device)
 
             early_stopping_results = start_training_process(trainer_and_tester, train_loader, val_loader, test_loader,
-                                                            self.RECEIVED_PARAMS, self.device, self.train_val_dataset)
+                                                            self.RECEIVED_PARAMS, self.device, self.train_val_test_dataset)
+
+            trainer_and_tester.pred_for_all_auc(test_loader, all_models_output, all_real_tags, job="test")
+            # print(all_models_output)
+            # print(all_real_tags)
+            if len(trainer_and_tester.alpha_list) > 0:
+                print(trainer_and_tester.alpha_list)
             min_val_train_auc = min(early_stopping_results['val_auc'], early_stopping_results['train_auc'])
             print("Minimum Validation and Train Auc", min_val_train_auc)
             min_train_val_metric.append(min_val_train_auc)  # the minimum between the aucs between train set and validation set
@@ -54,8 +63,15 @@ class TrainTestValKTimes:
             except:
                 pass
             run += 1
+        real_tags = np.ravel(np.array(all_real_tags))
+        models_output = np.ravel(np.array(all_models_output))
+        all_auc = roc_auc_score(real_tags, models_output)
+        return_lists.append(all_auc)
+        print(len(all_real_tags))
+        print("All auc score", all_auc)
+        all_real_tags = []
+        all_models_output = []
         return return_lists
-
 
     def tcr_dataset_dealing(self, train_idx, i):
         print(self.kwargs)
@@ -66,15 +82,23 @@ class TrainTestValKTimes:
         else:
             random_sample_from_train = int(self.kwargs["samples"])
         print(f"\nTake only {random_sample_from_train} from the training set\n")
-        mission = self.train_val_dataset.mission
+        mission = self.train_val_test_dataset.mission
         graph_type = self.kwargs["graph_model"]
         # print("Here, we ----do---- calculate again the golden-tcrs")
         train = Repertoires("train", random_sample_from_train)
         file_directory_path = os.path.join("..", "TCR_Dataset2", "Train")  # TCR_Dataset2 exists only in server
         # sample only some sample according to input sample size, and calc the golden tcrs only from them
         train_idx = random.sample(list(train_idx), random_sample_from_train)
-        train_files = [Path(os.path.join(file_directory_path, self.train_val_dataset.subject_list[id] + ".csv"))
-                       for id in train_idx]
+        train_files, new_train_idx = [], []
+        for id in train_idx:
+            if self.train_val_test_dataset.subject_list[id] in self.train_val_test_dataset.dall:
+                train_files.append(Path(os.path.join(self.train_val_test_dataset.dall[self.train_val_test_dataset.subject_list[id]])))
+                new_train_idx.append(id)
+            else:
+                print(self.train_val_test_dataset.subject_list[id])
+        # train_files = [Path(os.path.join(self.train_val_test_dataset.dall[
+        #                self.train_val_test_dataset.subject_list[id]])) for id in train_idx if self.train_val_test_dataset.subject_list[id]
+        #                in self.train_val_test_dataset.dall]
         # print("Length of chosen files", len(train_files))
         numrec = int(self.RECEIVED_PARAMS["numrec"])  # cutoff is also a hyper-parameter
         # print("Number of golden-tcrs", numrec)
@@ -90,14 +114,11 @@ class TrainTestValKTimes:
             proj_matrix = self.create_projection_tcr_network(outliers_pickle_name, adj_mat_path)
         else:
             corr_df_between_golden_tcrs = self.create_corr_tcr_network(train_idx, file_directory_path, outlier, adj_mat_path)
-        self.train_val_dataset.run_number = i
-        self.test_dataset.run_number = i
+        self.train_val_test_dataset.run_number = i
 
-        self.train_val_dataset.calc_golden_tcrs(adj_mat_path=adj_mat_path)
-        self.train_val_dataset.update_graphs()
-        self.test_dataset.calc_golden_tcrs(adj_mat_path=adj_mat_path)
-        self.test_dataset.update_graphs()
-        return train_idx
+        self.train_val_test_dataset.calc_golden_tcrs(adj_mat_path=adj_mat_path)
+        self.train_val_test_dataset.update_graphs()
+        return new_train_idx
 
     def create_corr_tcr_network(self, train_idx, file_directory_path, outlier, corr_file_name, Threshold=0.2):
         # Here, the graph is created with correlation between the existence of golden tcrs on training set only
@@ -109,9 +130,12 @@ class TrainTestValKTimes:
         train_samples_golden_tcrs_existence_mat = []
         # golden_tcrs = [i for i, j in list(outlier.keys())]
         golden_tcrs = list(outlier.keys())
-        train_subject_list = [self.train_val_dataset.subject_list[id] for id in train_idx]
+        train_subject_list = [self.train_val_test_dataset.subject_list[id] for id in train_idx]
         for i, subject in tqdm(enumerate(train_subject_list), desc='Create corr matrix tcrs', total=len(train_subject_list)):
-            file_path = os.path.join(file_directory_path, subject + ".csv")
+            if subject in self.train_val_test_dataset.dall:
+                file_path = os.path.join(self.train_val_test_dataset.dall[subject])
+            else:
+                continue
             samples_df = pd.read_csv(file_path, usecols=["combined", "frequency"])
             no_rep_sample_df = samples_df.groupby("combined").sum()  # sum the repetitions
             golden_tcr_existence_vector = [0] * len(golden_tcrs)
@@ -148,27 +172,18 @@ class TrainTestValKTimes:
         #     writer.writerows(df_proj_matrix)
         return df_proj_matrix
 
-    def create_data_loaders(self, i, train_idx, val_idx):
+    def create_data_loaders(self, i, train_idx, val_idx, test_idx):
         batch_size = int(self.RECEIVED_PARAMS['batch_size'])
-        # For Tcr dataset
-        if "TCR" in str(self.train_val_dataset):
-            train_idx = self.tcr_dataset_dealing(train_idx, i)
-            # train_subject_list = [self.train_val_dataset.subject_list[id] for id in train_idx]
-            # self.train_val_dataset.subject_list = train_subject_list
+        train_idx = self.tcr_dataset_dealing(train_idx, i)
         # Datasets
-        train_data = torch.utils.data.Subset(self.train_val_dataset, train_idx)
-        print("len of train data", len(train_data))
-        val_data = torch.utils.data.Subset(self.train_val_dataset, val_idx)
-        print("len of val data", len(val_data))
-
-        # Get and set train_graphs_list
-        train_graphs_list = get_train_graphs_list(train_data)
-        self.train_val_dataset.set_train_graphs_list(train_graphs_list)
-        self.test_dataset.set_train_graphs_list(train_graphs_list)
-
+        train_data = torch.utils.data.Subset(self.train_val_test_dataset, train_idx)
+        val_data = torch.utils.data.Subset(self.train_val_test_dataset, val_idx)
+        test_data = torch.utils.data.Subset(self.train_val_test_dataset, test_idx)
         # Dataloader
         train_loader = torch.utils.data.DataLoader(train_data, shuffle=True, batch_size=batch_size)
-        self.train_loader = train_loader
         val_loader = torch.utils.data.DataLoader(val_data, batch_size=batch_size, shuffle=False)
-        test_loader = torch.utils.data.DataLoader(self.test_dataset, batch_size=batch_size, shuffle=False)
+        test_loader = torch.utils.data.DataLoader(test_data, batch_size=batch_size, shuffle=False)
+        # print("train loader size:", len(train_idx))
+        # print("val loader size:", len(val_idx))
+        # print("test loader size:", len(test_idx))
         return train_loader, val_loader, test_loader

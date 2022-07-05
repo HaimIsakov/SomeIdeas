@@ -5,7 +5,7 @@ import torch.nn.functional as F
 
 
 class TwoLayersGCNValuesGraph(nn.Module):
-    def __init__(self, nodes_number, feature_size, RECEIVED_PARAMS, device, normalize_adj=False, num_classes=2):
+    def __init__(self, nodes_number, feature_size, RECEIVED_PARAMS, device, normalize_adj=False, num_classes=1):
         super(TwoLayersGCNValuesGraph, self).__init__()
         self.feature_size = feature_size
         self.nodes_number = nodes_number
