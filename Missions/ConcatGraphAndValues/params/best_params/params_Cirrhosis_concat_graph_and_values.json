@@ -1,0 +1,1 @@
+{"activation": "relu", "batch_size": 32.0, "dropout": 0.1, "layer_1": 128.0, "layer_2": 16.0, "learning_rate": 0.0001, "preweight": 5.0, "regularization": 1e-06}
