@@ -172,6 +172,7 @@ def results_dealing(return_lists, nni_flag, RECEIVED_PARAMS, result_file_name):
     mean_val_f1_macro, std_val_f1_macro = calc_mean_and_std(val_f1_macro)
     mean_test_f1_macro, std_test_f1_macro = calc_mean_and_std(test_f1_macro)
 
+    mean_alpha, std_alpha = calc_mean_and_std(alpha_list)
     if nni_flag:
         LOG.debug("\n \nMean Validation Set metric: ", mean_min_train_val_metric, " +- ", std_min_train_val_metric)
         LOG.debug("\nMean Final_Test Set metric: ", mean_test_metric, " +- ", std_test_metric)
@@ -202,6 +203,9 @@ def results_dealing(return_lists, nni_flag, RECEIVED_PARAMS, result_file_name):
         writer.writerow([])
         for key, value in RECEIVED_PARAMS.items():
             writer.writerow([key, value])
+        writer.writerow([])
+        writer.writerow(['Alpha_Value'] + alpha_list + ["", str(mean_alpha), str(std_alpha)])
+
         f.close()
 
     print("\n \nMean minimum Validation and Train Sets AUC: ", mean_min_train_val_metric, " +- ", std_min_train_val_metric)
@@ -580,7 +584,8 @@ if __name__ == '__main__':
         #                         **kwargs)
 
         # datasets = ["nut", "peanut", "male_female", "milk", "Cirrhosis"]
-        run_all_dataset(4, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes, datasets, **kwargs)
+        # run_all_dataset(4, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes, datasets, **kwargs)
+        datasets = ["Cirrhosis", "IBD", "bw", "IBD_Chrone", "male_female", "nugent"]
         run_all_dataset(7, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes, datasets, **kwargs)
 
         # # For grid search

@@ -65,7 +65,11 @@ class TrainTestValKTimesNoExternalTest:
             run += 1
         real_tags = np.ravel(np.array(all_real_tags))
         models_output = np.ravel(np.array(all_models_output))
-        all_auc = roc_auc_score(real_tags, models_output)
+        try:
+            all_auc = roc_auc_score(real_tags, models_output)
+        except Exception as e:
+            all_auc = 0.5
+            print(e)
         return_lists.append(all_auc)
         print(len(all_real_tags))
         print("All auc score", all_auc)
@@ -109,8 +113,6 @@ class TrainTestValKTimesNoExternalTest:
         adj_mat_path = f"graph_type_{graph_type}_tcr_corr_mat_{numrec}_with_sample_size_{len(train_files)}_run_number_{i}_mission_{mission}"
         outlier = train.new_outlier_finder(numrec, pickle_name=outliers_pickle_name)  # find outliers and save to pickle
         if graph_type == "projection":
-            # create distance matrix between the projection of the found golden tcrs
-            # create_distance_matrix(self.device, outliers_file=outliers_pickle_name, adj_mat=adj_mat_path)
             proj_matrix = self.create_projection_tcr_network(outliers_pickle_name, adj_mat_path)
         else:
             corr_df_between_golden_tcrs = self.create_corr_tcr_network(train_idx, file_directory_path, outlier, adj_mat_path)

@@ -32,11 +32,9 @@ class TrainTestValKTimes:
             indexes_array = np.array(range(dataset_len))
             train_idx, val_idx = train_test_split(indexes_array, test_size=0.2, shuffle=True)
             print(f"Run {run}")
-
+            self.create_data_loaders(i, train_idx, val_idx)
             train_loader, val_loader, test_loader = self.create_data_loaders(i, train_idx, val_idx)
-            # print("Train labels", get_labels_distribution(train_loader))
-            # print("val labels", get_labels_distribution(val_loader))
-            # print("test labels", get_labels_distribution(test_loader))
+
             model = get_model(self.train_val_dataset, self.RECEIVED_PARAMS, self.device)
             trainer_and_tester = TrainTestValOneTime(model, self.RECEIVED_PARAMS, train_loader, val_loader, test_loader,
                                                      self.device)
@@ -56,6 +54,36 @@ class TrainTestValKTimes:
             run += 1
         return return_lists
 
+    def compare_network(self, train_idx, i):
+        print(self.kwargs)
+        if "samples" not in self.kwargs:
+            random_sample_from_train = len(train_idx)
+        elif self.kwargs["samples"] == -1:
+            random_sample_from_train = len(train_idx)
+        else:
+            random_sample_from_train = int(self.kwargs["samples"])
+        print(f"\nTake only {random_sample_from_train} from the training set\n")
+        mission = self.train_val_dataset.mission
+        graph_type = self.kwargs["graph_model"]
+        # print("Here, we ----do---- calculate again the golden-tcrs")
+        train = Repertoires("train", random_sample_from_train)
+        file_directory_path = os.path.join("..", "TCR_Dataset2", "Train")  # TCR_Dataset2 exists only in server
+        # sample only some sample according to input sample size, and calc the golden tcrs only from them
+        train_idx = random.sample(list(train_idx), random_sample_from_train)
+        train_files = [Path(os.path.join(file_directory_path, self.train_val_dataset.subject_list[id] + ".csv"))
+                       for id in train_idx]
+        # print("Length of chosen files", len(train_files))
+        numrec = int(self.RECEIVED_PARAMS["numrec"])  # cutoff is also a hyper-parameter
+        # print("Number of golden-tcrs", numrec)
+        train.save_data(file_directory_path, files=train_files)
+        # save files' names
+        outliers_pickle_name = f"new_graph_type_{graph_type}_tcr_outliers_{numrec}_with_sample_size_{len(train_files)}_run_number_{i}_mission_{mission}"
+        adj_mat_path = f"new_graph_type_{graph_type}_tcr_mat_{numrec}_with_sample_size_{len(train_files)}_run_number_{i}_mission_{mission}"
+        outlier = train.new_outlier_finder(numrec, pickle_name=outliers_pickle_name)  # find outliers and save to pickle
+        corr_df_between_golden_tcrs = self.create_corr_tcr_network(train_idx, file_directory_path, outlier,
+                                                                   f"new_graph_type_corr_tcr_corr_mat_{numrec}_with_sample_size_{len(train_files)}_run_number_{i}_mission_{mission}")
+        proj_matrix = self.create_projection_tcr_network(outliers_pickle_name,
+                                                         f"new_graph_type_proj_tcr_mat_{numrec}_with_sample_size_{len(train_files)}_run_number_{i}_mission_{mission}")
 
     def tcr_dataset_dealing(self, train_idx, i):
         print(self.kwargs)
@@ -82,7 +110,7 @@ class TrainTestValKTimes:
         # train.outlier_finder(i, numrec=numrec, cutoff=cutoff)
         # save files' names
         outliers_pickle_name = f"graph_type_{graph_type}_tcr_outliers_{numrec}_with_sample_size_{len(train_files)}_run_number_{i}_mission_{mission}"
-        adj_mat_path = f"graph_type_{graph_type}_tcr_corr_mat_{numrec}_with_sample_size_{len(train_files)}_run_number_{i}_mission_{mission}"
+        adj_mat_path = f"graph_type_{graph_type}_tcr_mat_{numrec}_with_sample_size_{len(train_files)}_run_number_{i}_mission_{mission}"
         outlier = train.new_outlier_finder(numrec, pickle_name=outliers_pickle_name)  # find outliers and save to pickle
         if graph_type == "projection":
             # create distance matrix between the projection of the found golden tcrs
@@ -90,6 +118,7 @@ class TrainTestValKTimes:
             proj_matrix = self.create_projection_tcr_network(outliers_pickle_name, adj_mat_path)
         else:
             corr_df_between_golden_tcrs = self.create_corr_tcr_network(train_idx, file_directory_path, outlier, adj_mat_path)
+        # TODO: change back to option
         self.train_val_dataset.run_number = i
         self.test_dataset.run_number = i
 
@@ -124,13 +153,16 @@ class TrainTestValKTimes:
         df = pd.DataFrame(data=train_samples_golden_tcrs_existence_mat, columns=golden_tcrs)
         corr_df_between_golden_tcrs = df.corr(method="spearman")
         threshold = float(self.RECEIVED_PARAMS['thresh'])
+        # corr_df_between_golden_tcrs.to_csv(f"{corr_file_name}.csv")
+
         corr_df_between_golden_tcrs = arrange_corr_between_golden_tcr_mat(corr_df_between_golden_tcrs, Threshold=threshold)
         corr_df_between_golden_tcrs.to_csv(f"{corr_file_name}.csv")
         return corr_df_between_golden_tcrs
 
     def create_projection_tcr_network(self, outliers_pickle_name, adj_mat_path, Threshold=0.2):
         proj_matrix = create_distance_matrix(self.device, outliers_file=outliers_pickle_name, adj_mat=adj_mat_path)
-        threshold = float(self.RECEIVED_PARAMS['thresh'])
+        # threshold = float(self.RECEIVED_PARAMS['thresh'])
+        threshold = 0.62
         df_proj_matrix = pd.DataFrame(proj_matrix)
         df_proj_matrix.set_index(0, inplace=True)
         df_proj_matrix.columns = df_proj_matrix.iloc[0]
@@ -140,21 +172,20 @@ class TrainTestValKTimes:
         df_proj_matrix = 1 / df_proj_matrix
         np.fill_diagonal(df_proj_matrix.values, 0)
         df_proj_matrix = 10 * df_proj_matrix
-        # df_proj_matrix.values[[np.arange(df_proj_matrix.shape[0])] * 2] = 0
+        # df_proj_matrix.to_csv(f"{adj_mat_path}.csv")
         df_proj_matrix_binary = (np.abs(df_proj_matrix) >= threshold).astype(int)
         df_proj_matrix_binary.to_csv(f"{adj_mat_path}.csv")
         # with open(f"{adj_mat_path}.csv", "w", newline="") as f:
         #     writer = csv.writer(f)
         #     writer.writerows(df_proj_matrix)
-        return df_proj_matrix
+        return df_proj_matrix_binary
 
     def create_data_loaders(self, i, train_idx, val_idx):
         batch_size = int(self.RECEIVED_PARAMS['batch_size'])
         # For Tcr dataset
         if "TCR" in str(self.train_val_dataset):
             train_idx = self.tcr_dataset_dealing(train_idx, i)
-            # train_subject_list = [self.train_val_dataset.subject_list[id] for id in train_idx]
-            # self.train_val_dataset.subject_list = train_subject_list
+            # train_idx = self.compare_network(train_idx, i)
         # Datasets
         train_data = torch.utils.data.Subset(self.train_val_dataset, train_idx)
         print("len of train data", len(train_data))
@@ -172,3 +203,4 @@ class TrainTestValKTimes:
         val_loader = torch.utils.data.DataLoader(val_data, batch_size=batch_size, shuffle=False)
         test_loader = torch.utils.data.DataLoader(self.test_dataset, batch_size=batch_size, shuffle=False)
         return train_loader, val_loader, test_loader
+        # return None, None, None

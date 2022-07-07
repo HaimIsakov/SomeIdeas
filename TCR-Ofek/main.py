@@ -63,6 +63,7 @@ class Main:
                                [f for f in listdir(test_data_file_path) if isfile(join(test_data_file_path, f))]
         new_all_train_test_files = [x.split("_")[0] for x in all_train_test_files]
         subject_list = [subject for subject in list(label_df.index) if subject in new_all_train_test_files]
+        dall = preprocess_hla_label_file(train_data_file_path, test_data_file_path)
 
         train_val_test_dataset = self.create_hla_dataset(train_data_file_path, test_data_file_path, train_tag_file_path,
                                                          subject_list, mission,
@@ -177,6 +178,20 @@ def preprocess_hla_label_file(train_data_file_path, test_data_file_path):
     dall.update(testOnlyfiles_dict)
     return dall
 
+def run_alleles():
+    train_tag_file_path = os.path.join("TCR_Alleles_tags_file.csv")
+    label_df = pd.read_csv(train_tag_file_path, index_col=0)
+
+    all_alleles = list(label_df.columns)
+    all_alleles = "A1,A11,A2,A23,A24,A25,A26,A28,B63,B7,B70,B73,B75,B78,B8,B82".split(",")
+    print("All alleles", all_alleles)
+    for hla in tqdm(all_alleles, desc="Alleles", total=len(all_alleles)):
+        try:
+            print(hla)
+            return_lists = runner_hla(dataset_name, cuda_number, hla, **kwargs)
+        except Exception as e:
+            print(e)
+
 
 if __name__ == '__main__':
     try:
@@ -184,7 +199,7 @@ if __name__ == '__main__':
         args = parser.parse_args()
         dataset_name = "tcr"
         # Options are: projection, correlation
-        graph_model = "correlation"
+        graph_model = "projection"
         cuda_number = args.device_num
         samples = args.samples
         kwargs = {"samples": samples, "graph_model": graph_model}
@@ -195,18 +210,9 @@ if __name__ == '__main__':
         train_data_file_path = os.path.join("..", "TCR_Dataset2", "Train")
         test_data_file_path = os.path.join("..", "TCR_Dataset2", "Test")
 
-        dall = preprocess_hla_label_file(train_data_file_path, test_data_file_path)
-        train_tag_file_path = os.path.join("TCR_Alleles_tags_file.csv")
-        label_df = pd.read_csv(train_tag_file_path, index_col=0)
-        all_alleles = list(label_df.columns)[8:]
-        print("All alleles", all_alleles)
-        for hla in tqdm(all_alleles, desc="Alleles", total=len(all_alleles)):
-            try:
-                print(hla)
-                return_lists = runner_hla(dataset_name, cuda_number, hla, **kwargs)
-            except Exception as e:
-                print(e)
-
+        # dall = preprocess_hla_label_file(train_data_file_path, test_data_file_path)
+        # runner(dataset_name, cuda_number, **kwargs)
+        run_alleles()
     except Exception as e:
         print(e)
         # raise

@@ -71,7 +71,11 @@ class TrainTestValOneTime:
             # all_models_output.append(pred)
             # all_real_tags.append(true_labels)
             # For the regular auc calculation
-            metric_result = roc_auc_score(true_labels, pred)
+            try:
+                metric_result = roc_auc_score(true_labels, pred)
+            except Exception as e:
+                metric_result = 0.5
+                print(e)
         return metric_result
 
     def pred_for_all_auc(self, data_loader, all_models_output, all_real_tags, job=VAL_JOB):
