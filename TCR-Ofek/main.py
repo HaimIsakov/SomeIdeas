@@ -1,10 +1,5 @@
 import os
-import random
 import sys
-
-import pandas as pd
-import pickle
-from tqdm import tqdm
 from os import listdir
 from os.path import isfile, join
 
@@ -69,22 +64,19 @@ class Main:
                                                          subject_list, mission,
                                                          graph_model, allele, dall)
         trainer_and_tester = TrainTestValKTimesNoExternalTest(self.RECEIVED_PARAMS, self.device, train_val_test_dataset, **kwargs)
-        K = 10
+        K = 20
         return_lists = trainer_and_tester.train_group_k_cross_validation(k=K)
         return return_lists
 
-    def play(self, kwargs):
+    def play(self, config_dict, kwargs):
         mission = 'concat_graph_and_values'
-        # if not os.path.isfile(params_file_path):
-        #     print("Use default params file")
-        #     params_file_path = os.path.join("Missions", "ValuesAndGraphStructure", 'Models', f"graph_and_values_params_file.json")
         graph_model = kwargs["graph_model"]
-        train_data_file_path = os.path.join("..", "TCR_Dataset2", "Train")
+        train_data_file_path = config_dict["train_data_file_path"]
 
-        train_tag_file_path = os.path.join("..", "TCR_dataset", "samples.csv")
-        test_data_file_path = os.path.join("..", "TCR_Dataset2", "Test")
+        train_tag_file_path = config_dict["train_tag_file_path"]
+        test_data_file_path = config_dict["test_data_file_path"]
 
-        test_tag_file_path = os.path.join("..", "TCR_dataset", "samples.csv")
+        test_tag_file_path = config_dict["test_tag_file_path"]
         label_df = pd.read_csv(train_tag_file_path)
         label_df["sample"] = label_df["sample"] + "_" + label_df['status']
         label_df.set_index("sample", inplace=True)
@@ -141,14 +133,14 @@ def results_dealing(return_lists, RECEIVED_PARAMS, result_file_name):
     return train_metric, val_metric, test_metric
 
 
-def runner(dataset_name, cuda_number, **kwargs):
+def runner(dataset_name, cuda_number, config_dict, **kwargs):
     device = f"cuda:{cuda_number}" if torch.cuda.is_available() else "cpu"
     print("Device", device)
     params_file_path = os.path.join("tcr_concat_graph_and_values.json")
     RECEIVED_PARAMS = json.load(open(params_file_path, 'r'))
     print("Hyper-parameters", RECEIVED_PARAMS)
     main_runner = Main(dataset_name, RECEIVED_PARAMS, device)
-    return_lists = main_runner.play(kwargs)
+    return_lists = main_runner.play(config_dict, kwargs)
     result_file_name = f"{dataset_name}_concat_graph_and_values"
     results_dealing(return_lists, RECEIVED_PARAMS, result_file_name)
     return return_lists
@@ -166,9 +158,6 @@ def runner_hla(dataset_name, cuda_number, hla, **kwargs):
     return return_lists
 
 def preprocess_hla_label_file(train_data_file_path, test_data_file_path):
-    # train_data_file_path = os.path.join("..", "TCR_Dataset2", "Train")
-    # test_data_file_path = os.path.join("..", "TCR_Dataset2", "Test")
-
     trainOnlyfiles = [f for f in listdir(train_data_file_path) if isfile(join(train_data_file_path, f))]
     trainOnlyfiles_dict = {x.split("_")[0]: os.path.join(train_data_file_path, x) for x in trainOnlyfiles}
     testOnlyfiles = [f for f in listdir(test_data_file_path) if isfile(join(test_data_file_path, f))]
@@ -182,10 +171,10 @@ def run_alleles():
     train_tag_file_path = os.path.join("TCR_Alleles_tags_file.csv")
     label_df = pd.read_csv(train_tag_file_path, index_col=0)
 
-    all_alleles = list(label_df.columns)
-    all_alleles = "A1,A11,A2,A23,A24,A25,A26,A28,B63,B7,B70,B73,B75,B78,B8,B82".split(",")
-    print("All alleles", all_alleles)
-    for hla in tqdm(all_alleles, desc="Alleles", total=len(all_alleles)):
+    alelels_to_run = list(label_df.columns)
+
+    print("All alleles", alelels_to_run)
+    for hla in tqdm(alelels_to_run, desc="Alleles", total=len(alelels_to_run)):
         try:
             print(hla)
             return_lists = runner_hla(dataset_name, cuda_number, hla, **kwargs)
@@ -195,24 +184,19 @@ def run_alleles():
 
 if __name__ == '__main__':
     try:
+        config_file_path = "config_file.json"
         parser = set_arguments()
         args = parser.parse_args()
         dataset_name = "tcr"
-        # Options are: projection, correlation
-        graph_model = "projection"
         cuda_number = args.device_num
         samples = args.samples
+        config_dict = json.load(open(config_file_path, 'r'))
+        # Options are: projection, correlation
+        graph_model = config_dict["graph_model"]
         kwargs = {"samples": samples, "graph_model": graph_model}
-        # runner(dataset_name, cuda_number, **kwargs)
-        # hla_dict = pickle.load(open("hla_labels.pkl", "rb"))
-        # hla_df = pd.DataFrame.from_dict(hla_dict, orient='index')
-        # hla_df.to_csv("TCR_Alleles_tags_file.csv")
-        train_data_file_path = os.path.join("..", "TCR_Dataset2", "Train")
-        test_data_file_path = os.path.join("..", "TCR_Dataset2", "Test")
 
-        # dall = preprocess_hla_label_file(train_data_file_path, test_data_file_path)
-        # runner(dataset_name, cuda_number, **kwargs)
-        run_alleles()
+        runner(dataset_name, cuda_number, config_dict, **kwargs)
+        # run_alleles()
     except Exception as e:
-        print(e)
-        # raise
+        # print(e)
+        raise

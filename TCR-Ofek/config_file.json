@@ -1,0 +1,7 @@
+{
+  "train_data_file_path" : "../TCR_Dataset2/Train",
+  "test_data_file_path" : "../TCR_Dataset2/Test",
+  "train_tag_file_path": "../TCR_dataset/samples.csv",
+  "test_tag_file_path": "../TCR_dataset/samples.csv",
+  "graph_model": "projection"
+}

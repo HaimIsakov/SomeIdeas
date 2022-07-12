@@ -32,7 +32,6 @@ class TrainTestValKTimes:
             indexes_array = np.array(range(dataset_len))
             train_idx, val_idx = train_test_split(indexes_array, test_size=0.2, shuffle=True)
             print(f"Run {run}")
-            self.create_data_loaders(i, train_idx, val_idx)
             train_loader, val_loader, test_loader = self.create_data_loaders(i, train_idx, val_idx)
 
             model = get_model(self.train_val_dataset, self.RECEIVED_PARAMS, self.device)
@@ -54,37 +53,37 @@ class TrainTestValKTimes:
             run += 1
         return return_lists
 
-    def compare_network(self, train_idx, i):
-        print(self.kwargs)
-        if "samples" not in self.kwargs:
-            random_sample_from_train = len(train_idx)
-        elif self.kwargs["samples"] == -1:
-            random_sample_from_train = len(train_idx)
-        else:
-            random_sample_from_train = int(self.kwargs["samples"])
-        print(f"\nTake only {random_sample_from_train} from the training set\n")
-        mission = self.train_val_dataset.mission
-        graph_type = self.kwargs["graph_model"]
-        # print("Here, we ----do---- calculate again the golden-tcrs")
-        train = Repertoires("train", random_sample_from_train)
-        file_directory_path = os.path.join("..", "TCR_Dataset2", "Train")  # TCR_Dataset2 exists only in server
-        # sample only some sample according to input sample size, and calc the golden tcrs only from them
-        train_idx = random.sample(list(train_idx), random_sample_from_train)
-        train_files = [Path(os.path.join(file_directory_path, self.train_val_dataset.subject_list[id] + ".csv"))
-                       for id in train_idx]
-        # print("Length of chosen files", len(train_files))
-        numrec = int(self.RECEIVED_PARAMS["numrec"])  # cutoff is also a hyper-parameter
-        # print("Number of golden-tcrs", numrec)
-        train.save_data(file_directory_path, files=train_files)
-        # save files' names
-        outliers_pickle_name = f"new_graph_type_{graph_type}_tcr_outliers_{numrec}_with_sample_size_{len(train_files)}_run_number_{i}_mission_{mission}"
-        adj_mat_path = f"new_graph_type_{graph_type}_tcr_mat_{numrec}_with_sample_size_{len(train_files)}_run_number_{i}_mission_{mission}"
-        outlier = train.new_outlier_finder(numrec, pickle_name=outliers_pickle_name)  # find outliers and save to pickle
-        corr_df_between_golden_tcrs = self.create_corr_tcr_network(train_idx, file_directory_path, outlier,
-                                                                   f"new_graph_type_corr_tcr_corr_mat_{numrec}_with_sample_size_{len(train_files)}_run_number_{i}_mission_{mission}")
-        proj_matrix = self.create_projection_tcr_network(outliers_pickle_name,
-                                                         f"new_graph_type_proj_tcr_mat_{numrec}_with_sample_size_{len(train_files)}_run_number_{i}_mission_{mission}")
-
+    # def compare_network(self, train_idx, i):
+    #     print(self.kwargs)
+    #     if "samples" not in self.kwargs:
+    #         random_sample_from_train = len(train_idx)
+    #     elif self.kwargs["samples"] == -1:
+    #         random_sample_from_train = len(train_idx)
+    #     else:
+    #         random_sample_from_train = int(self.kwargs["samples"])
+    #     print(f"\nTake only {random_sample_from_train} from the training set\n")
+    #     mission = self.train_val_dataset.mission
+    #     graph_type = self.kwargs["graph_model"]
+    #     # print("Here, we ----do---- calculate again the golden-tcrs")
+    #     train = Repertoires("train", random_sample_from_train)
+    #     file_directory_path = os.path.join("..", "TCR_Dataset2", "Train")  # TCR_Dataset2 exists only in server
+    #     # sample only some sample according to input sample size, and calc the golden tcrs only from them
+    #     train_idx = random.sample(list(train_idx), random_sample_from_train)
+    #     train_files = [Path(os.path.join(file_directory_path, self.train_val_dataset.subject_list[id] + ".csv"))
+    #                    for id in train_idx]
+    #     # print("Length of chosen files", len(train_files))
+    #     numrec = int(self.RECEIVED_PARAMS["numrec"])  # cutoff is also a hyper-parameter
+    #     # print("Number of golden-tcrs", numrec)
+    #     train.save_data(file_directory_path, files=train_files)
+    #     # save files' names
+    #     outliers_pickle_name = f"new_graph_type_{graph_type}_tcr_outliers_{numrec}_with_sample_size_{len(train_files)}_run_number_{i}_mission_{mission}"
+    #     adj_mat_path = f"new_graph_type_{graph_type}_tcr_mat_{numrec}_with_sample_size_{len(train_files)}_run_number_{i}_mission_{mission}"
+    #     outlier = train.new_outlier_finder(numrec, pickle_name=outliers_pickle_name)  # find outliers and save to pickle
+    #     corr_df_between_golden_tcrs = self.create_corr_tcr_network(train_idx, file_directory_path, outlier,
+    #                                                                f"new_graph_type_corr_tcr_corr_mat_{numrec}_with_sample_size_{len(train_files)}_run_number_{i}_mission_{mission}")
+    #     proj_matrix = self.create_projection_tcr_network(outliers_pickle_name,
+    #                                                      f"new_graph_type_proj_tcr_mat_{numrec}_with_sample_size_{len(train_files)}_run_number_{i}_mission_{mission}")
+    #
     def tcr_dataset_dealing(self, train_idx, i):
         print(self.kwargs)
         if "samples" not in self.kwargs:
@@ -96,29 +95,22 @@ class TrainTestValKTimes:
         print(f"\nTake only {random_sample_from_train} from the training set\n")
         mission = self.train_val_dataset.mission
         graph_type = self.kwargs["graph_model"]
-        # print("Here, we ----do---- calculate again the golden-tcrs")
         train = Repertoires("train", random_sample_from_train)
         file_directory_path = os.path.join("..", "TCR_Dataset2", "Train")  # TCR_Dataset2 exists only in server
         # sample only some sample according to input sample size, and calc the golden tcrs only from them
         train_idx = random.sample(list(train_idx), random_sample_from_train)
         train_files = [Path(os.path.join(file_directory_path, self.train_val_dataset.subject_list[id] + ".csv"))
                        for id in train_idx]
-        # print("Length of chosen files", len(train_files))
         numrec = int(self.RECEIVED_PARAMS["numrec"])  # cutoff is also a hyper-parameter
-        # print("Number of golden-tcrs", numrec)
         train.save_data(file_directory_path, files=train_files)
-        # train.outlier_finder(i, numrec=numrec, cutoff=cutoff)
         # save files' names
         outliers_pickle_name = f"graph_type_{graph_type}_tcr_outliers_{numrec}_with_sample_size_{len(train_files)}_run_number_{i}_mission_{mission}"
         adj_mat_path = f"graph_type_{graph_type}_tcr_mat_{numrec}_with_sample_size_{len(train_files)}_run_number_{i}_mission_{mission}"
         outlier = train.new_outlier_finder(numrec, pickle_name=outliers_pickle_name)  # find outliers and save to pickle
         if graph_type == "projection":
-            # create distance matrix between the projection of the found golden tcrs
-            # create_distance_matrix(self.device, outliers_file=outliers_pickle_name, adj_mat=adj_mat_path)
             proj_matrix = self.create_projection_tcr_network(outliers_pickle_name, adj_mat_path)
         else:
             corr_df_between_golden_tcrs = self.create_corr_tcr_network(train_idx, file_directory_path, outlier, adj_mat_path)
-        # TODO: change back to option
         self.train_val_dataset.run_number = i
         self.test_dataset.run_number = i
 

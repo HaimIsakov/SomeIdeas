@@ -19,8 +19,7 @@ class ConcatValuesAndGraphStructure(nn.Module):
         self.dropout = nn.Dropout(p=self.RECEIVED_PARAMS["dropout"])
 
         self.alpha = nn.Parameter(torch.rand(1, requires_grad=True, device=self.device))
-        self.activation_func_dict = {'relu': nn.ReLU(), 'elu': nn.ELU(), 'tanh': nn.Tanh(), "srss": Srss()}
-        # self.activation_func = "srss"
+        self.activation_func_dict = {'relu': nn.ReLU(), 'elu': nn.ELU(), 'tanh': nn.Tanh()}
 
         self.gcn_layer = nn.Sequential(
             self.pre_weighting,
@@ -61,26 +60,6 @@ class ConcatValuesAndGraphStructure(nn.Module):
         final_output = self.fc3(concat_graph_and_values)
         return final_output
 
-    # def calculate_adjacency_matrix(self, batched_adjacency_matrix):
-    #     # Here we normalize (𝛼I + A)
-    #     # D^(-0.5)
-    #     def calc_d_minus_root_sqr(batched_adjacency_matrix):
-    #         r = []
-    #         for adjacency_matrix in batched_adjacency_matrix:
-    #             sum_of_each_row = adjacency_matrix.sum(1)
-    #             # sum_of_each_row_plus_one = torch.where(sum_of_each_row != 0, sum_of_each_row, torch.tensor(1.0))
-    #             try:
-    #                 r.append(torch.diag(torch.pow(sum_of_each_row, -0.5)))
-    #             except Exception as e:
-    #                 print(e)
-    #                 raise
-    #         s = torch.stack(r)
-    #         return s
-    #
-    #     D__minus_sqrt = calc_d_minus_root_sqr(batched_adjacency_matrix)
-    #     normalized_adjacency = torch.matmul(torch.matmul(D__minus_sqrt, batched_adjacency_matrix), D__minus_sqrt)
-    #     return normalized_adjacency
-
     def calculate_adjacency_matrix(self, batched_adjacency_matrix):
         # Here we normalize A
 
@@ -100,19 +79,3 @@ class ConcatValuesAndGraphStructure(nn.Module):
         D__minus_sqrt = calc_d_minus_root_sqr(batched_adjacency_matrix)
         normalized_adjacency = torch.matmul(torch.matmul(D__minus_sqrt, batched_adjacency_matrix), D__minus_sqrt)
         return normalized_adjacency
-
-def srss_func(x):
-    return 1 - 2 / (x**2 + 1)
-
-class Srss(nn.Module):
-    def __init__(self):
-        '''
-        Init method.
-        '''
-        super().__init__() # init the base class
-
-    def forward(self, input):
-        '''
-        Forward pass of the function.
-        '''
-        return srss_func(input) # simply apply already implemented SiLU
