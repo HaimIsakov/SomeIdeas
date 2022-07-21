@@ -94,9 +94,9 @@ class TrainTestValKTimes:
             random_sample_from_train = int(self.kwargs["samples"])
         print(f"\nTake only {random_sample_from_train} from the training set\n")
         mission = self.train_val_dataset.mission
-        graph_type = self.kwargs["graph_model"]
+        graph_type = self.RECEIVED_PARAMS["graph_model"]
         train = Repertoires("train", random_sample_from_train)
-        file_directory_path = os.path.join("..", "TCR_Dataset2", "Train")  # TCR_Dataset2 exists only in server
+        file_directory_path = self.kwargs["train_data_file_path"]
         # sample only some sample according to input sample size, and calc the golden tcrs only from them
         train_idx = random.sample(list(train_idx), random_sample_from_train)
         train_files = [Path(os.path.join(file_directory_path, self.train_val_dataset.subject_list[id] + ".csv"))
@@ -142,6 +142,8 @@ class TrainTestValKTimes:
                 if golden_tcr in cur_sample_tcrs:
                     golden_tcr_existence_vector[inx] = 1
             train_samples_golden_tcrs_existence_mat.append(golden_tcr_existence_vector)
+        tqdm._instances.clear()
+
         df = pd.DataFrame(data=train_samples_golden_tcrs_existence_mat, columns=golden_tcrs)
         corr_df_between_golden_tcrs = df.corr(method="spearman")
         threshold = float(self.RECEIVED_PARAMS['thresh'])

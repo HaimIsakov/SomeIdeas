@@ -2,11 +2,9 @@ import copy
 
 import torch
 import torch.nn.functional as F
-from sklearn.metrics import roc_auc_score, f1_score
+from sklearn.metrics import roc_auc_score
 from torch import optim
 import numpy as np
-# from torch.optim.lr_scheduler import ReduceLROnPlateau
-# from EarlyStopping import EarlyStopping
 
 TRAIN_JOB = 'train'
 TEST_JOB = 'test'

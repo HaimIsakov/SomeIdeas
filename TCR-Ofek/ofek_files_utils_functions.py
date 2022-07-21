@@ -1,9 +1,9 @@
 import os
 import sys
-for path_name in [os.path.join(os.path.dirname(__file__)),
-                  os.path.join(os.path.dirname(__file__), 'Data'),
-                  os.path.join(os.path.dirname(__file__), 'Missions')]:
-    sys.path.append(path_name)
+# for path_name in [os.path.join(os.path.dirname(__file__)),
+#                   os.path.join(os.path.dirname(__file__), 'Data'),
+#                   os.path.join(os.path.dirname(__file__), 'Missions')]:
+#     sys.path.append(path_name)
 
 import pickle
 import time
@@ -21,13 +21,14 @@ DATA = {}
 
 
 class Repertoires:
-    def __init__(self, name, nump):
+    def __init__(self, name, nump, hla=None):
         self.name = name
         self.combinations = {}
         self.__id2patient = {}
         self.score = {}
         self.outlier = {}
         self.size = nump
+        self.hla = hla
         self.cmv = None
 
     def personal_information(self, directory, files=None, mix=False):
@@ -57,17 +58,25 @@ class Repertoires:
             attr.append(item.as_posix())
             self.__id2patient[tuple(attr)] = count
             count += 1
+        tqdm._instances.clear()
 
     """
     creates the vector that tells us whether a person i is pos/neg
     """
 
     def create_cmv_vector(self):
+        if self.hla is not None:
+            label_dict = list(self.hla.to_dict().values())[0]
 
         self.cmv = np.zeros(self.size, dtype=np.int8)
         for item, index in self.__id2patient.items():
             if item[1] == 'positive':
                 self.cmv[index] = 1
+            if self.hla is not None:
+                patient = item[0]
+                self.cmv[index] = int(label_dict[patient])
+
+
 
     """
     Create the dictionary to which all the data is loaded to. For each TCR in the data, 
@@ -93,6 +102,7 @@ class Repertoires:
         print(f"{Fore.LIGHTBLUE_EX}Amount of combinations: {Fore.RED}{len(self.combinations)}{Fore.RESET}")
         print(
             f"{Fore.LIGHTBLUE_EX}Generate a quantity of instances combinations, {Fore.RED}time elapsed: {time.time() - start_time:.2f}s{Fore.RESET}\n")
+        tqdm._instances.clear()
 
     def save_data(self, directory, files=None):
         self.personal_information(directory, files=files)
@@ -132,10 +142,14 @@ class Repertoires:
         self.score = dict(sorted(self.score.items(), key=lambda item: item[1], reverse=True))
         element, min_score = list(self.score.items())[numrec]
         print("Reactive TCRs found:")
+        count = 0
         for element, score in list(self.score.items()):
             if score >= min_score:
                 print(f'element: {element}, score: {score}')
                 self.outlier[element] = self.combinations[element]
+                count += 1
+            if count > numrec:
+                break
         with open(f"{pickle_name}.pkl", "wb") as f:
             pickle.dump(self.outlier, f)
         print("Number of outliers", len(self.outlier))

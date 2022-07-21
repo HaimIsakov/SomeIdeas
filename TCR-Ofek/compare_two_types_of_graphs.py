@@ -55,5 +55,6 @@ for i in range(20):
 print(np.mean(corr_n_conn))
 print(np.mean(proj_n_conn))
 print(np.mean(jaccard_index))
+print(np.std(jaccard_index))
 #
 # x=2

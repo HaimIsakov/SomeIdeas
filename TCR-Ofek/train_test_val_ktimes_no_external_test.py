@@ -1,5 +1,5 @@
 from sklearn.metrics import roc_auc_score
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, KFold
 from torch.utils.data import DataLoader
 from train_test_val_ktimes_utils import *
 from train_test_val_ktimes import get_model, start_training_process
@@ -24,18 +24,20 @@ class TrainTestValKTimesNoExternalTest:
         train_metric, val_metric, test_metric, min_train_val_metric, alpha_list = [], [], [], [], []
         all_auc = 0
         return_lists = [train_metric, val_metric, test_metric, min_train_val_metric, alpha_list]
+        kf = KFold(n_splits=5)
+        indexes_array = np.array(range(dataset_len))
 
         run = 0
-        for i in range(k):
-            indexes_array = np.array(range(dataset_len))
-            train_idx, test_idx = train_test_split(indexes_array, test_size=0.2, shuffle=True)
+        # for i in range(k):
+        for train_idx, test_idx in kf.split(indexes_array):
+            # train_idx, test_idx = train_test_split(indexes_array, test_size=0.2, shuffle=True)
             train_idx, val_idx = train_test_split(train_idx, test_size=0.25, shuffle=True)
             # print("Val indexes", val_idx)
             print(f"Run {run}")
             # print("len of train set:", len(train_idx))
             # print("len of val set:", len(val_idx))
 
-            train_loader, val_loader, test_loader = self.create_data_loaders(i, train_idx, val_idx, test_idx)
+            train_loader, val_loader, test_loader = self.create_data_loaders(run, train_idx, val_idx, test_idx)
             print("Train labels", get_labels_distribution(train_loader))
             print("val labels", get_labels_distribution(val_loader))
             print("test labels", get_labels_distribution(test_loader))
@@ -87,9 +89,10 @@ class TrainTestValKTimesNoExternalTest:
             random_sample_from_train = int(self.kwargs["samples"])
         print(f"\nTake only {random_sample_from_train} from the training set\n")
         mission = self.train_val_test_dataset.mission
-        graph_type = self.kwargs["graph_model"]
-        # print("Here, we ----do---- calculate again the golden-tcrs")
-        train = Repertoires("train", random_sample_from_train)
+        graph_type = self.RECEIVED_PARAMS["graph_model"]
+        hla_tags_file = pd.read_csv(os.path.join("TCR_Alleles_tags_file.csv"), usecols=[self.kwargs["allele"], "ID"],
+                         index_col=0)
+        train = Repertoires("train", random_sample_from_train, hla=hla_tags_file)
         file_directory_path = os.path.join("..", "TCR_Dataset2", "Train")  # TCR_Dataset2 exists only in server
         # sample only some sample according to input sample size, and calc the golden tcrs only from them
         train_idx = random.sample(list(train_idx), random_sample_from_train)
@@ -147,6 +150,8 @@ class TrainTestValKTimesNoExternalTest:
                 if golden_tcr in cur_sample_tcrs:
                     golden_tcr_existence_vector[inx] = 1
             train_samples_golden_tcrs_existence_mat.append(golden_tcr_existence_vector)
+        tqdm._instances.clear()
+
         df = pd.DataFrame(data=train_samples_golden_tcrs_existence_mat, columns=golden_tcrs)
         corr_df_between_golden_tcrs = df.corr(method="spearman")
         threshold = float(self.RECEIVED_PARAMS['thresh'])

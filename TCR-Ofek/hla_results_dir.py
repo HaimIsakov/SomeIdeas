@@ -19,7 +19,7 @@ import pandas as pd
 # print(set(all_alleles) - set(alleles_list))
 
 def create_results_file():
-    mypath = os.path.join("hla_results")
+    mypath = os.path.join("new_hla_results")
     # mypath = "."
     onlyfiles = [f for f in listdir(mypath) if isfile(join(mypath, f))]
     # onlyfiles = ["allele_B53_concat_graph_and_values_val_mean_0.475_test_mean_0.866.csv"]
@@ -36,4 +36,4 @@ def create_results_file():
 
 results_dic_df = create_results_file()
 print(results_dic_df)
-results_dic_df.to_csv("Hla_TCR.csv")
+results_dic_df.to_csv("new_Hla_TCR.csv")

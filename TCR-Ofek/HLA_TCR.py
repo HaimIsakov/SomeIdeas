@@ -11,13 +11,13 @@ from tqdm import tqdm
 
 
 class HLA_TCR(Dataset):
-    def __init__(self, dataset_name, train_data_path, test_data_path, label_path, subject_list, mission, graph_model,
+    def __init__(self, train_data_path, test_data_path, label_path, subject_list, mission, graph_model,
                  allele, dall):
         self.train_data_path = train_data_path
         self.test_data_path = test_data_path
         self.label_path = label_path
         self.subject_list = subject_list
-        self.dataset_name = dataset_name if dataset_name != "tcr" else "TCR"
+        self.dataset_name = "TCR"
         self.adj_mat = None
         self.values_dict = None
         self.networks_dict = None
@@ -140,6 +140,8 @@ class HLA_TCR(Dataset):
             for tcr in golden_tcrs:
                 values_list.append(tcr_sample_dict[tcr])
             values_dict[subject] = values_list
+        tqdm._instances.clear()
+
         return networks_dict, values_dict
 
     def load_or_create_label_dict(self):

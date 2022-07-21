@@ -11,11 +11,11 @@ from tqdm import tqdm
 
 
 class TCRDataset(Dataset):
-    def __init__(self, dataset_name, data_path, label_path, subject_list, mission, graph_model):
+    def __init__(self, data_path, label_path, subject_list, mission, graph_model):
         self.data_path = data_path
         self.label_path = label_path
         self.subject_list = subject_list
-        self.dataset_name = dataset_name if dataset_name != "tcr" else "TCR"
+        self.dataset_name = "TCR"
         self.adj_mat = None
         self.values_dict = None
         self.networks_dict = None
@@ -71,15 +71,6 @@ class TCRDataset(Dataset):
 
     def from_distance_mat_to_adj_matrix(self, adj_mat_path):
         adj_mat_df = pd.read_csv(adj_mat_path, index_col=0)
-        # network_values = distance_mat_df.values
-        # if self.graph_model == "projection":
-        #     np.fill_diagonal(network_values, 1)
-        #     TODO: Make the comment to real code when running the first version of tcrs' graphs creation
-            # network_values = 1 / network_values
-            # np.fill_diagonal(network_values, 0)
-        # else:
-        #     np.fill_diagonal(network_values, 0)
-        # adj_mat_df = pd.DataFrame(network_values, index=distance_mat_df.index, columns=distance_mat_df.index)
         return adj_mat_df
 
     def set_dataset_dict(self, **kwargs):
@@ -93,7 +84,7 @@ class TCRDataset(Dataset):
     def update_graphs(self, **kwargs):
         if self.adj_mat is not None:
             self.set_dataset_dict(**kwargs)
-            self.calc_avg_degree()
+            # self.calc_avg_degree()
 
     def load_or_create_tcr_network(self):
         networks_dict = {}
@@ -115,7 +106,6 @@ class TCRDataset(Dataset):
                     network[tcr] = np.zeros(network.shape[1])
             for tcr in intersec_golden_and_sample_tcrs:
                 network.loc[tcr] = network[tcr]
-            # network.to_csv(f"tcr_new_graph_{subject}.csv")
             networks_dict[subject] = network
             no_rep_sample_df['frequency'] = np.log(no_rep_sample_df['frequency'] + 1e-300)
             tcr_sample_dict = {}
@@ -129,6 +119,8 @@ class TCRDataset(Dataset):
             for tcr in golden_tcrs:
                 values_list.append(tcr_sample_dict[tcr])
             values_dict[subject] = values_list
+        tqdm._instances.clear()
+
         return networks_dict, values_dict
 
     def load_or_create_label_dict(self):
@@ -144,5 +136,4 @@ class TCRDataset(Dataset):
         if adj_mat_path is None:
             adj_mat_path = f"dist_mat_{self.run_number}.csv"
         self.adj_mat = self.from_distance_mat_to_adj_matrix(adj_mat_path + ".csv")
-        # self.values_df = self.load_or_create_values_dict()
         self.networks_dict, self.values_dict = self.load_or_create_tcr_network()

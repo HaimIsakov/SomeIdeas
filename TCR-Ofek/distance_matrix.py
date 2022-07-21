@@ -72,4 +72,6 @@ def create_distance_matrix(device, outliers_file="outliers", adj_mat="dist_mat")
     # with open(f"{adj_mat}.csv", "w", newline="") as f:
     #     writer = csv.writer(f)
     #     writer.writerows(matrix)
+    tqdm._instances.clear()
+
     return matrix

@@ -21,8 +21,10 @@ class ValuesAndGraphStructure(nn.Module):
         self.dropout = nn.Dropout(p=self.RECEIVED_PARAMS["dropout"])
 
         # self.alpha = nn.Parameter(torch.rand(1, requires_grad=True, device=self.device))
-        noise = np.random.normal(0, 0.1)
-        self.alpha = nn.Parameter(torch.tensor([1+noise], requires_grad=True, device=self.device).float())
+        # noise = np.random.normal(0, 0.1)
+        # self.alpha = nn.Parameter(torch.tensor([1+noise], requires_grad=True, device=self.device).float())
+        self.alpha = torch.tensor([1], device=self.device)
+
         self.minimum = 1e-10
 
         # self.alpha = torch.tensor([1], device=self.device)

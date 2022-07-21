@@ -1,5 +1,7 @@
+import numpy as np
 import torch
 import torch.nn as nn
+
 
 class ConcatValuesAndGraphStructure(nn.Module):
     def __init__(self, nodes_number, feature_size, RECEIVED_PARAMS, device, num_classes=1):
@@ -9,7 +11,6 @@ class ConcatValuesAndGraphStructure(nn.Module):
         self.device = device
         self.RECEIVED_PARAMS = RECEIVED_PARAMS
         self.min_value = torch.tensor([1e-10], device=device).float()
-        # self.pre_weighting = nn.Linear(self.feature_size, int(self.RECEIVED_PARAMS["preweight"]))
         self.pre_weighting = nn.Linear(1, int(self.RECEIVED_PARAMS["preweight"]))
         self.fc1 = nn.Linear(1, int(self.RECEIVED_PARAMS["layer_1"]))  # input layer
         self.fc2 = nn.Linear(int(self.RECEIVED_PARAMS["layer_1"]), int(self.RECEIVED_PARAMS["layer_2"]))
@@ -18,7 +19,10 @@ class ConcatValuesAndGraphStructure(nn.Module):
         self.activation_func = self.RECEIVED_PARAMS['activation']
         self.dropout = nn.Dropout(p=self.RECEIVED_PARAMS["dropout"])
 
-        self.alpha = nn.Parameter(torch.rand(1, requires_grad=True, device=self.device))
+        # self.alpha = nn.Parameter(torch.rand(1, requires_grad=True, device=self.device))
+        noise = np.random.normal(0, 0.1)
+        self.alpha = nn.Parameter(torch.tensor([1+noise], requires_grad=True, device=self.device).float())
+
         self.activation_func_dict = {'relu': nn.ReLU(), 'elu': nn.ELU(), 'tanh': nn.Tanh()}
 
         self.gcn_layer = nn.Sequential(

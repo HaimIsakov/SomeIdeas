@@ -22,8 +22,10 @@ class ConcatValuesAndGraphStructure(nn.Module):
         self.dropout = nn.Dropout(p=self.RECEIVED_PARAMS["dropout"])
 
         # self.alpha = nn.Parameter(torch.rand(1, requires_grad=True, device=self.device))
+
         noise = np.random.normal(0, 0.1)
         self.alpha = nn.Parameter(torch.tensor([1+noise], requires_grad=True, device=self.device).float())
+        # self.alpha = torch.tensor([1], device=self.device)
 
         self.activation_func_dict = {'relu': nn.ReLU(), 'elu': nn.ELU(), 'tanh': nn.Tanh(), "srss": Srss()}
         # self.activation_func = "srss"

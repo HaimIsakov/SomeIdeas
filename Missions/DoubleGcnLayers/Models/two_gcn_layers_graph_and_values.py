@@ -2,6 +2,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from sklearn.ensemble import GradientBoostingClassifier
 
 
 class TwoLayersGCNValuesGraph(nn.Module):
@@ -33,6 +34,7 @@ class TwoLayersGCNValuesGraph(nn.Module):
 
         noise = np.random.normal(0, 0.1)
         self.alpha = nn.Parameter(torch.tensor([1+noise], requires_grad=True, device=self.device).float())
+        # self.alpha = torch.tensor([1], device=self.device)
         self.activation_func_dict = {'relu': nn.ReLU(), 'elu': nn.ELU(), 'tanh': nn.Tanh()}
 
         self.gcn_layer = nn.Sequential(
@@ -50,6 +52,7 @@ class TwoLayersGCNValuesGraph(nn.Module):
             self.fc2,
             self.activation_func_dict[self.activation_func],
         )
+
 
     def forward(self, x, adjacency_matrix):
         a, b, c = adjacency_matrix.shape
