@@ -575,13 +575,14 @@ if __name__ == '__main__':
         pytorch_geometric_mode = False
         add_attributes = False
         kwargs = {"samples": samples}
-        # for dataset_name in ["Cirrhosis_4sparse_75", "Cirrhosis_4sparse_80", "Cirrhosis_4sparse_85", "Cirrhosis_4sparse_90",
-        #                      "Cirrhosis_4sparse_95", "Cirrhosis_4sparse_97", "Cirrhosis_4sparse_98", "Cirrhosis_4sparse_99"]:
-        #     runner(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes, **kwargs)
+        for dataset_name in ["nugent", "IBD_Chrone", "male_female"]:
+            for option in ["_4sparse_97", "_4sparse_98", "_4sparse_99"]:
+                runner(dataset_name + option, 3, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes, **kwargs)
 
         # runner(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes, **kwargs)
         # datasets = ["nut", "peanut", "male_female", "milk", "Cirrhosis"]
-        run_all_dataset(3, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes, datasets, **kwargs)
+        # run_all_dataset(2, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes, datasets, **kwargs)
+        # run_all_dataset(3, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes, datasets, **kwargs)
         # datasets = ["Cirrhosis", "IBD", "bw", "IBD_Chrone", "male_female", "nugent"]
         # datasets = ["nut", "peanut", "milk"]
 

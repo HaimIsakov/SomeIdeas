@@ -15,8 +15,8 @@ class JustGraphStructure(nn.Module):
         self.fc2 = nn.Linear(int(self.RECEIVED_PARAMS["layer_1"]), int(self.RECEIVED_PARAMS["layer_2"]))
         self.fc3 = nn.Linear(int(self.RECEIVED_PARAMS["layer_2"]), 1)
         self.device = device
-        # self.alpha = nn.Parameter(torch.rand(1, requires_grad=True, device=self.device))
-        self.alpha = torch.tensor([1], device=self.device)
+        self.alpha = nn.Parameter(torch.rand(1, requires_grad=True, device=self.device))
+        # self.alpha = torch.tensor([1], device=self.device)
 
         self.activation_func = self.RECEIVED_PARAMS['activation']
         self.dropout = nn.Dropout(p=self.RECEIVED_PARAMS["dropout"])
