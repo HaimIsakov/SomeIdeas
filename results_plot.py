@@ -54,7 +54,7 @@ def create_bar_plot_new(df, rows2keep, cols2delete, title):
     plt.ylim((0.4, 1))
     plt.ylabel("Auc")
     save_file = f"summary_{title}"
-    plt.title(save_file)
+    # plt.title(save_file)
     ax.legend(loc='center left', bbox_to_anchor=(0.05, 1.2), ncol=3, fancybox=True, shadow=True)
 
     plt.tight_layout(pad=1)
@@ -80,11 +80,10 @@ if __name__ == "__main__":
     # histogram(corr_mat_df)
     # heat_map(corr_mat_df)
 
-    # df = pd.read_csv("all_models_06_06.csv", index_col=0)
-    # rows2keep = ["IBD", "CD-IBD", "Nugent", "Cirrhosis", "BW", "Milk", "Nut", "Peanut", "MF", "abide",
-    #              "TCRs"]
-    # cols2delete = []
-    # title = "all_models_06_06"
-    # create_bar_plot_new(df, rows2keep, cols2delete, title)
     df = pd.read_csv("all_models_06_06.csv", index_col=0)
-    concat_mean_std(df)
+    rows2keep = ["IBD", "CD-IBD", "Nugent", "Cirrhosis", "BW", "Milk", "Nut", "Peanut", "MF", "TCRs"]
+    cols2delete = []
+    title = "all_models_06_06"
+    create_bar_plot_new(df, rows2keep, cols2delete, title)
+    # df = pd.read_csv("all_models_06_06.csv", index_col=0)
+    # concat_mean_std(df)
