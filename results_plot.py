@@ -48,8 +48,11 @@ def create_bar_plot_new(df, rows2keep, cols2delete, title):
     mean_df = df[mean_cols]
     std_df = df[std_cols]
     std_df.columns = mean_df.columns
+    mean_df['Average'] = mean_df.mean(numeric_only=True, axis=1)
+
     fig, ax = plt.subplots()
     b = mean_df.plot.bar(yerr=std_df, ax=ax, capsize=0.5)
+
     plt.xlabel("Dataset")
     plt.ylim((0.4, 1))
     plt.ylabel("Auc")
@@ -80,7 +83,7 @@ if __name__ == "__main__":
     # histogram(corr_mat_df)
     # heat_map(corr_mat_df)
 
-    df = pd.read_csv("all_models_06_06.csv", index_col=0)
+    df = pd.read_csv("all_models_06_062.csv", index_col=0)
     rows2keep = ["IBD", "CD-IBD", "Nugent", "Cirrhosis", "BW", "Milk", "Nut", "Peanut", "MF", "TCRs"]
     cols2delete = []
     title = "all_models_06_06"
