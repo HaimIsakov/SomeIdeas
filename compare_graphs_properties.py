@@ -90,6 +90,16 @@ def calc_attributes_by_myself(graphs_list):
     graphs_attributes_mean_df = pd.DataFrame.from_dict(graphs_attributes_mean, orient='index')
     return graphs_attributes_mean_df
 
+def calc_attributes_by_myself_degree_only(graphs_list):
+    graphs_attributes_mean = {}
+    for i, graph in enumerate(graphs_list):
+        # degree
+        degree_dict = {node: val for (node, val) in graph.degree()}
+        degree_df = pd.DataFrame.from_dict(degree_dict, orient='index', columns=["degree"])
+        graphs_attributes_mean[i] = {"degree": degree_df.mean(axis=0).values[0]}
+    graphs_attributes_mean_df = pd.DataFrame.from_dict(graphs_attributes_mean, orient='index')
+    return graphs_attributes_mean_df
+
 # def merge_df_attributes_labels(graphs_attributes_mean_df_0, graphs_attributes_mean_df_1):
 #     merged = pd.merge(graphs_attributes_mean_df_0, graphs_attributes_mean_df_1, left_index=True, right_index=True,
 #                       how='inner', suffixes=("_0", "_1"))
@@ -215,6 +225,46 @@ def plot_comparison_between_graph_and_labels(graphs_attributes_mean_df_0, graphs
     plt.savefig(save_fig + ".jpeg")
     plt.show()
 
+def plot_comparison_between_graph_and_labels_all_datasets(datasets, save_fig):
+    fig, axs = plt.subplots(len(datasets), 1, figsize=(25, 25))
+    p = 0
+
+    for dataset_name in datasets.keys():
+        graphs_attributes_mean_df_0, graphs_attributes_mean_df_1 = load_microbiome_dataset(dataset_name)
+        # ind = [(i, j) for i in range(len_datasets) for j in [0]]
+        for col in list(graphs_attributes_mean_df_0.columns):
+            # for ax1
+            print(p)
+            ax1 = axs[p]
+            x_0 = graphs_attributes_mean_df_0[col]
+            mu_0 = x_0.mean()
+            median_0 = np.median(x_0)
+            sigma_0 = x_0.std()
+
+            x_1 = graphs_attributes_mean_df_1[col]
+            mu_1 = x_1.mean()
+            median_1 = np.median(x_1)
+            sigma_1 = x_1.std()
+            textstr = '\n'.join((
+                r'$\mu_0=%.4f$' % (mu_0, ),
+                r'$\mu_1=%.4f$' % (mu_1,),
+                r'$\sigma_0=%.4f$' % (sigma_0,),
+                r'$\sigma_1=%.4f$' % (sigma_1,),
+                r'$\mathrm{median}_0=%.4f$' % (median_0, ),
+                r'$\mathrm{median}_1=%.4f$' % (median_1,)))
+
+            props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
+            ax1.text(0.88, 0.95, textstr, transform=ax1.transAxes, fontsize=15, verticalalignment='top', bbox=props)
+            sns.histplot(x_0, stat='probability', ax=ax1, color="k", binrange=(0,1), bins=8)
+            sns.histplot(x_1, stat='probability', ax=ax1, color="y", binrange=(0,1), bins=8)
+
+            ax1.set_title(datasets[dataset_name], size=30)
+            ax1.set(xlabel=None)
+            p += 1
+    plt.tight_layout()
+    plt.savefig(save_fig + ".jpeg")
+    plt.show()
+
 
 def get_tcr_files():
     train_data_file_path = os.path.join("TCR_Dataset2", "Train")
@@ -246,10 +296,34 @@ def get_NIH_files():
     subject_list = list(label_df.index)
     return train_val_test_data_file_path, train_val_test_label_file_path, subject_list
 
+def load_microbiome_dataset(dataset_name):
+    origin_dir = os.path.join("Data", "split_datasets_new")
+    train_data_file_path = os.path.join(origin_dir, f'{dataset_name}_split_dataset',
+                                        f'train_val_set_{dataset_name}_microbiome.csv')
+    train_tag_file_path = os.path.join(origin_dir, f'{dataset_name}_split_dataset',
+                                       f'train_val_set_{dataset_name}_tags.csv')
+
+    test_data_file_path = os.path.join(origin_dir, f'{dataset_name}_split_dataset',
+                                       f'test_set_{dataset_name}_microbiome.csv')
+    test_tag_file_path = os.path.join(origin_dir, f'{dataset_name}_split_dataset',
+                                      f'test_set_{dataset_name}_tags.csv')
+    data_path = train_data_file_path
+    label_path = train_tag_file_path
+
+    add_attributes, geometric_mode = False, False
+    mission = "just_values"
+    cur_dataset = GraphDataset(data_path, label_path, mission, add_attributes, geometric_mode)
+
+    cur_dataset.update_graphs()
+    graphs_list_0, graphs_list_1 = seperate_graphs_list_according_to_its_label(cur_dataset.dataset_dict)
+    graphs_attributes_mean_df_0 = calc_attributes_by_myself_degree_only(graphs_list_0)
+    graphs_attributes_mean_df_1 = calc_attributes_by_myself_degree_only(graphs_list_1)
+    return graphs_attributes_mean_df_0, graphs_attributes_mean_df_1
+
 
 if __name__ == "__main__":
-    dataset_name = "tcr"
-    # origin_dir = "split_datasets_new"
+    # dataset_name = "bw"
+    # origin_dir = os.path.join("Data", "split_datasets_new")
     # train_data_file_path = os.path.join(origin_dir, f'{dataset_name}_split_dataset',
     #                                     f'train_val_set_{dataset_name}_microbiome.csv')
     # train_tag_file_path = os.path.join(origin_dir, f'{dataset_name}_split_dataset',
@@ -259,37 +333,45 @@ if __name__ == "__main__":
     #                                    f'test_set_{dataset_name}_microbiome.csv')
     # test_tag_file_path = os.path.join(origin_dir, f'{dataset_name}_split_dataset',
     #                                   f'test_set_{dataset_name}_tags.csv')
-
-    # train_data_file_path = os.path.join("covid", f"new_{dataset_name}")
-    # train_tag_file_path = os.path.join("covid", f"{dataset_name}_samples.csv")
-
+    #
+    # # train_data_file_path = os.path.join("covid", f"new_{dataset_name}")
+    # # train_tag_file_path = os.path.join("covid", f"{dataset_name}_samples.csv")
+    #
     # data_path = train_data_file_path
     # label_path = train_tag_file_path
-    data_path, label_path, subject_list = get_tcr_files()
-    # data_path, label_path, subject_list = get_ISB_files()
-    # data_path, label_path, subject_list = get_NIH_files()
-
-    add_attributes, geometric_mode = False, False
-    mission = "just_values"
+    # # data_path, label_path, subject_list = get_tcr_files()
+    # # data_path, label_path, subject_list = get_ISB_files()
+    # # data_path, label_path, subject_list = get_NIH_files()
+    #
+    # add_attributes, geometric_mode = False, False
+    # mission = "just_values"
     # cur_dataset = GraphDataset(data_path, label_path, mission, add_attributes, geometric_mode)
-    # label_df = pd.read_csv(train_tag_file_path)
-    # label_df["sample"] = label_df["sample"] + "_" + label_df['status']
-    # label_df.set_index("sample", inplace=True)
-    # subject_list = list(label_df.index)
+    # # label_df = pd.read_csv(train_tag_file_path)
+    # # label_df["sample"] = label_df["sample"] + "_" + label_df['status']
+    # # label_df.set_index("sample", inplace=True)
+    # # subject_list = list(label_df.index)
+    #
+    # # cur_dataset = TCRDataset(dataset_name, data_path, label_path, subject_list, mission)
+    # # adj_mat_path = "dist_mat_with_sample_size_135_run_number_0"
+    # # cur_dataset.calc_golden_tcrs(adj_mat_path=adj_mat_path)
+    # cur_dataset.update_graphs()
+    # graphs_list_0, graphs_list_1 = seperate_graphs_list_according_to_its_label(cur_dataset.dataset_dict)
+    # graphs_attributes_mean_df_0 = calc_attributes_by_myself(graphs_list_0)
+    # # graphs_attributes_mean_df_0.to_csv("graphs_attributes_mean_df_0.csv")
+    # graphs_attributes_mean_df_1 = calc_attributes_by_myself(graphs_list_1)
+    # # graphs_attributes_mean_df_1.to_csv("graphs_attributes_mean_df_1.csv")
+    #
+    # # graphs_attributes_mean_df_0 = pd.read_csv("graphs_attributes_mean_df_0.csv", index_col=0)
+    # # graphs_attributes_mean_df_1 = pd.read_csv("graphs_attributes_mean_df_1.csv", index_col=0)
+    # save_fig = f"{dataset_name}_comparison_graphs_attributes"
+    # plot_comparison_between_graph_and_labels(graphs_attributes_mean_df_0, graphs_attributes_mean_df_1, save_fig)
+    # # add_nodes_attributes(graphs_list)
+    # x = 1
+    # import numpy as np
+    # import matplotlib.pyplot as plt
 
-    cur_dataset = TCRDataset(dataset_name, data_path, label_path, subject_list, mission)
-    adj_mat_path = "dist_mat_with_sample_size_135_run_number_0"
-    cur_dataset.calc_golden_tcrs(adj_mat_path=adj_mat_path)
-    cur_dataset.update_graphs()
-    graphs_list_0, graphs_list_1 = seperate_graphs_list_according_to_its_label(cur_dataset.dataset_dict)
-    graphs_attributes_mean_df_0 = calc_attributes_by_myself(graphs_list_0)
-    # graphs_attributes_mean_df_0.to_csv("graphs_attributes_mean_df_0.csv")
-    graphs_attributes_mean_df_1 = calc_attributes_by_myself(graphs_list_1)
-    # graphs_attributes_mean_df_1.to_csv("graphs_attributes_mean_df_1.csv")
-
-    # graphs_attributes_mean_df_0 = pd.read_csv("graphs_attributes_mean_df_0.csv", index_col=0)
-    # graphs_attributes_mean_df_1 = pd.read_csv("graphs_attributes_mean_df_1.csv", index_col=0)
-    save_fig = f"{dataset_name}_comparison_graphs_attributes"
-    plot_comparison_between_graph_and_labels(graphs_attributes_mean_df_0, graphs_attributes_mean_df_1, save_fig)
-    # add_nodes_attributes(graphs_list)
-    x = 1
+    datasets = ["Cirrhosis", "IBD", "bw", "IBD_Chrone", "male_female", "nugent", "milk", "nut", "peanut"]
+    datasets_dict = {"Cirrhosis":"Cirrhosis", "IBD":"IBD", "bw":"CA", "IBD_Chrone":"IBD_Chrone",
+                     "male_female":"Male Female", "nugent":"Nugent", "milk":"Milk", "nut":"Nut", "peanut":"Peanut"}
+    save_fig = "degree_distribution_compare"
+    plot_comparison_between_graph_and_labels_all_datasets(datasets_dict, save_fig)

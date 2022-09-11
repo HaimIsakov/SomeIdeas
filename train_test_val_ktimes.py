@@ -23,6 +23,7 @@ from FiedlerVector.fiedler_vector import FielderVector
 from YoramAttention.Models.yoram_attention import YoramAttention
 from distance_matrix import create_distance_matrix
 
+from Missions.JustGraphStructure.Models.two_layers_gm import TwoJustGraphStructure
 from Missions.ValuesAndGraphStructure.gmic_v_using_alpha_gcn import GmicVUsingAlphaGcn
 from node2vec_embed import find_embed
 from ofek_files_utils_functions import HistoMaker
@@ -295,7 +296,10 @@ class TrainTestValKTimes:
             elif mission == "just_graph":
                 data_size = self.train_val_dataset.get_vector_size()
                 nodes_number = self.train_val_dataset.nodes_number()
-                model = JustGraphStructure(nodes_number, data_size, self.RECEIVED_PARAMS, self.device)
+                # TODO: Fix it back
+                # model = JustGraphStructure(nodes_number, data_size, self.RECEIVED_PARAMS, self.device)
+                print("TwoJustGraphStructure")
+                model = TwoJustGraphStructure(nodes_number, data_size, self.RECEIVED_PARAMS, self.device)
             elif mission == "graph_and_values":
                 data_size = self.train_val_dataset.get_vector_size()
                 nodes_number = self.train_val_dataset.nodes_number()
