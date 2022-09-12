@@ -239,27 +239,31 @@ def plot_comparison_between_graph_and_labels_all_datasets(datasets, save_fig):
             x_0 = graphs_attributes_mean_df_0[col]
             mu_0 = x_0.mean()
             median_0 = np.median(x_0)
-            sigma_0 = x_0.std()
+            sigma_0 = x_0.sem()
 
             x_1 = graphs_attributes_mean_df_1[col]
             mu_1 = x_1.mean()
             median_1 = np.median(x_1)
-            sigma_1 = x_1.std()
-            textstr = '\n'.join((
-                r'$\mu_0=%.4f$' % (mu_0, ),
-                r'$\mu_1=%.4f$' % (mu_1,),
-                r'$\sigma_0=%.4f$' % (sigma_0,),
-                r'$\sigma_1=%.4f$' % (sigma_1,),
-                r'$\mathrm{median}_0=%.4f$' % (median_0, ),
-                r'$\mathrm{median}_1=%.4f$' % (median_1,)))
+            sigma_1 = x_1.sem()
+            # textstr = '\n'.join((
+            #     r'$\mu_0=%.4f$' % (mu_0, ),
+            #     r'$\mu_1=%.4f$' % (mu_1,),
+            #     r'$\sigma_0=%.4f$' % (sigma_0,),
+            #     r'$\sigma_1=%.4f$' % (sigma_1,)))
+            #     # r'$\mathrm{median}_0=%.4f$' % (median_0, ),
+            #     # r'$\mathrm{median}_1=%.4f$' % (median_1,)))
+            textstr = '\n'.join((f"Class 0: {mu_0:.4f} ± {sigma_0:.4f}", f"Class 1: {mu_1:.4f} ± {sigma_1:.4f}"))
 
             props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
-            ax1.text(0.88, 0.95, textstr, transform=ax1.transAxes, fontsize=15, verticalalignment='top', bbox=props)
+            ax1.text(0.82, 0.95, textstr, transform=ax1.transAxes, fontsize=25, verticalalignment='top', bbox=props)
             sns.histplot(x_0, stat='probability', ax=ax1, color="k", binrange=(0,1), bins=8)
             sns.histplot(x_1, stat='probability', ax=ax1, color="y", binrange=(0,1), bins=8)
+            ax1.tick_params(axis='both', which='major', labelsize=25)
 
             ax1.set_title(datasets[dataset_name], size=30)
             ax1.set(xlabel=None)
+            ax1.set(ylabel=None)
+
             p += 1
     plt.tight_layout()
     plt.savefig(save_fig + ".jpeg")
@@ -366,12 +370,13 @@ if __name__ == "__main__":
     # save_fig = f"{dataset_name}_comparison_graphs_attributes"
     # plot_comparison_between_graph_and_labels(graphs_attributes_mean_df_0, graphs_attributes_mean_df_1, save_fig)
     # # add_nodes_attributes(graphs_list)
-    # x = 1
-    # import numpy as np
-    # import matplotlib.pyplot as plt
 
     datasets = ["Cirrhosis", "IBD", "bw", "IBD_Chrone", "male_female", "nugent", "milk", "nut", "peanut"]
     datasets_dict = {"Cirrhosis":"Cirrhosis", "IBD":"IBD", "bw":"CA", "IBD_Chrone":"IBD_Chrone",
                      "male_female":"Male Female", "nugent":"Nugent", "milk":"Milk", "nut":"Nut", "peanut":"Peanut"}
+
+    # datasets = ["Cirrhosis", "IBD"]
+    # datasets_dict = {"Cirrhosis":"Cirrhosis", "IBD":"IBD"}
+
     save_fig = "degree_distribution_compare"
     plot_comparison_between_graph_and_labels_all_datasets(datasets_dict, save_fig)

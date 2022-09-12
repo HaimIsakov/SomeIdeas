@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
+plt.rcParams["font.family"] = "Times New Roman"
 
 
 def heat_map(corr_mat):
@@ -47,7 +48,8 @@ def create_bar_plot_new(df, rows2keep, cols2delete, title):
         else:
             std_cols.append(col)
     mean_df = df[mean_cols]
-    std_df = df[std_cols]
+    # Standard error
+    std_df = df[std_cols]/(10 ** (0.5))
     std_df.columns = mean_df.columns
     mean_df['Average'] = mean_df.mean(numeric_only=True, axis=1)
 
@@ -56,12 +58,12 @@ def create_bar_plot_new(df, rows2keep, cols2delete, title):
 
     plt.xlabel("Dataset")
     plt.ylim((0.4, 1))
-    plt.ylabel("Auc")
+    plt.ylabel("AUC")
     save_file = f"summary_{title}"
     # plt.title(save_file)
     ax.legend(loc='center left', bbox_to_anchor=(0.05, 1.2), ncol=3, fancybox=True, shadow=True)
 
-    plt.tight_layout(pad=1)
+    plt.tight_layout()
     plt.savefig(f'{save_file}.png')
     plt.show()
 

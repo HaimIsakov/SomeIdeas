@@ -22,7 +22,7 @@ from DoubleGcnLayers.Models.two_gcn_layers_graph_and_values import TwoLayersGCNV
 from FiedlerVector.fiedler_vector import FielderVector
 from YoramAttention.Models.yoram_attention import YoramAttention
 from distance_matrix import create_distance_matrix
-
+from Missions.ConcatGraphAndValues.two_layers_gvm import TwoGVM
 from Missions.JustGraphStructure.Models.two_layers_gm import TwoJustGraphStructure
 from Missions.ValuesAndGraphStructure.gmic_v_using_alpha_gcn import GmicVUsingAlphaGcn
 from node2vec_embed import find_embed
@@ -38,6 +38,8 @@ ACCURACY_PLOT = 'acc'
 AUC_PLOT = 'auc'
 TRAIN_JOB = 'train'
 TEST_JOB = 'test'
+
+
 
 
 class TrainTestValKTimes:
@@ -313,7 +315,10 @@ class TrainTestValKTimes:
             elif mission == "concat_graph_and_values":
                 data_size = self.train_val_dataset.get_vector_size()
                 nodes_number = self.train_val_dataset.nodes_number()
-                model = ConcatValuesAndGraphStructure(nodes_number, data_size, self.RECEIVED_PARAMS, self.device)
+                # model = ConcatValuesAndGraphStructure(nodes_number, data_size, self.RECEIVED_PARAMS, self.device)
+                # TODO: Fix it back
+                print("TwoJustGraphStructure")
+                model = TwoGVM(nodes_number, data_size, self.RECEIVED_PARAMS, self.device)
             elif mission == "one_head_attention":
                 # data_size = self.train_val_dataset.get_vector_size()
                 data_size = 128
@@ -329,7 +334,6 @@ class TrainTestValKTimes:
                 # data_size = 128
                 nodes_number = self.train_val_dataset.nodes_number()
                 model = FielderVector(nodes_number, data_size, self.RECEIVED_PARAMS, self.device)
-
         else:
             data_size = self.train_val_dataset.get_vector_size()
             model = GCN(1, self.RECEIVED_PARAMS, self.device)
