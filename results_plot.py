@@ -37,6 +37,7 @@ def create_bar_plot(df, title):
 def create_bar_plot_new(df, rows2keep, cols2delete, title):
     df.drop(cols2delete, axis=1, inplace=True)
     df = df.loc[rows2keep]
+
     columns = list(df.columns)
     mean_cols = []
     std_cols = []
@@ -74,6 +75,7 @@ def concat_mean_std(df):
     df.to_csv("all_models_results_06_06_concat.csv")
     x=1
 
+
 if __name__ == "__main__":
     # for mission in ["just_graph", "graph_and_values", "double_gcn_layer", "concat_graph_and_values"]:
     #     df = pd.read_csv(f"{mission}_all_datasets_results_train_val_test_09_04_2022.csv", index_col=0)
@@ -84,7 +86,7 @@ if __name__ == "__main__":
     # heat_map(corr_mat_df)
 
     df = pd.read_csv("all_models_06_062.csv", index_col=0)
-    rows2keep = ["IBD", "CD-IBD", "Nugent", "Cirrhosis", "BW", "Milk", "Nut", "Peanut", "MF", "TCRs"]
+    rows2keep = ["IBD", "CD-IBD", "Nugent", "Cirrhosis", "CA", "Milk", "Nut", "Peanut", "Male Female", "TCR"]
     cols2delete = []
     title = "all_models_06_06"
     create_bar_plot_new(df, rows2keep, cols2delete, title)

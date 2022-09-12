@@ -318,8 +318,8 @@ def run_all_dataset(mission_number, cuda_number, nni_flag, pytorch_geometric_mod
                 datasets_results_dict[dataset_name]["alpha_value_std"] = std_alpha_value
 
         except Exception as e:
-            raise
-            # print(e)
+            # raise
+            print(e)
     today = date.today()
     d1 = today.strftime("%d_%m_%Y")
     all_missions_results_df = pd.DataFrame.from_dict(datasets_results_dict, orient='index')
@@ -579,9 +579,9 @@ if __name__ == '__main__':
         #     for option in ["_4sparse_97", "_4sparse_98", "_4sparse_99"]:
         #         runner(dataset_name + option, 3, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes, **kwargs)
 
-        runner(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes, **kwargs)
+        # runner(dataset_name, mission_number, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes, **kwargs)
         # datasets = ["nut", "peanut", "male_female", "milk", "Cirrhosis"]
-        # run_all_dataset(2, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes, datasets, **kwargs)
+        run_all_dataset(2, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes, datasets, **kwargs)
         # run_all_dataset(3, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes, datasets, **kwargs)
         # datasets = ["Cirrhosis", "IBD", "bw", "IBD_Chrone", "male_female", "nugent"]
         # datasets = ["nut", "peanut", "milk"]
