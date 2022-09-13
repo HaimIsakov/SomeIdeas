@@ -583,7 +583,7 @@ if __name__ == '__main__':
         # datasets = ["nut", "peanut", "male_female", "milk", "Cirrhosis"]
         datasets = ["Cirrhosis", "IBD", "bw", "IBD_Chrone", "male_female", "nugent"]
 
-        run_all_dataset(7, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes, datasets, **kwargs)
+        run_all_dataset(2, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes, datasets, **kwargs)
         # run_all_dataset(3, cuda_number, nni_flag, pytorch_geometric_mode, add_attributes, datasets, **kwargs)
         # datasets = ["Cirrhosis", "IBD", "bw", "IBD_Chrone", "male_female", "nugent"]
         # datasets = ["nut", "peanut", "milk"]

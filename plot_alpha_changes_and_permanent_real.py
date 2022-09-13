@@ -62,6 +62,6 @@ if __name__ == "__main__":
     ax2.legend(loc="best")
 
     plt.tight_layout()
-    # plt.savefig("comapre_alpha_changes_and_constant_real_datasets")
+    plt.savefig("comapre_alpha_changes_and_constant_real_datasets")
     plt.show()
     x=1
