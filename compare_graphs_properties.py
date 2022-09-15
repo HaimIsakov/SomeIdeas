@@ -226,7 +226,7 @@ def plot_comparison_between_graph_and_labels(graphs_attributes_mean_df_0, graphs
     plt.show()
 
 def plot_comparison_between_graph_and_labels_all_datasets(datasets, save_fig):
-    fig, axs = plt.subplots(len(datasets), 1, figsize=(25, 25))
+    fig, axs = plt.subplots(len(datasets), 1, figsize=(25, 45))
     p = 0
 
     for dataset_name in datasets.keys():
@@ -253,14 +253,19 @@ def plot_comparison_between_graph_and_labels_all_datasets(datasets, save_fig):
             #     # r'$\mathrm{median}_0=%.4f$' % (median_0, ),
             #     # r'$\mathrm{median}_1=%.4f$' % (median_1,)))
             textstr = '\n'.join((f"Class 0: {mu_0:.4f} ± {sigma_0:.4f}", f"Class 1: {mu_1:.4f} ± {sigma_1:.4f}"))
-
+            # _, bins, _ = ax1.hist(x_0, bins=50, range=[0, 1])
             props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
-            ax1.text(0.82, 0.95, textstr, transform=ax1.transAxes, fontsize=25, verticalalignment='top', bbox=props)
-            sns.histplot(x_0, stat='probability', ax=ax1, color="k", binrange=(0,1), bins=8)
-            sns.histplot(x_1, stat='probability', ax=ax1, color="y", binrange=(0,1), bins=8)
-            ax1.tick_params(axis='both', which='major', labelsize=25)
+            ax1.text(0.75, 0.95, textstr, transform=ax1.transAxes, fontsize=32, verticalalignment='top', bbox=props)
+            # sns.histplot(x_0, stat='probability', ax=ax1, color="k", binrange=(0,1), bins=8)
+            # sns.histplot(x_1, stat='probability', ax=ax1, color="y", binrange=(0,1), bins=8)
+            bins = np.histogram_bin_edges(x_0, bins=30, range=(0, 1))
+            sns.histplot(x_0, stat='probability',bins=bins, ax=ax1, color="r")
+            sns.histplot(x_1, stat='probability', bins=bins, ax=ax1, color="b")
+            # _ = ax1.hist(x_1, bins=bins, alpha=0.5)
 
-            ax1.set_title(datasets[dataset_name], size=30)
+            ax1.tick_params(axis='both', which='major', labelsize=30)
+
+            ax1.set_title(datasets[dataset_name], size=35)
             ax1.set(xlabel=None)
             ax1.set(ylabel=None)
 
