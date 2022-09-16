@@ -306,22 +306,29 @@ def get_NIH_files():
     return train_val_test_data_file_path, train_val_test_label_file_path, subject_list
 
 def load_microbiome_dataset(dataset_name):
-    origin_dir = os.path.join("Data", "split_datasets_new")
-    train_data_file_path = os.path.join(origin_dir, f'{dataset_name}_split_dataset',
-                                        f'train_val_set_{dataset_name}_microbiome.csv')
-    train_tag_file_path = os.path.join(origin_dir, f'{dataset_name}_split_dataset',
-                                       f'train_val_set_{dataset_name}_tags.csv')
-
-    test_data_file_path = os.path.join(origin_dir, f'{dataset_name}_split_dataset',
-                                       f'test_set_{dataset_name}_microbiome.csv')
-    test_tag_file_path = os.path.join(origin_dir, f'{dataset_name}_split_dataset',
-                                      f'test_set_{dataset_name}_tags.csv')
-    data_path = train_data_file_path
-    label_path = train_tag_file_path
-
-    add_attributes, geometric_mode = False, False
     mission = "just_values"
-    cur_dataset = GraphDataset(data_path, label_path, mission, add_attributes, geometric_mode)
+
+    if dataset_name != "TCR":
+        origin_dir = os.path.join("Data", "split_datasets_new")
+        train_data_file_path = os.path.join(origin_dir, f'{dataset_name}_split_dataset',
+                                            f'train_val_set_{dataset_name}_microbiome.csv')
+        train_tag_file_path = os.path.join(origin_dir, f'{dataset_name}_split_dataset',
+                                           f'train_val_set_{dataset_name}_tags.csv')
+
+        test_data_file_path = os.path.join(origin_dir, f'{dataset_name}_split_dataset',
+                                           f'test_set_{dataset_name}_microbiome.csv')
+        test_tag_file_path = os.path.join(origin_dir, f'{dataset_name}_split_dataset',
+                                          f'test_set_{dataset_name}_tags.csv')
+        data_path = train_data_file_path
+        label_path = train_tag_file_path
+
+        add_attributes, geometric_mode = False, False
+        cur_dataset = GraphDataset(data_path, label_path, mission, add_attributes, geometric_mode)
+    else:
+        train_data_file_path, train_tag_file_path, train_subject_list = get_tcr_files()
+        cur_dataset = TCRDataset(dataset_name, train_data_file_path, train_tag_file_path, train_subject_list, mission)
+        adj_mat_path = None
+        cur_dataset.calc_golden_tcrs(adj_mat_path=adj_mat_path)
 
     cur_dataset.update_graphs()
     graphs_list_0, graphs_list_1 = seperate_graphs_list_according_to_its_label(cur_dataset.dataset_dict)
