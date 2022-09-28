@@ -1,16 +1,24 @@
 import os
 import sys
+from functools import reduce
+
 import numpy as np
 import pandas as pd
 from colorama import Fore
 from matplotlib import pyplot as plt
 from tqdm import tqdm
 
+# from Data.TcrDataset import TCRDataset
+# from TCR_Ofek import TcrDataset
 for path_name in [os.path.join(os.path.dirname(__file__)),
                   os.path.join(os.path.dirname(__file__), 'Data'),
                   os.path.join(os.path.dirname(__file__), 'Missions')]:
     sys.path.append(path_name)
+sys.path.append(os.path.join(os.path.dirname(__file__), 'TCR_Ofek'))
 
+sys.path.append(os.path.join(os.path.dirname(__file__), 'TCR_Ofek', "TcrDataset"))
+from TcrDataset import TCRDataset
+from scipy.stats import norm
 
 from GraphDataset import GraphDataset
 # from graph_measures.features_algorithms.vertices.average_neighbor_degree import AverageNeighborDegreeCalculator
@@ -27,7 +35,6 @@ from GraphDataset import GraphDataset
 import seaborn as sns
 from networkx import closeness_centrality, average_neighbor_degree, core_number, betweenness_centrality
 
-from TcrDataset import TCRDataset
 
 plt.rcParams["font.family"] = "Times New Roman"
 
@@ -90,10 +97,11 @@ def calc_attributes_by_myself(graphs_list):
     graphs_attributes_mean_df = pd.DataFrame.from_dict(graphs_attributes_mean, orient='index')
     return graphs_attributes_mean_df
 
-def calc_attributes_by_myself_degree_only(graphs_list):
+def calc_attributes_by_myself_degree_only(dataset_dict, index_list):
     graphs_attributes_mean = {}
-    for i, graph in enumerate(graphs_list):
+    for i, ind in enumerate(index_list):
         # degree
+        graph = dataset_dict[ind]["graph"]
         degree_dict = {node: val for (node, val) in graph.degree()}
         degree_df = pd.DataFrame.from_dict(degree_dict, orient='index', columns=["degree"])
         graphs_attributes_mean[i] = {"degree": degree_df.mean(axis=0).values[0]}
@@ -112,17 +120,17 @@ def get_graphs_list(dataset_dict):
         graphs_list.append(v['graph'])
     return graphs_list
 
+
 def seperate_graphs_list_according_to_its_label(dataset_dict):
-    graphs_list_0, graphs_list_1 = [], []
+    index_list_0, index_list_1 = [], []
     for k, v in dataset_dict.items():
         graph = v['graph']
         label = v['label']
         if label == 0:
-            graphs_list_0.append(graph)
+            index_list_0.append(k)
         else:
-            graphs_list_1.append(graph)
-    return graphs_list_0, graphs_list_1
-
+            index_list_1.append(k)
+    return index_list_0, index_list_1
 
 
 def arrange_new_tcr_dataset():
@@ -327,7 +335,7 @@ def load_microbiome_dataset(dataset_name):
     else:
         train_data_file_path, train_tag_file_path, train_subject_list = get_tcr_files()
         cur_dataset = TCRDataset(dataset_name, train_data_file_path, train_tag_file_path, train_subject_list, mission)
-        adj_mat_path = None
+        adj_mat_path = "new_new_graph_type_corr_tcr_corr_mat_125_with_sample_size_547_run_number_1_mission_concat_graph_and_values"
         cur_dataset.calc_golden_tcrs(adj_mat_path=adj_mat_path)
 
     cur_dataset.update_graphs()
@@ -335,6 +343,49 @@ def load_microbiome_dataset(dataset_name):
     graphs_attributes_mean_df_0 = calc_attributes_by_myself_degree_only(graphs_list_0)
     graphs_attributes_mean_df_1 = calc_attributes_by_myself_degree_only(graphs_list_1)
     return graphs_attributes_mean_df_0, graphs_attributes_mean_df_1
+
+
+def df_values(dataset_dict, index_list):
+    # For tcr dataset only
+    dataframes_list = []
+    for ind in index_list:
+        cur_values = dataset_dict[ind]["values"]
+        cur_values = [(a, b) for a, b in enumerate(cur_values)]
+        cur_df = pd.DataFrame(cur_values, columns=['bacteria', f'val_{ind}'])
+        cur_df.set_index("bacteria", inplace=True)
+        dataframes_list.append(cur_df)
+    df_merged = reduce(lambda left, right: pd.merge(left, right, left_index=True, right_index=True, how='inner'),
+                       dataframes_list)
+    df_merged.sort_index(inplace=True)
+    return df_merged
+
+def find_epsilon_sigma(df_values_0, df_values_1, df_degrees_0, df_degrees_1):
+    mu1, std1 = norm.fit(df_degrees_0.mean(axis=1).values)
+    mu2, std2 = norm.fit(df_degrees_1.mean(axis=1).values)
+    epsilon = (mu1 - mu2) / ((mu1 + mu2) / 2)
+    # mu1, std1 = norm.fit(df_values_0.mean(axis=1).values)
+    # mu2, std2 = norm.fit(df_values_1.mean(axis=1).values)
+    print("Check if the features are aligned", list(df_values_0.index) == list(df_values_1.index))
+    sigma = np.std(df_values_0.mean(axis=1) - df_values_1.mean(axis=1))
+    print("epsilon", epsilon)
+    print("sigma", sigma)
+    return sigma, epsilon
+
+
+def sigma_epsilon_for_tcr():
+    train_data_file_path, train_tag_file_path, train_subject_list = get_tcr_files()
+    cur_dataset = TCRDataset("TCR", train_data_file_path, train_tag_file_path, train_subject_list, "just_values")
+    adj_mat_path = "new_new_graph_type_corr_tcr_corr_mat_125_with_sample_size_547_run_number_1_mission_concat_graph_and_values"
+    cur_dataset.calc_golden_tcrs(adj_mat_path=adj_mat_path)
+
+    cur_dataset.update_graphs()
+    index_list_0, index_list_1 = seperate_graphs_list_according_to_its_label(cur_dataset.dataset_dict)
+    df_values_0 = df_values(cur_dataset.dataset_dict, index_list_0)
+    df_values_1 = df_values(cur_dataset.dataset_dict, index_list_1)
+    graphs_attributes_mean_df_0 = calc_attributes_by_myself_degree_only(cur_dataset.dataset_dict, index_list_0)
+    graphs_attributes_mean_df_1 = calc_attributes_by_myself_degree_only(cur_dataset.dataset_dict, index_list_1)
+    sigma, epsilon = find_epsilon_sigma(df_values_0, df_values_1, graphs_attributes_mean_df_0, graphs_attributes_mean_df_1)
+    print(sigma, epsilon)
 
 
 if __name__ == "__main__":
@@ -383,12 +434,20 @@ if __name__ == "__main__":
     # plot_comparison_between_graph_and_labels(graphs_attributes_mean_df_0, graphs_attributes_mean_df_1, save_fig)
     # # add_nodes_attributes(graphs_list)
 
-    datasets = ["Cirrhosis", "IBD", "bw", "IBD_Chrone", "male_female", "nugent", "milk", "nut", "peanut"]
+    datasets = ["Cirrhosis", "IBD", "bw", "IBD_Chrone", "male_female", "nugent", "milk", "nut", "peanut", "TCR"]
     datasets_dict = {"Cirrhosis":"Cirrhosis", "IBD":"IBD", "bw":"CA", "IBD_Chrone":"IBD_Chrone",
-                     "male_female":"Male Female", "nugent":"Nugent", "milk":"Milk", "nut":"Nut", "peanut":"Peanut"}
+                     "male_female":"Male Female", "nugent":"Nugent", "milk":"Milk", "nut":"Nut", "peanut":"Peanut", "TCR":"TCR"}
 
     # datasets = ["Cirrhosis", "IBD"]
     # datasets_dict = {"Cirrhosis":"Cirrhosis", "IBD":"IBD"}
+    # datasets = ["TCR", "Cirrhosis"]
+    # datasets_dict = {"TCR":"TCR", "Cirrhosis":"Cirrhosis"}
 
-    save_fig = "degree_distribution_compare"
-    plot_comparison_between_graph_and_labels_all_datasets(datasets_dict, save_fig)
+    save_fig = "degree_distribution_compare_tcr"
+    # plot_comparison_between_graph_and_labels_all_datasets(datasets_dict, save_fig)
+    # corr_df_between_golden_tcrs = pd.read_csv("new_graph_type_corr_tcr_corr_mat_125_with_sample_size_547_run_number_1_mission_concat_graph_and_values.csv",
+    #                                           index_col=0)
+    # corr_df_between_golden_tcrs.values[[np.arange(corr_df_between_golden_tcrs.shape[0])] * 2] = 0
+    # new_corr_df_between_golden_tcrs = (np.abs(corr_df_between_golden_tcrs) >= 0.2).astype(int)
+    # new_corr_df_between_golden_tcrs.to_csv("new_new_graph_type_corr_tcr_corr_mat_125_with_sample_size_547_run_number_1_mission_concat_graph_and_values.csv")
+    sigma_epsilon_for_tcr()
